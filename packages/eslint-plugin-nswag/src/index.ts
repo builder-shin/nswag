@@ -1,6 +1,6 @@
 /**
  * @aspect/eslint-plugin-nswag
- * ESLint plugin for @aspect/nswag-specs DSL
+ * ESLint plugin for @builder-shin/nswag-specs DSL
  */
 
 import requireRunTest from './rules/require-run-test.js';
@@ -26,31 +26,31 @@ const rules = {
 
 // Recommended config
 const recommendedConfig = {
-  plugins: ['@aspect/nswag'],
+  plugins: ['@builder-shin/nswag'],
   rules: {
-    '@aspect/nswag/require-run-test': 'error',
-    '@aspect/nswag/valid-schema': 'error',
-    '@aspect/nswag/no-duplicate-operation-id': 'error',
-    '@aspect/nswag/require-response-schema': 'warn',
-    '@aspect/nswag/require-tags': 'warn',
-    '@aspect/nswag/no-empty-response': 'error',
-    '@aspect/nswag/valid-http-status': 'error',
-    '@aspect/nswag/prefer-request-body': 'warn',
+    '@builder-shin/nswag/require-run-test': 'error',
+    '@builder-shin/nswag/valid-schema': 'error',
+    '@builder-shin/nswag/no-duplicate-operation-id': 'error',
+    '@builder-shin/nswag/require-response-schema': 'warn',
+    '@builder-shin/nswag/require-tags': 'warn',
+    '@builder-shin/nswag/no-empty-response': 'error',
+    '@builder-shin/nswag/valid-http-status': 'error',
+    '@builder-shin/nswag/prefer-request-body': 'warn',
   },
 };
 
 // Strict config
 const strictConfig = {
-  plugins: ['@aspect/nswag'],
+  plugins: ['@builder-shin/nswag'],
   rules: {
-    '@aspect/nswag/require-run-test': 'error',
-    '@aspect/nswag/valid-schema': 'error',
-    '@aspect/nswag/no-duplicate-operation-id': 'error',
-    '@aspect/nswag/require-response-schema': 'error',
-    '@aspect/nswag/require-tags': 'error',
-    '@aspect/nswag/no-empty-response': 'error',
-    '@aspect/nswag/valid-http-status': ['error', { warnOnNonStandard: true }],
-    '@aspect/nswag/prefer-request-body': 'error',
+    '@builder-shin/nswag/require-run-test': 'error',
+    '@builder-shin/nswag/valid-schema': 'error',
+    '@builder-shin/nswag/no-duplicate-operation-id': 'error',
+    '@builder-shin/nswag/require-response-schema': 'error',
+    '@builder-shin/nswag/require-tags': 'error',
+    '@builder-shin/nswag/no-empty-response': 'error',
+    '@builder-shin/nswag/valid-http-status': ['error', { warnOnNonStandard: true }],
+    '@builder-shin/nswag/prefer-request-body': 'error',
   },
 };
 
