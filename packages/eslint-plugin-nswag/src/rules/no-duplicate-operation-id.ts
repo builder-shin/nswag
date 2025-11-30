@@ -21,7 +21,7 @@ function getLiteralValue(node: Node): string | undefined {
     return node.value;
   }
   if (node.type === 'TemplateLiteral' && node.quasis.length === 1) {
-    return node.quasis[0].value.cooked ?? undefined;
+    return node.quasis[0]?.value.cooked ?? undefined;
   }
   return undefined;
 }
