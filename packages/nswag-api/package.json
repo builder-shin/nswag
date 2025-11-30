@@ -1,7 +1,7 @@
 {
   "name": "@aspect/nswag-api",
-  "version": "0.0.1",
-  "description": "생성된 OpenAPI 파일을 JSON/YAML 엔드포인트로 노출하는 미들웨어",
+  "version": "1.0.0",
+  "description": "Middleware for exposing generated OpenAPI files as JSON/YAML endpoints",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",

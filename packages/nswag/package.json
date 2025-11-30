@@ -1,7 +1,7 @@
 {
   "name": "@aspect/nswag",
-  "version": "0.0.1",
-  "description": "Node.js용 OpenAPI 스펙 생성 및 문서화 도구 - 메타 패키지",
+  "version": "1.0.0",
+  "description": "OpenAPI spec generation and documentation tool for Node.js - meta package",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",

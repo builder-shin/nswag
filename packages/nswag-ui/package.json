@@ -1,7 +1,7 @@
 {
   "name": "@aspect/nswag-ui",
-  "version": "0.0.1",
-  "description": "Swagger UI 또는 Redoc을 통한 문서 탐색 인터페이스 제공",
+  "version": "1.0.0",
+  "description": "Document exploration interface via Swagger UI or Redoc",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",

@@ -2,7 +2,7 @@
   "name": "nswag-monorepo",
   "version": "0.0.0",
   "private": true,
-  "description": "Node.js용 OpenAPI 스펙 생성 및 문서화 도구 모노레포",
+  "description": "OpenAPI spec generation and documentation tool monorepo for Node.js",
   "packageManager": "pnpm@9.15.0",
   "engines": {
     "node": ">=18.0.0"
