@@ -1,5 +1,5 @@
 /**
- * @aspect/eslint-plugin-nswag
+ * @builder-shin/eslint-plugin-nswag
  * ESLint plugin for @builder-shin/nswag-specs DSL
  */
 

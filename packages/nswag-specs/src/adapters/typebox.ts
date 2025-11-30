@@ -72,7 +72,7 @@ const TYPEBOX_ONLY_KEYS = ['$id', 'kind', '$static', 'transform', 'params'];
  * @example
  * ```typescript
  * import { Type } from '@sinclair/typebox';
- * import { typeboxToOpenApi } from '@aspect/nswag-specs/typebox';
+ * import { typeboxToOpenApi } from '@builder-shin/nswag-specs/typebox';
  *
  * const BlogSchema = Type.Object({
  *   id: Type.Integer(),

@@ -71,7 +71,7 @@ const ZodTypeNames = {
  * @example
  * ```typescript
  * import { z } from 'zod';
- * import { zodToOpenApi } from '@aspect/nswag-specs/zod';
+ * import { zodToOpenApi } from '@builder-shin/nswag-specs/zod';
  *
  * const BlogSchema = z.object({
  *   id: z.number().int(),

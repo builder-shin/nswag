@@ -5,14 +5,14 @@
  * @example
  * // .mocharc.js
  * module.exports = {
- *   require: ['@aspect/nswag-specs/mocha'],
+ *   require: ['@builder-shin/nswag-specs/mocha'],
  * };
  *
  * @example
  * // Using Root Hook Plugin
  * // .mocharc.js
  * module.exports = {
- *   require: ['@aspect/nswag-specs/mocha'],
+ *   require: ['@builder-shin/nswag-specs/mocha'],
  *   'root-hooks': true,
  * };
  */
@@ -85,7 +85,7 @@ function setupGlobalApi(): void {
  * @example
  * // .mocharc.js
  * module.exports = {
- *   require: ['@aspect/nswag-specs/mocha'],
+ *   require: ['@builder-shin/nswag-specs/mocha'],
  * };
  */
 export const mochaHooks = {

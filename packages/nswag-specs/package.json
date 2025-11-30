@@ -1,5 +1,5 @@
 {
-  "name": "@aspect/nswag-specs",
+  "name": "@builder-shin/nswag-specs",
   "version": "1.0.0",
   "description": "OpenAPI-based DSL with test runner integration and spec file generation",
   "type": "module",

@@ -3,12 +3,12 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@aspect/nswag-specs": ["packages/nswag-specs/src"],
-      "@aspect/nswag-specs/*": ["packages/nswag-specs/src/*"],
-      "@aspect/nswag-api": ["packages/nswag-api/src"],
-      "@aspect/nswag-api/*": ["packages/nswag-api/src/*"],
-      "@aspect/nswag-ui": ["packages/nswag-ui/src"],
-      "@aspect/nswag-ui/*": ["packages/nswag-ui/src/*"]
+      "@builder-shin/nswag-specs": ["packages/nswag-specs/src"],
+      "@builder-shin/nswag-specs/*": ["packages/nswag-specs/src/*"],
+      "@builder-shin/nswag-api": ["packages/nswag-api/src"],
+      "@builder-shin/nswag-api/*": ["packages/nswag-api/src/*"],
+      "@builder-shin/nswag-ui": ["packages/nswag-ui/src"],
+      "@builder-shin/nswag-ui/*": ["packages/nswag-ui/src/*"]
     }
   },
   "references": [

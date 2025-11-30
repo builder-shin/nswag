@@ -9,9 +9,9 @@
   },
   "scripts": {
     "build": "turbo run build",
-    "build:specs": "pnpm --filter @aspect/nswag-specs build",
-    "build:api": "pnpm --filter @aspect/nswag-api build",
-    "build:ui": "pnpm --filter @aspect/nswag-ui build",
+    "build:specs": "pnpm --filter @builder-shin/nswag-specs build",
+    "build:api": "pnpm --filter @builder-shin/nswag-api build",
+    "build:ui": "pnpm --filter @builder-shin/nswag-ui build",
     "dev": "turbo run dev",
     "test": "turbo run test",
     "lint": "turbo run lint",

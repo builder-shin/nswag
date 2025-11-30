@@ -4,7 +4,7 @@
  *
  * @example
  * ```typescript
- * import { nswagApiPlugin } from '@aspect/nswag-api/fastify';
+ * import { nswagApiPlugin } from '@builder-shin/nswag-api/fastify';
  *
  * app.register(nswagApiPlugin, {
  *   prefix: '/api-docs',

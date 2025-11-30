@@ -56,7 +56,7 @@ type ExpressRouter = {
  *
  * @example
  * ```typescript
- * import { swaggerUi } from '@aspect/nswag-ui';
+ * import { swaggerUi } from '@builder-shin/nswag-ui';
  *
  * // Single spec
  * app.use('/docs', swaggerUi({
@@ -119,7 +119,7 @@ export const createSwaggerUiMiddleware = swaggerUi;
  *
  * @example
  * ```typescript
- * import { redoc } from '@aspect/nswag-ui';
+ * import { redoc } from '@builder-shin/nswag-ui';
  *
  * app.use('/redoc', redoc({
  *   specUrl: '/api-docs/v1/openapi.json',
@@ -173,7 +173,7 @@ export const createRedocMiddleware = redoc;
  * @example
  * ```typescript
  * import express from 'express';
- * import { setupDocsRouter } from '@aspect/nswag-ui';
+ * import { setupDocsRouter } from '@builder-shin/nswag-ui';
  *
  * const docsRouter = express.Router();
  * setupDocsRouter(docsRouter, {

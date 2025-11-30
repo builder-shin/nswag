@@ -6,7 +6,7 @@
  * // vitest.config.ts
  * export default defineConfig({
  *   test: {
- *     setupFiles: ['@aspect/nswag-specs/vitest/setup'],
+ *     setupFiles: ['@builder-shin/nswag-specs/vitest/setup'],
  *   },
  * });
  */

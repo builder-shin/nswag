@@ -10,7 +10,7 @@ import { logger, type ParsedArgs } from '../utils.js';
 /**
  * nswag.config.ts template
  */
-const CONFIG_TEMPLATE = `import { defineConfig } from '@aspect/nswag-specs';
+const CONFIG_TEMPLATE = `import { defineConfig } from '@builder-shin/nswag-specs';
 
 export default defineConfig({
   // Test framework configuration ('jest' | 'vitest' | 'mocha')
@@ -49,7 +49,7 @@ export default defineConfig({
 /**
  * openapi_helper.ts template
  */
-const OPENAPI_HELPER_TEMPLATE = `import { configure } from '@aspect/nswag-specs';
+const OPENAPI_HELPER_TEMPLATE = `import { configure } from '@builder-shin/nswag-specs';
 
 // Import app instance (modify according to your project)
 // import { app } from '../src/app';
@@ -87,7 +87,7 @@ const EXAMPLE_SPEC_TEMPLATE = `import {
   response,
   runTest,
   requestParams,
-} from '@aspect/nswag-specs';
+} from '@builder-shin/nswag-specs';
 import '../openapi_helper';
 
 // Define path /api/v1/blogs

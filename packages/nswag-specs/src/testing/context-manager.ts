@@ -22,7 +22,7 @@ import type {
  * Users can add custom properties through module extension
  *
  * @example
- * declare module '@aspect/nswag-specs' {
+ * declare module '@builder-shin/nswag-specs' {
  *   interface ExtendedTestContext {
  *     authToken?: string;
  *     dbConnection?: DatabaseConnection;

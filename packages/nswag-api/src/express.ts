@@ -4,7 +4,7 @@
  *
  * @example
  * ```typescript
- * import { nswagApi } from '@aspect/nswag-api/express';
+ * import { nswagApi } from '@builder-shin/nswag-api/express';
  *
  * app.use('/api-docs', nswagApi({
  *   openapiRoot: './openapi',

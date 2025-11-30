@@ -1,5 +1,5 @@
 {
-  "name": "@aspect/nswag-ui",
+  "name": "@builder-shin/nswag-ui",
   "version": "1.0.0",
   "description": "Document exploration interface via Swagger UI or Redoc",
   "type": "module",

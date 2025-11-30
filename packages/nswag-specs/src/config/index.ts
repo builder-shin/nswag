@@ -68,7 +68,7 @@ const CONFIG_FILE_NAMES = [
  * @example
  * ```typescript
  * // nswag.config.ts
- * import { defineConfig } from '@aspect/nswag-specs';
+ * import { defineConfig } from '@builder-shin/nswag-specs';
  *
  * export default defineConfig({
  *   testFramework: 'vitest',

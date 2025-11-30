@@ -1,5 +1,5 @@
 /**
- * @aspect/nswag-specs
+ * @builder-shin/nswag-specs
  * OpenAPI-based DSL and test runner integration, spec file generation
  */
 

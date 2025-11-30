@@ -1,5 +1,5 @@
 /**
- * @aspect/nswag-ui
+ * @builder-shin/nswag-ui
  * Provides document browsing interface through Swagger UI or Redoc
  *
  * @packageDocumentation

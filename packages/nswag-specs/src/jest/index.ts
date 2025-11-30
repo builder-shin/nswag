@@ -5,8 +5,8 @@
  * @example
  * // jest.config.js
  * module.exports = {
- *   testEnvironment: '@aspect/nswag-specs/jest/environment',
- *   setupFilesAfterEnv: ['@aspect/nswag-specs/jest/setup'],
+ *   testEnvironment: '@builder-shin/nswag-specs/jest/environment',
+ *   setupFilesAfterEnv: ['@builder-shin/nswag-specs/jest/setup'],
  * };
  */
 
@@ -18,7 +18,7 @@ export * from './setup.js';
  *
  * @example
  * // jest.config.js
- * const { createJestConfig } = require('@aspect/nswag-specs/jest');
+ * const { createJestConfig } = require('@builder-shin/nswag-specs/jest');
  * module.exports = createJestConfig({ rootDir: __dirname });
  */
 export function createJestConfig(options?: {
@@ -27,8 +27,8 @@ export function createJestConfig(options?: {
   outputSpec?: string;
 }) {
   return {
-    testEnvironment: '@aspect/nswag-specs/jest/environment',
-    setupFilesAfterEnv: ['@aspect/nswag-specs/jest/setup'],
+    testEnvironment: '@builder-shin/nswag-specs/jest/environment',
+    setupFilesAfterEnv: ['@builder-shin/nswag-specs/jest/setup'],
     rootDir: options?.rootDir ?? process.cwd(),
     testEnvironmentOptions: {
       vcrMode: options?.vcrMode,

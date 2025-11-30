@@ -4,7 +4,7 @@
  *
  * @example
  * ```typescript
- * import { NswagApiModule } from '@aspect/nswag-api/nestjs';
+ * import { NswagApiModule } from '@builder-shin/nswag-api/nestjs';
  *
  * @Module({
  *   imports: [

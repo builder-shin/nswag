@@ -37,12 +37,12 @@ interface VitePlugin {
  * @example
  * // vitest.config.ts
  * import { defineConfig } from 'vitest/config';
- * import { nswagPlugin } from '@aspect/nswag-specs/vitest';
+ * import { nswagPlugin } from '@builder-shin/nswag-specs/vitest';
  *
  * export default defineConfig({
  *   plugins: [nswagPlugin()],
  *   test: {
- *     setupFiles: ['@aspect/nswag-specs/vitest/setup'],
+ *     setupFiles: ['@builder-shin/nswag-specs/vitest/setup'],
  *   },
  * });
  */
@@ -128,10 +128,10 @@ export const validateResponses = ${options.validateResponses ?? true};
 export const outputSpec = ${options.outputSpec ? `"${options.outputSpec}"` : 'undefined'};
 
 // Get configuration
-export { configure, getConfiguration } from '@aspect/nswag-specs/testing';
-export { createHttpClient } from '@aspect/nswag-specs/testing';
-export { getContextManager } from '@aspect/nswag-specs/testing';
-export { getSpecCollector } from '@aspect/nswag-specs/testing';
+export { configure, getConfiguration } from '@builder-shin/nswag-specs/testing';
+export { createHttpClient } from '@builder-shin/nswag-specs/testing';
+export { getContextManager } from '@builder-shin/nswag-specs/testing';
+export { getSpecCollector } from '@builder-shin/nswag-specs/testing';
 `;
 }
 

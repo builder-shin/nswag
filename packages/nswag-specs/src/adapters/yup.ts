@@ -39,7 +39,7 @@ export interface YupSchema {
  * @example
  * ```typescript
  * import * as yup from 'yup';
- * import { yupToOpenApi } from '@aspect/nswag-specs/yup';
+ * import { yupToOpenApi } from '@builder-shin/nswag-specs/yup';
  *
  * const BlogSchema = yup.object({
  *   id: yup.number().integer().required(),

@@ -45,7 +45,7 @@ export const NSWAG_UI_OPTIONS = 'NSWAG_UI_OPTIONS';
  *
  * @example
  * ```typescript
- * import { NswagUiModule } from '@aspect/nswag-ui/nestjs';
+ * import { NswagUiModule } from '@builder-shin/nswag-ui/nestjs';
  *
  * @Module({
  *   imports: [
@@ -214,7 +214,7 @@ function generateUiHtml(options: NswagUiModuleOptions): string {
  * @example
  * ```typescript
  * import { Controller, Get, Header, Req, Res, HttpStatus } from '@nestjs/common';
- * import { createSwaggerUIHandlers } from '@aspect/nswag-ui/nestjs';
+ * import { createSwaggerUIHandlers } from '@builder-shin/nswag-ui/nestjs';
  *
  * const swaggerHandlers = createSwaggerUIHandlers({
  *   specUrl: '/api-docs.json',

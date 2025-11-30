@@ -29,7 +29,7 @@ import type {
  *
  * @example
  * ```typescript
- * import { swaggerUiPlugin } from '@aspect/nswag-ui/fastify';
+ * import { swaggerUiPlugin } from '@builder-shin/nswag-ui/fastify';
  *
  * await fastify.register(swaggerUiPlugin, {
  *   prefix: '/docs',
@@ -119,7 +119,7 @@ export function createSwaggerUIPlugin(
  *
  * @example
  * ```typescript
- * import { redocPlugin } from '@aspect/nswag-ui/fastify';
+ * import { redocPlugin } from '@builder-shin/nswag-ui/fastify';
  *
  * await fastify.register(redocPlugin, {
  *   prefix: '/redoc',
@@ -234,7 +234,7 @@ export async function registerRedoc(
  *
  * @example
  * ```typescript
- * import { registerBothUIs } from '@aspect/nswag-ui/fastify';
+ * import { registerBothUIs } from '@builder-shin/nswag-ui/fastify';
  *
  * await registerBothUIs(fastify, {
  *   specUrl: '/api-docs/openapi.json',

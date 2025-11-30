@@ -1,5 +1,5 @@
 {
-  "name": "@aspect/nswag-api",
+  "name": "@builder-shin/nswag-api",
   "version": "1.0.0",
   "description": "Middleware for exposing generated OpenAPI files as JSON/YAML endpoints",
   "type": "module",

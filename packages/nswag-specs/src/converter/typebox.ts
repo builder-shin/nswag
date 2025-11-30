@@ -4,7 +4,7 @@
  *
  * @example
  * ```typescript
- * import { openApiToTypeBox, generateTypeBoxCode } from '@aspect/nswag-specs/converter';
+ * import { openApiToTypeBox, generateTypeBoxCode } from '@builder-shin/nswag-specs/converter';
  * import { Value } from '@sinclair/typebox/value';
  *
  * // Runtime schema generation

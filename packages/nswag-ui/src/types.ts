@@ -1,5 +1,5 @@
 /**
- * @aspect/nswag-ui type definitions
+ * @builder-shin/nswag-ui type definitions
  * Swagger UI and Redoc UI configuration options
  */
 

@@ -1,6 +1,6 @@
 /**
  * nswag-api type definitions
- * Based on specification section 5. @aspect/nswag-api module
+ * Based on specification section 5. @builder-shin/nswag-api module
  */
 
 /**

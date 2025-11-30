@@ -4,7 +4,7 @@
  *
  * @example
  * ```typescript
- * import { nswagApi } from '@aspect/nswag-api/koa';
+ * import { nswagApi } from '@builder-shin/nswag-api/koa';
  *
  * app.use(nswagApi({
  *   prefix: '/api-docs',

@@ -9,7 +9,7 @@
  *
  * @example
  * ```typescript
- * import { convertSchema, generateSchemaCode } from '@aspect/nswag-specs/converter';
+ * import { convertSchema, generateSchemaCode } from '@builder-shin/nswag-specs/converter';
  *
  * // Use unified conversion function
  * const result = await convertSchema(openApiSchema, 'zod');

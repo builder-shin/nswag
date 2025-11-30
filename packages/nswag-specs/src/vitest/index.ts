@@ -5,12 +5,12 @@
  * @example
  * // vitest.config.ts
  * import { defineConfig } from 'vitest/config';
- * import { nswagPlugin } from '@aspect/nswag-specs/vitest';
+ * import { nswagPlugin } from '@builder-shin/nswag-specs/vitest';
  *
  * export default defineConfig({
  *   plugins: [nswagPlugin()],
  *   test: {
- *     setupFiles: ['@aspect/nswag-specs/vitest/setup'],
+ *     setupFiles: ['@builder-shin/nswag-specs/vitest/setup'],
  *   },
  * });
  */
@@ -25,7 +25,7 @@ export * from './setup.js';
  * @example
  * // vitest.config.ts
  * import { defineConfig } from 'vitest/config';
- * import { createVitestConfig } from '@aspect/nswag-specs/vitest';
+ * import { createVitestConfig } from '@builder-shin/nswag-specs/vitest';
  *
  * const nswagConfig = createVitestConfig();
  * export default defineConfig({
@@ -40,7 +40,7 @@ export function createVitestConfig(options?: {
   return {
     test: {
       setupFiles: [
-        '@aspect/nswag-specs/vitest/setup',
+        '@builder-shin/nswag-specs/vitest/setup',
         ...(options?.setupFiles ?? []),
       ],
       // Global configuration

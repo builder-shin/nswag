@@ -4,7 +4,7 @@
  *
  * @example
  * ```typescript
- * import { openApiToYup, generateYupCode } from '@aspect/nswag-specs/converter';
+ * import { openApiToYup, generateYupCode } from '@builder-shin/nswag-specs/converter';
  *
  * // Runtime schema generation
  * const result = await openApiToYup({

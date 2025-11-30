@@ -4,7 +4,7 @@
  *
  * @example
  * ```typescript
- * import { openApiToZod, generateZodCode } from '@aspect/nswag-specs/converter';
+ * import { openApiToZod, generateZodCode } from '@builder-shin/nswag-specs/converter';
  *
  * // Runtime schema generation
  * const result = openApiToZod({

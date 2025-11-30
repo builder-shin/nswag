@@ -45,13 +45,13 @@ importers:
 
   packages/nswag:
     dependencies:
-      '@aspect/nswag-api':
+      '@builder-shin/nswag-api':
         specifier: workspace:*
         version: link:../nswag-api
-      '@aspect/nswag-specs':
+      '@builder-shin/nswag-specs':
         specifier: workspace:*
         version: link:../nswag-specs
-      '@aspect/nswag-ui':
+      '@builder-shin/nswag-ui':
         specifier: workspace:*
         version: link:../nswag-ui
     devDependencies:

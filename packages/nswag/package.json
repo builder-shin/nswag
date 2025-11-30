@@ -1,5 +1,5 @@
 {
-  "name": "@aspect/nswag",
+  "name": "@builder-shin/nswag",
   "version": "1.0.0",
   "description": "OpenAPI spec generation and documentation tool for Node.js - meta package",
   "type": "module",
@@ -24,9 +24,9 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@aspect/nswag-specs": "workspace:*",
-    "@aspect/nswag-api": "workspace:*",
-    "@aspect/nswag-ui": "workspace:*"
+    "@builder-shin/nswag-specs": "workspace:*",
+    "@builder-shin/nswag-api": "workspace:*",
+    "@builder-shin/nswag-ui": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

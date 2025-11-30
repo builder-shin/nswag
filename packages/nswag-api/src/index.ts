@@ -1,11 +1,11 @@
 /**
- * @aspect/nswag-api
+ * @builder-shin/nswag-api
  * Middleware to expose generated OpenAPI files as JSON/YAML endpoints
  *
  * @example
  * Express:
  * ```typescript
- * import { nswagApi } from '@aspect/nswag-api/express';
+ * import { nswagApi } from '@builder-shin/nswag-api/express';
  *
  * app.use('/api-docs', nswagApi({
  *   openapiRoot: './openapi',
@@ -14,7 +14,7 @@
  *
  * Fastify:
  * ```typescript
- * import { nswagApiPlugin } from '@aspect/nswag-api/fastify';
+ * import { nswagApiPlugin } from '@builder-shin/nswag-api/fastify';
  *
  * app.register(nswagApiPlugin, {
  *   prefix: '/api-docs',
@@ -24,7 +24,7 @@
  *
  * NestJS:
  * ```typescript
- * import { NswagApiModule } from '@aspect/nswag-api/nestjs';
+ * import { NswagApiModule } from '@builder-shin/nswag-api/nestjs';
  *
  * @Module({
  *   imports: [
@@ -39,7 +39,7 @@
  *
  * Koa:
  * ```typescript
- * import { nswagApi } from '@aspect/nswag-api/koa';
+ * import { nswagApi } from '@builder-shin/nswag-api/koa';
  *
  * app.use(nswagApi({
  *   prefix: '/api-docs',
