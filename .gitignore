@@ -39,3 +39,6 @@ temp/
 
 # docs
 docs/
+
+# serena
+.serena/
