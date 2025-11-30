@@ -1,0 +1,157 @@
+{
+  "name": "@aspect/nswag-specs",
+  "version": "0.0.1",
+  "description": "OpenAPI 기반 DSL과 테스트 러너 통합, 스펙 파일 생성",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "nswag": "./bin/nswag.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./testing": {
+      "types": "./dist/testing/index.d.ts",
+      "import": "./dist/testing/index.js"
+    },
+    "./jest": {
+      "types": "./dist/jest/index.d.ts",
+      "import": "./dist/jest/index.js"
+    },
+    "./jest/environment": {
+      "types": "./dist/jest/environment.d.ts",
+      "import": "./dist/jest/environment.js"
+    },
+    "./jest/setup": {
+      "types": "./dist/jest/setup.d.ts",
+      "import": "./dist/jest/setup.js"
+    },
+    "./vitest": {
+      "types": "./dist/vitest/index.d.ts",
+      "import": "./dist/vitest/index.js"
+    },
+    "./vitest/setup": {
+      "types": "./dist/vitest/setup.d.ts",
+      "import": "./dist/vitest/setup.js"
+    },
+    "./vitest/plugin": {
+      "types": "./dist/vitest/plugin.d.ts",
+      "import": "./dist/vitest/plugin.js"
+    },
+    "./mocha": {
+      "types": "./dist/mocha/index.d.ts",
+      "import": "./dist/mocha/index.js"
+    },
+    "./zod": {
+      "types": "./dist/adapters/zod.d.ts",
+      "import": "./dist/adapters/zod.js"
+    },
+    "./yup": {
+      "types": "./dist/adapters/yup.d.ts",
+      "import": "./dist/adapters/yup.js"
+    },
+    "./typebox": {
+      "types": "./dist/adapters/typebox.d.ts",
+      "import": "./dist/adapters/typebox.js"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.js"
+    },
+    "./mock": {
+      "types": "./dist/mock/index.d.ts",
+      "import": "./dist/mock/index.js"
+    },
+    "./config": {
+      "types": "./dist/config/index.d.ts",
+      "import": "./dist/config/index.js"
+    },
+    "./cli": {
+      "types": "./dist/cli/index.d.ts",
+      "import": "./dist/cli/index.js"
+    },
+    "./errors": {
+      "types": "./dist/errors/index.d.ts",
+      "import": "./dist/errors/index.js"
+    },
+    "./logger": {
+      "types": "./dist/logger/index.d.ts",
+      "import": "./dist/logger/index.js"
+    },
+    "./plugin": {
+      "types": "./dist/plugin/index.d.ts",
+      "import": "./dist/plugin/index.js"
+    },
+    "./compare": {
+      "types": "./dist/compare/index.d.ts",
+      "import": "./dist/compare/index.js"
+    },
+    "./converter": {
+      "types": "./dist/converter/index.d.ts",
+      "import": "./dist/converter/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "bin",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "ajv": "^8.12.0",
+    "yaml": "^2.3.0"
+  },
+  "devDependencies": {
+    "@sinclair/typebox": "^0.32.0",
+    "@types/node": "^20.10.0",
+    "@types/supertest": "^2.0.16",
+    "supertest": "^6.3.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0",
+    "yup": "^1.0.0",
+    "zod": "^3.0.0"
+  },
+  "peerDependencies": {
+    "supertest": ">=6.0.0",
+    "zod": "^3.0.0",
+    "yup": "^1.0.0",
+    "@sinclair/typebox": "^0.32.0"
+  },
+  "peerDependenciesMeta": {
+    "supertest": {
+      "optional": true
+    },
+    "zod": {
+      "optional": true
+    },
+    "yup": {
+      "optional": true
+    },
+    "@sinclair/typebox": {
+      "optional": true
+    }
+  },
+  "keywords": [
+    "openapi",
+    "swagger",
+    "api-testing",
+    "spec-generation",
+    "jest",
+    "vitest",
+    "mocha"
+  ],
+  "author": "",
+  "license": "MIT"
+}

@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@aspect/nswag-specs": ["packages/nswag-specs/src"],
+      "@aspect/nswag-specs/*": ["packages/nswag-specs/src/*"],
+      "@aspect/nswag-api": ["packages/nswag-api/src"],
+      "@aspect/nswag-api/*": ["packages/nswag-api/src/*"],
+      "@aspect/nswag-ui": ["packages/nswag-ui/src"],
+      "@aspect/nswag-ui/*": ["packages/nswag-ui/src/*"]
+    }
+  },
+  "references": [
+    { "path": "packages/nswag-specs" },
+    { "path": "packages/nswag-api" },
+    { "path": "packages/nswag-ui" }
+  ],
+  "include": [],
+  "exclude": ["node_modules", "**/dist/**"]
+}

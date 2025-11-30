@@ -1,0 +1,73 @@
+{
+  "name": "@aspect/nswag-ui",
+  "version": "0.0.1",
+  "description": "Swagger UI 또는 Redoc을 통한 문서 탐색 인터페이스 제공",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./express": {
+      "types": "./dist/express.d.ts",
+      "import": "./dist/express.js"
+    },
+    "./fastify": {
+      "types": "./dist/fastify.d.ts",
+      "import": "./dist/fastify.js"
+    },
+    "./nestjs": {
+      "types": "./dist/nestjs.d.ts",
+      "import": "./dist/nestjs.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "swagger-ui-dist": "^5.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/swagger-ui-dist": "^3.30.4",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  },
+  "peerDependencies": {
+    "fastify": ">=4.0.0",
+    "@nestjs/common": ">=10.0.0"
+  },
+  "peerDependenciesMeta": {
+    "fastify": {
+      "optional": true
+    },
+    "@nestjs/common": {
+      "optional": true
+    }
+  },
+  "keywords": [
+    "openapi",
+    "swagger",
+    "swagger-ui",
+    "redoc",
+    "api-documentation",
+    "express",
+    "fastify",
+    "nestjs"
+  ],
+  "author": "",
+  "license": "MIT"
+}

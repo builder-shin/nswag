@@ -1,0 +1,37 @@
+{
+  "name": "nswag-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Node.js용 OpenAPI 스펙 생성 및 문서화 도구 모노레포",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "build:specs": "pnpm --filter @aspect/nswag-specs build",
+    "build:api": "pnpm --filter @aspect/nswag-api build",
+    "build:ui": "pnpm --filter @aspect/nswag-ui build",
+    "dev": "turbo run dev",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\""
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "prettier": "^3.1.0",
+    "turbo": "^2.3.0",
+    "typescript": "^5.3.0"
+  },
+  "keywords": [
+    "openapi",
+    "swagger",
+    "api-documentation",
+    "testing",
+    "nodejs"
+  ],
+  "author": "",
+  "license": "MIT"
+}
