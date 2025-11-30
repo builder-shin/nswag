@@ -1,12 +1,12 @@
 /**
- * Zod 스키마 변환기
- * OpenAPI JSON Schema와 Zod 스키마 간의 양방향 변환
+ * Zod schema converter
+ * Bidirectional conversion between OpenAPI JSON Schema and Zod schemas
  *
  * @example
  * ```typescript
  * import { openApiToZod, generateZodCode } from '@aspect/nswag-specs/converter';
  *
- * // 런타임 스키마 생성
+ * // Runtime schema generation
  * const result = openApiToZod({
  *   type: 'object',
  *   properties: {
@@ -16,10 +16,10 @@
  *   required: ['id', 'email'],
  * });
  *
- * // 유효성 검증
+ * // Validation
  * const parsed = result.schema.safeParse(data);
  *
- * // 코드 생성
+ * // Code generation
  * const code = generateZodCode(schema, { schemaName: 'UserSchema' });
  * ```
  */
@@ -39,7 +39,7 @@ import {
 } from './utils.js';
 
 /**
- * Zod 네임스페이스 타입 (동적 import용)
+ * Zod namespace type (for dynamic import)
  */
 interface ZodNamespace {
   string: () => ZodType;
@@ -59,7 +59,7 @@ interface ZodNamespace {
 }
 
 /**
- * Zod 타입 인터페이스 (내부 사용)
+ * Zod type interface (internal use)
  */
 interface ZodType {
   optional: () => ZodType;
@@ -90,10 +90,10 @@ interface ZodType {
 }
 
 /**
- * Zod 인스턴스를 동적으로 로드
+ * Zod Dynamically load instance
  *
- * @returns Zod 모듈
- * @throws Zod가 설치되어 있지 않은 경우 에러
+ * @returns Zod module
+ * @throws ZodError if not installed
  */
 async function loadZod(): Promise<ZodNamespace> {
   try {
@@ -102,17 +102,17 @@ async function loadZod(): Promise<ZodNamespace> {
     return (zodModule as any).z as ZodNamespace;
   } catch {
     throw new Error(
-      'zod 패키지가 설치되어 있지 않습니다. npm install zod를 실행하세요.',
+      'The zod package is not installed. Please run npm install zod.',
     );
   }
 }
 
 /**
- * OpenAPI 스키마를 Zod 스키마로 변환 (비동기)
+ * Convert OpenAPI schema to Zod schema (async)
  *
- * @param schema - OpenAPI 스키마
- * @param options - 변환 옵션
- * @returns 변환 결과 (Zod 스키마 및 경고)
+ * @param schema - OpenAPI schema
+ * @param options - Conversion options
+ * @returns Conversion result (schema and warnings)
  *
  * @example
  * ```typescript
@@ -147,13 +147,13 @@ export async function openApiToZod(
 }
 
 /**
- * OpenAPI 스키마를 Zod 스키마로 변환 (동기, Zod 인스턴스 필요)
+ * Convert OpenAPI schema to Zod schema (sync, instance required)
  *
- * @param schema - OpenAPI 스키마
- * @param z - Zod 네임스페이스
- * @param options - 변환 옵션
- * @param collector - 경고 수집기
- * @returns Zod 스키마
+ * @param schema - OpenAPI schema
+ * @param z - Zod namespace
+ * @param options - Conversion options
+ * @param collector - Warning collector
+ * @returns Zod schema
  */
 function convertSchemaToZod(
   schema: Schema,
@@ -161,7 +161,7 @@ function convertSchemaToZod(
   options: ReturnType<typeof getDefaultOptions>,
   collector: WarningCollector,
 ): ZodType {
-  // $ref 처리
+  // $ref processing
   if (schema.$ref) {
     const resolved = tryResolveRef(schema.$ref, options.rootSpec, collector);
     if (Object.keys(resolved).length === 0) {
@@ -170,13 +170,13 @@ function convertSchemaToZod(
     return convertSchemaToZod(resolved, z, options, collector);
   }
 
-  // allOf 처리
+  // allOf processing
   if (schema.allOf) {
     const processed = processCompositeSchema(schema, options, collector);
     return convertSchemaToZod(processed, z, options, collector);
   }
 
-  // oneOf 처리
+  // oneOf processing
   if (schema.oneOf && schema.oneOf.length > 0) {
     const schemas = schema.oneOf.map((s) => convertSchemaToZod(s, z, options, collector));
     if (schemas.length === 1) {
@@ -185,7 +185,7 @@ function convertSchemaToZod(
     return z.union(schemas as [ZodType, ZodType, ...ZodType[]]);
   }
 
-  // anyOf 처리 (oneOf와 동일하게 처리)
+  // anyOf processing (same as oneOf)
   if (schema.anyOf && schema.anyOf.length > 0) {
     const schemas = schema.anyOf.map((s) => convertSchemaToZod(s, z, options, collector));
     if (schemas.length === 1) {
@@ -194,7 +194,7 @@ function convertSchemaToZod(
     return z.union(schemas as [ZodType, ZodType, ...ZodType[]]);
   }
 
-  // enum 처리
+  // enum processing
   if (schema.enum && schema.enum.length > 0) {
     const values = schema.enum as string[];
     if (values.length === 1) {
@@ -203,7 +203,7 @@ function convertSchemaToZod(
     return z.enum(values as [string, ...string[]]);
   }
 
-  // 타입별 처리
+  // Type-specific processing
   switch (schema.type) {
     case 'string':
       return convertStringSchema(schema, z, collector);
@@ -225,18 +225,18 @@ function convertSchemaToZod(
       return convertObjectSchema(schema, z, options, collector);
 
     default:
-      // 타입이 없는 경우 any로 처리
+      // If no type specified, process as any
       if (!schema.type) {
-        collector.add('unsupported-type', '타입이 지정되지 않은 스키마입니다. any로 변환됩니다.');
+        collector.add('unsupported-type', 'Schema has no type specified. Converting to any.');
         return z.any();
       }
-      collector.add('unsupported-type', `지원하지 않는 타입입니다: ${schema.type}`);
+      collector.add('unsupported-type', `Unsupported type: ${schema.type}`);
       return z.any();
   }
 }
 
 /**
- * string 스키마 변환
+ * string Schema conversion
  */
 function convertStringSchema(
   schema: Schema,
@@ -245,7 +245,7 @@ function convertStringSchema(
 ): ZodType {
   let result = z.string();
 
-  // format 처리
+  // format processing
   if (schema.format) {
     switch (schema.format) {
       case 'email':
@@ -265,21 +265,21 @@ function convertStringSchema(
       case 'ipv4':
       case 'ipv6':
       case 'hostname':
-        // Zod에서 직접 지원하지 않음, 정규식으로 처리 가능하지만 경고만 표시
+        // Not directly supported by Zod, could use regex but only show warning
         collector.add(
           'unsupported-format',
-          `Zod에서 '${schema.format}' format을 직접 지원하지 않습니다. 기본 string으로 처리됩니다.`,
+          `Zod does not directly support '${schema.format}' format. Converting to basic string.`,
         );
         break;
       default:
         collector.add(
           'unsupported-format',
-          `알 수 없는 format입니다: ${schema.format}`,
+          `Unknown format: ${schema.format}`,
         );
     }
   }
 
-  // 길이 제약조건
+  // Length constraints
   if (schema.minLength !== undefined) {
     result = result.min(schema.minLength);
   }
@@ -287,14 +287,14 @@ function convertStringSchema(
     result = result.max(schema.maxLength);
   }
 
-  // pattern 처리
+  // pattern processing
   if (schema.pattern) {
     try {
       result = result.regex(new RegExp(schema.pattern));
     } catch (error) {
       collector.add(
         'unsupported-constraint',
-        `잘못된 정규식 패턴입니다: ${schema.pattern}`,
+        `Invalid regex pattern: ${schema.pattern}`,
       );
     }
   }
@@ -303,7 +303,7 @@ function convertStringSchema(
 }
 
 /**
- * number/integer 스키마 변환
+ * number/integer Schema conversion
  */
 function convertNumberSchema(
   schema: Schema,
@@ -312,12 +312,12 @@ function convertNumberSchema(
 ): ZodType {
   let result = z.number();
 
-  // integer 처리
+  // integer processing
   if (schema.type === 'integer') {
     result = result.int();
   }
 
-  // minimum/maximum 제약조건
+  // minimum/maximum constraints
   if (schema.minimum !== undefined) {
     result = result.gte(schema.minimum);
   }
@@ -331,7 +331,7 @@ function convertNumberSchema(
     result = result.lt(schema.exclusiveMaximum);
   }
 
-  // multipleOf 처리
+  // multipleOf processing
   if (schema.multipleOf !== undefined) {
     result = result.multipleOf(schema.multipleOf);
   }
@@ -340,7 +340,7 @@ function convertNumberSchema(
 }
 
 /**
- * array 스키마 변환
+ * array Schema conversion
  */
 function convertArraySchema(
   schema: Schema,
@@ -348,14 +348,14 @@ function convertArraySchema(
   options: ReturnType<typeof getDefaultOptions>,
   collector: WarningCollector,
 ): ZodType {
-  // items 스키마
+  // Items schema
   const itemSchema = schema.items
     ? convertSchemaToZod(schema.items, z, options, collector)
     : z.any();
 
   let result = z.array(itemSchema);
 
-  // 배열 길이 제약조건
+  // Array length constraints
   if (schema.minItems !== undefined) {
     result = result.min(schema.minItems);
   }
@@ -363,11 +363,11 @@ function convertArraySchema(
     result = result.max(schema.maxItems);
   }
 
-  // uniqueItems는 Zod에서 직접 지원하지 않음
+  // uniqueItems is not directly supported by Zod
   if (schema.uniqueItems) {
     collector.add(
       'unsupported-constraint',
-      'uniqueItems는 Zod에서 직접 지원하지 않습니다. refine()을 사용하여 수동으로 검증하세요.',
+      'uniqueItems is not directly supported by Zod. Use refine() for manual validation.',
     );
   }
 
@@ -375,7 +375,7 @@ function convertArraySchema(
 }
 
 /**
- * object 스키마 변환
+ * object Schema conversion
  */
 function convertObjectSchema(
   schema: Schema,
@@ -390,7 +390,7 @@ function convertObjectSchema(
     for (const [key, propSchema] of Object.entries(schema.properties)) {
       let fieldSchema = convertSchemaToZod(propSchema, z, options, collector);
 
-      // nullable 처리
+      // nullable processing
       if (propSchema.nullable) {
         switch (options.nullable) {
           case 'optional':
@@ -405,13 +405,13 @@ function convertObjectSchema(
         }
       }
 
-      // optional 처리
+      // optional processing
       const isRequired = options.defaultRequired || requiredFields.has(key);
       if (!isRequired && !propSchema.nullable) {
         fieldSchema = fieldSchema.optional();
       }
 
-      // default 처리
+      // default processing
       if (propSchema.default !== undefined) {
         fieldSchema = fieldSchema.default(propSchema.default);
       }
@@ -422,7 +422,7 @@ function convertObjectSchema(
 
   let result = z.object(shape);
 
-  // additionalProperties 처리
+  // additionalProperties processing
   if (options.additionalProperties) {
     result = result.passthrough();
   } else if (options.strict) {
@@ -433,20 +433,20 @@ function convertObjectSchema(
 }
 
 /**
- * Zod 스키마를 OpenAPI 스키마로 변환
- * (adapters/zod.ts의 zodToOpenApi와 동일한 기능 - re-export)
+ * Zod Convert schema to OpenAPI schema
+ * (Same functionality as zodToOpenApi in adapters/zod.ts - re-export)
  *
- * @param zodSchema - Zod 스키마
- * @returns OpenAPI 스키마
+ * @param zodSchema - Zod schema
+ * @returns OpenAPI schema
  */
 export { zodToOpenApi } from '../adapters/zod.js';
 
 /**
- * OpenAPI 스키마에서 Zod TypeScript 코드 생성
+ * Generate TypeScript code from OpenAPI schema
  *
- * @param schema - OpenAPI 스키마
- * @param options - 변환 옵션
- * @returns 생성된 TypeScript 코드
+ * @param schema - OpenAPI schema
+ * @param options - Conversion options
+ * @returns Generated TypeScript code
  *
  * @example
  * ```typescript
@@ -462,7 +462,7 @@ export { zodToOpenApi } from '../adapters/zod.js';
  *   { schemaName: 'UserSchema', includeImports: true }
  * );
  *
- * // 출력:
+ * // Output:
  * // import { z } from 'zod';
  * //
  * // export const UserSchema = z.object({
@@ -476,25 +476,25 @@ export function generateZodCode(schema: Schema, options: ConvertOptions = {}): s
   const collector = new WarningCollector();
   const lines: string[] = [];
 
-  // import 문 생성
+  // Generate import statement
   if (opts.includeImports) {
     lines.push("import { z } from 'zod';");
     lines.push('');
   }
 
-  // 스키마 이름
+  // Schema name
   const schemaName = opts.schemaName
     ? normalizeSchemaName(opts.schemaName)
     : 'GeneratedSchema';
 
-  // 스키마 코드 생성
+  // Schema code generation
   const schemaCode = generateSchemaCode(schema, opts, collector, 0);
 
-  // export 여부
+  // Export flag
   const exportPrefix = opts.exportSchema ? 'export ' : '';
   lines.push(`${exportPrefix}const ${schemaName} = ${schemaCode};`);
 
-  // 타입 추론 생성
+  // Generate type inference
   if (opts.generateTypeInference) {
     lines.push('');
     const typeName = schemaName.replace(/Schema$/, '') || schemaName;
@@ -505,7 +505,7 @@ export function generateZodCode(schema: Schema, options: ConvertOptions = {}): s
 }
 
 /**
- * 스키마 코드 생성 (재귀)
+ * Schema code generation (recursive)
  */
 function generateSchemaCode(
   schema: Schema,
@@ -516,14 +516,14 @@ function generateSchemaCode(
   const indent = options.indent.repeat(depth);
   const innerIndent = options.indent.repeat(depth + 1);
 
-  // $ref 처리
+  // $ref processing
   if (schema.$ref) {
     const refName = getSchemaNameFromRef(schema.$ref);
-    // 참조 스키마가 정의에 있는 경우 해당 이름 사용
+    // Use the name if the referenced schema is in definitions
     return normalizeSchemaName(refName);
   }
 
-  // allOf 처리
+  // allOf processing
   if (schema.allOf && schema.allOf.length > 0) {
     const schemas = schema.allOf.map((s) => generateSchemaCode(s, options, collector, depth));
     if (schemas.length === 1) {
@@ -532,7 +532,7 @@ function generateSchemaCode(
     return schemas.reduce((acc, s) => `${acc}.and(${s})`);
   }
 
-  // oneOf 처리
+  // oneOf processing
   if (schema.oneOf && schema.oneOf.length > 0) {
     const schemas = schema.oneOf.map((s) => generateSchemaCode(s, options, collector, depth));
     if (schemas.length === 1) {
@@ -541,7 +541,7 @@ function generateSchemaCode(
     return `z.union([${schemas.join(', ')}])`;
   }
 
-  // anyOf 처리
+  // anyOf processing
   if (schema.anyOf && schema.anyOf.length > 0) {
     const schemas = schema.anyOf.map((s) => generateSchemaCode(s, options, collector, depth));
     if (schemas.length === 1) {
@@ -550,7 +550,7 @@ function generateSchemaCode(
     return `z.union([${schemas.join(', ')}])`;
   }
 
-  // enum 처리
+  // enum processing
   if (schema.enum && schema.enum.length > 0) {
     const values = enumToLiterals(schema.enum);
     if (values.length === 1) {
@@ -559,7 +559,7 @@ function generateSchemaCode(
     return `z.enum([${values.join(', ')}])`;
   }
 
-  // 타입별 처리
+  // Type-specific processing
   switch (schema.type) {
     case 'string':
       return generateStringCode(schema, collector);
@@ -584,18 +584,18 @@ function generateSchemaCode(
       if (!schema.type) {
         return 'z.any()';
       }
-      collector.add('unsupported-type', `지원하지 않는 타입입니다: ${schema.type}`);
+      collector.add('unsupported-type', `Unsupported type: ${schema.type}`);
       return 'z.any()';
   }
 }
 
 /**
- * string 코드 생성
+ * string Code generation
  */
 function generateStringCode(schema: Schema, collector: WarningCollector): string {
   let code = 'z.string()';
 
-  // format 처리
+  // format processing
   if (schema.format) {
     switch (schema.format) {
       case 'email':
@@ -615,12 +615,12 @@ function generateStringCode(schema: Schema, collector: WarningCollector): string
       default:
         collector.add(
           'unsupported-format',
-          `Zod에서 '${schema.format}' format을 직접 지원하지 않습니다.`,
+          `Zod does not directly support '${schema.format}' format.`,
         );
     }
   }
 
-  // 길이 제약조건
+  // Length constraints
   if (schema.minLength !== undefined) {
     code += `.min(${schema.minLength})`;
   }
@@ -628,7 +628,7 @@ function generateStringCode(schema: Schema, collector: WarningCollector): string
     code += `.max(${schema.maxLength})`;
   }
 
-  // pattern 처리
+  // pattern processing
   if (schema.pattern) {
     const escapedPattern = escapeRegexPattern(schema.pattern);
     code += `.regex(/${escapedPattern}/)`;
@@ -638,17 +638,17 @@ function generateStringCode(schema: Schema, collector: WarningCollector): string
 }
 
 /**
- * number 코드 생성
+ * number Code generation
  */
 function generateNumberCode(schema: Schema): string {
   let code = 'z.number()';
 
-  // integer 처리
+  // integer processing
   if (schema.type === 'integer') {
     code += '.int()';
   }
 
-  // minimum/maximum 제약조건
+  // minimum/maximum constraints
   if (schema.minimum !== undefined) {
     code += `.gte(${schema.minimum})`;
   }
@@ -662,7 +662,7 @@ function generateNumberCode(schema: Schema): string {
     code += `.lt(${schema.exclusiveMaximum})`;
   }
 
-  // multipleOf 처리
+  // multipleOf processing
   if (schema.multipleOf !== undefined) {
     code += `.multipleOf(${schema.multipleOf})`;
   }
@@ -671,7 +671,7 @@ function generateNumberCode(schema: Schema): string {
 }
 
 /**
- * array 코드 생성
+ * array Code generation
  */
 function generateArrayCode(
   schema: Schema,
@@ -696,7 +696,7 @@ function generateArrayCode(
 }
 
 /**
- * object 코드 생성
+ * object Code generation
  */
 function generateObjectCode(
   schema: Schema,
@@ -720,7 +720,7 @@ function generateObjectCode(
   for (const [key, propSchema] of Object.entries(schema.properties)) {
     let propCode = generateSchemaCode(propSchema, options, collector, depth + 1);
 
-    // nullable 처리
+    // nullable processing
     if (propSchema.nullable) {
       switch (options.nullable) {
         case 'optional':
@@ -735,13 +735,13 @@ function generateObjectCode(
       }
     }
 
-    // optional 처리
+    // optional processing
     const isRequired = options.defaultRequired || requiredFields.has(key);
     if (!isRequired && !propSchema.nullable) {
       propCode += '.optional()';
     }
 
-    // default 처리
+    // default processing
     if (propSchema.default !== undefined) {
       const defaultValue =
         typeof propSchema.default === 'string'
@@ -755,7 +755,7 @@ function generateObjectCode(
 
   let code = `z.object({\n${propLines.join('\n')}\n${indent}})`;
 
-  // additionalProperties 처리
+  // additionalProperties processing
   if (options.additionalProperties) {
     code += '.passthrough()';
   } else if (options.strict) {

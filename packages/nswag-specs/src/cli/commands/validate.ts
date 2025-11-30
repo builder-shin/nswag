@@ -1,6 +1,6 @@
 /**
- * validate 서브커맨드
- * OpenAPI 스펙 파일 검증
+ * validate subcommand
+ * Validate OpenAPI spec file
  */
 
 import { existsSync, readFileSync } from 'fs';
@@ -11,7 +11,7 @@ import { loadConfig } from '../../config/index.js';
 import { logger, type ParsedArgs, colorize } from '../utils.js';
 
 /**
- * OpenAPI 3.0 스키마 정의 (간소화 버전)
+ * OpenAPI 3.0 schema definition (simplified version)
  */
 const OPENAPI_SCHEMA = {
   type: 'object',
@@ -57,16 +57,16 @@ const OPENAPI_SCHEMA = {
 };
 
 /**
- * validate 커맨드 실행
+ * Run validate command
  */
 export async function runValidate(args: ParsedArgs): Promise<void> {
-  logger.title('OpenAPI 스펙 검증');
+  logger.title('Validate OpenAPI spec');
 
-  // 스펙 파일 경로 결정
+  // Determine spec file path
   let specPath = args.args[0];
 
   if (!specPath) {
-    // 설정에서 기본 경로 가져오기
+    // Get default path from configuration
     const configPath = args.flags.config as string | undefined || args.flags.c as string | undefined;
     const config = await loadConfig(configPath);
     specPath = resolve(
@@ -78,33 +78,33 @@ export async function runValidate(args: ParsedArgs): Promise<void> {
     specPath = resolve(process.cwd(), specPath);
   }
 
-  // 파일 존재 확인
+  // Check if file exists
   if (!existsSync(specPath)) {
-    logger.error(`스펙 파일을 찾을 수 없습니다: ${specPath}`);
+    logger.error(`Spec file not found: ${specPath}`);
     process.exit(1);
   }
 
-  logger.info(`검증 대상: ${specPath}`);
+  logger.info(`Validating: ${specPath}`);
   logger.newline();
 
-  // 스펙 파일 로드
+  // Load spec file
   let spec: unknown;
   try {
     spec = loadSpecFile(specPath);
   } catch (error) {
-    logger.error(`스펙 파일 파싱 실패: ${error instanceof Error ? error.message : error}`);
+    logger.error(`Failed to parse spec file: ${error instanceof Error ? error.message : error}`);
     process.exit(1);
   }
 
-  // 검증 수행
+  // Perform validation
   const result = validateSpec(spec);
 
-  // 결과 출력
+  // Print results
   if (result.valid) {
-    logger.success('스펙 검증 성공!');
+    logger.success('Spec validation successful!');
     printSpecSummary(spec as Record<string, unknown>);
   } else {
-    logger.error('스펙 검증 실패');
+    logger.error('Spec validation failed');
     logger.newline();
 
     for (const error of result.errors) {
@@ -116,7 +116,7 @@ export async function runValidate(args: ParsedArgs): Promise<void> {
 }
 
 /**
- * 스펙 파일 로드
+ * Load spec file
  */
 function loadSpecFile(filePath: string): unknown {
   const content = readFileSync(filePath, 'utf-8');
@@ -130,7 +130,7 @@ function loadSpecFile(filePath: string): unknown {
 }
 
 /**
- * 스펙 검증
+ * Validate spec
  */
 interface ValidationError {
   path: string;
@@ -145,8 +145,8 @@ interface ValidationResult {
 function validateSpec(spec: unknown): ValidationResult {
   const errors: ValidationError[] = [];
 
-  // 기본 구조 검증
-  // ESM에서 AJV 인스턴스 생성 (default export 처리)
+  // Basic structure validation
+  // Create AJV instance in ESM (handle default export)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const AjvModule = Ajv as any;
   const AjvClass = AjvModule.default ?? AjvModule;
@@ -163,42 +163,42 @@ function validateSpec(spec: unknown): ValidationResult {
     }
   }
 
-  // 추가 검증 (커스텀 규칙)
+  // Additional validation (custom rules)
   if (typeof spec === 'object' && spec !== null) {
     const specObj = spec as Record<string, unknown>;
 
-    // paths 검증
+    // Validate paths
     if (specObj.paths && typeof specObj.paths === 'object') {
       const paths = specObj.paths as Record<string, unknown>;
 
       for (const [pathKey, pathItem] of Object.entries(paths)) {
-        // 경로 형식 검증
+        // Validate path format
         if (!pathKey.startsWith('/')) {
           errors.push({
             path: `/paths/${pathKey}`,
-            message: '경로는 /로 시작해야 합니다',
+            message: 'Path must start with /',
           });
         }
 
-        // 메서드 검증
+        // Validate methods
         if (pathItem && typeof pathItem === 'object') {
           const item = pathItem as Record<string, unknown>;
           const validMethods = ['get', 'post', 'put', 'delete', 'patch', 'options', 'head', 'trace'];
 
           for (const key of Object.keys(item)) {
             if (!validMethods.includes(key) && key !== 'parameters' && key !== 'summary' && key !== 'description') {
-              // 유효하지 않은 메서드는 무시 (경고만)
+              // Ignore invalid methods (warning only)
             }
           }
 
-          // 각 메서드의 responses 검증
+          // Validate responses for each method
           for (const method of validMethods) {
             if (item[method]) {
               const operation = item[method] as Record<string, unknown>;
               if (!operation.responses) {
                 errors.push({
                   path: `/paths/${pathKey}/${method}`,
-                  message: 'responses 필드는 필수입니다',
+                  message: 'responses field is required',
                 });
               }
             }
@@ -207,12 +207,12 @@ function validateSpec(spec: unknown): ValidationResult {
       }
     }
 
-    // components/schemas 참조 검증
+    // Validate components/schemas references
     if (specObj.components && typeof specObj.components === 'object') {
       const components = specObj.components as Record<string, unknown>;
 
       if (components.schemas && typeof components.schemas === 'object') {
-        // 스키마 정의 검증은 여기서 수행
+        // Schema definition validation is performed here
       }
     }
   }
@@ -224,25 +224,25 @@ function validateSpec(spec: unknown): ValidationResult {
 }
 
 /**
- * 스펙 요약 출력
+ * Print spec summary
  */
 function printSpecSummary(spec: Record<string, unknown>): void {
   logger.newline();
-  logger.info('스펙 요약:');
+  logger.info('Spec summary:');
 
-  // 정보
+  // Info
   if (spec.info && typeof spec.info === 'object') {
     const info = spec.info as Record<string, unknown>;
-    logger.info(`  제목: ${info.title}`);
-    logger.info(`  버전: ${info.version}`);
+    logger.info(`  Title: ${info.title}`);
+    logger.info(`  Version: ${info.version}`);
   }
 
-  // 경로 수
+  // Path count
   if (spec.paths && typeof spec.paths === 'object') {
     const paths = spec.paths as Record<string, unknown>;
     const pathCount = Object.keys(paths).length;
 
-    // 메서드 수 계산
+    // Calculate method count
     let operationCount = 0;
     const methods = ['get', 'post', 'put', 'delete', 'patch', 'options', 'head', 'trace'];
 
@@ -256,21 +256,21 @@ function printSpecSummary(spec: Record<string, unknown>): void {
       }
     }
 
-    logger.info(`  경로: ${colorize(String(pathCount), 'cyan')}개`);
-    logger.info(`  작업: ${colorize(String(operationCount), 'cyan')}개`);
+    logger.info(`  Paths: ${colorize(String(pathCount), 'cyan')}`);
+    logger.info(`  Operations: ${colorize(String(operationCount), 'cyan')}`);
   }
 
-  // 태그 수
+  // Tag count
   if (spec.tags && Array.isArray(spec.tags)) {
-    logger.info(`  태그: ${colorize(String(spec.tags.length), 'cyan')}개`);
+    logger.info(`  Tags: ${colorize(String(spec.tags.length), 'cyan')}`);
   }
 
-  // 스키마 수
+  // Schema count
   if (spec.components && typeof spec.components === 'object') {
     const components = spec.components as Record<string, unknown>;
     if (components.schemas && typeof components.schemas === 'object') {
       const schemaCount = Object.keys(components.schemas as object).length;
-      logger.info(`  스키마: ${colorize(String(schemaCount), 'cyan')}개`);
+      logger.info(`  Schemas: ${colorize(String(schemaCount), 'cyan')}`);
     }
   }
 

@@ -1,14 +1,14 @@
 /**
  * @aspect/nswag-ui
- * Swagger UI 또는 Redoc을 통한 문서 탐색 인터페이스 제공
+ * Provides document browsing interface through Swagger UI or Redoc
  *
  * @packageDocumentation
  */
 
-// ========== 타입 내보내기 ==========
+// ========== Type Exports ==========
 export * from './types.js';
 
-// ========== HTML 생성기 ==========
+// ========== HTML Generator ==========
 export {
   generateSwaggerUIHtml,
   generateRedocHtml,
@@ -25,12 +25,12 @@ export {
   type AuthResult,
 } from './basic-auth.js';
 
-// ========== Express 미들웨어 ==========
+// ========== Express Middleware ==========
 export {
   swaggerUi,
   redoc,
   setupDocsRouter,
-  // 별칭 (레거시 호환)
+  // Aliases (for legacy compatibility)
   createSwaggerUiMiddleware,
   createRedocMiddleware,
 } from './express.js';

@@ -1,5 +1,5 @@
 /**
- * 스키마 변환기 통합 테스트
+ * Schema converter integration tests
  */
 
 import { describe, it, expect } from 'vitest';
@@ -61,7 +61,7 @@ describe('Schema Converter Integration', () => {
     it('should throw error for invalid target', () => {
       expect(() => {
         generateSchemaCode(testSchema, 'invalid' as 'zod', {});
-      }).toThrow('지원하지 않는 대상 라이브러리입니다');
+      }).toThrow('Unsupported target library');
     });
   });
 
@@ -133,12 +133,12 @@ describe('Schema Converter Integration', () => {
       const yupCode = generateSchemaCode(complexSchema, 'yup', { schemaName: 'Schema' });
       const typeboxCode = generateSchemaCode(complexSchema, 'typebox', { schemaName: 'Schema' });
 
-      // 모든 타겟에서 id는 필수
+      // id is required in all targets
       expect(zodCode).not.toContain('id: z.number().int().optional()');
       expect(yupCode).toContain('id: yup.number().integer().min(1).required()');
       expect(typeboxCode).toContain('id: Type.Integer(');
 
-      // 모든 타겟에서 tags는 선택적
+      // tags is optional in all targets
       expect(zodCode).toContain('optional()');
       expect(yupCode).not.toContain('tags: yup.array().of(yup.string()).required()');
       expect(typeboxCode).toContain('tags: Type.Optional(');
@@ -156,7 +156,7 @@ describe('Schema Converter Integration', () => {
       const yupCode = generateSchemaCode(arraySchema, 'yup', { schemaName: 'ArraySchema' });
       const typeboxCode = generateSchemaCode(arraySchema, 'typebox', { schemaName: 'ArraySchema' });
 
-      // 모든 타겟에서 배열 길이 제약조건 포함
+      // all targets include array length constraints
       expect(zodCode).toContain('.min(1)');
       expect(zodCode).toContain('.max(10)');
       expect(yupCode).toContain('.min(1)');
@@ -175,7 +175,7 @@ describe('Schema Converter Integration', () => {
       const yupCode = generateSchemaCode(enumSchema, 'yup', { schemaName: 'EnumSchema' });
       const typeboxCode = generateSchemaCode(enumSchema, 'typebox', { schemaName: 'EnumSchema' });
 
-      // 모든 타겟에서 enum 값 포함
+      // all targets include enum values
       expect(zodCode).toContain("'a'");
       expect(zodCode).toContain("'b'");
       expect(zodCode).toContain("'c'");

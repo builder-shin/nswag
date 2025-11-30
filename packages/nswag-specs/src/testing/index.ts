@@ -1,6 +1,6 @@
 /**
- * 테스팅 모듈
- * HTTP 클라이언트 설정 및 테스트 유틸리티 제공
+ * Testing Module
+ * Provides HTTP client configuration and test utilities
  */
 
 export { configure, getConfiguration, resetConfiguration } from './configure.js';

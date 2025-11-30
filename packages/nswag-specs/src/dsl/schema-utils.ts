@@ -1,26 +1,26 @@
 /**
- * 스키마 처리 유틸리티
- * Phase 4: API 버전 및 문서화 옵션
+ * Schema processing utilities
+ * Phase 4: API version and documentation options
  *
- * Nullable 속성 지원, 스키마 검증 옵션 처리
+ * Nullable property support, schema validation options handling
  */
 
 import type { SchemaObject, ResponseOptions } from './types.js';
 import { GlobalConfigManager } from './global-config.js';
 
 /**
- * 확장 스키마 타입 (nullable 처리용 - OpenAPI 3.1 배열 타입 지원)
+ * Extended schema type (for nullable handling - OpenAPI 3.1 array type support)
  */
 interface ExtendedSchemaObject extends Omit<SchemaObject, 'type'> {
   type?: string | string[];
 }
 
 // ============================================================================
-// Nullable 처리
+// Nullable handling
 // ============================================================================
 
 /**
- * 스키마가 OpenAPI 3.1인지 확인
+ * Check if schema is OpenAPI 3.1
  */
 export function isOpenAPI31(specPath?: string): boolean {
   const version = GlobalConfigManager.getOpenAPIVersion(specPath);
@@ -28,26 +28,26 @@ export function isOpenAPI31(specPath?: string): boolean {
 }
 
 /**
- * nullable 속성을 OpenAPI 버전에 맞게 정규화
+ * Normalize nullable property according to OpenAPI version
  *
  * OpenAPI 3.0: { type: 'string', nullable: true }
  * OpenAPI 3.1: { type: ['string', 'null'] }
  *
  * @example
- * // OpenAPI 3.0에서
+ * // In OpenAPI 3.0
  * normalizeNullable({ type: 'string', nullable: true })
  * // => { type: 'string', nullable: true }
  *
- * // OpenAPI 3.1에서
+ * // In OpenAPI 3.1
  * normalizeNullable({ type: 'string', nullable: true })
  * // => { type: ['string', 'null'] }
  */
 export function normalizeNullable(schema: SchemaObject, specPath?: string): SchemaObject {
-  // ExtendedSchemaObject로 처리 (배열 타입 지원)
+  // Process as ExtendedSchemaObject (array type support)
   const result: ExtendedSchemaObject = { ...schema };
   const is31 = isOpenAPI31(specPath);
 
-  // x-nullable 레거시 지원 (Swagger 2.0 호환)
+  // Support x-nullable legacy (Swagger 2.0 compatibility)
   if ('x-nullable' in schema) {
     const xNullable = (schema as Record<string, unknown>)['x-nullable'];
     if (xNullable === true) {
@@ -57,17 +57,17 @@ export function normalizeNullable(schema: SchemaObject, specPath?: string): Sche
         result.nullable = true;
       }
     }
-    // x-nullable 속성 제거
+    // Remove x-nullable property
     delete (result as Record<string, unknown>)['x-nullable'];
   }
 
-  // nullable 속성을 OpenAPI 3.1로 변환
+  // Convert nullable property to OpenAPI 3.1
   if (result.nullable && is31) {
     result.type = makeNullableType31(result.type as string | undefined);
     delete result.nullable;
   }
 
-  // OpenAPI 3.1 배열 타입을 3.0으로 변환 (필요시)
+  // Convert OpenAPI 3.1 array type to 3.0 (if needed)
   if (!is31 && Array.isArray(result.type)) {
     const types = result.type as string[];
     if (types.includes('null')) {
@@ -76,7 +76,7 @@ export function normalizeNullable(schema: SchemaObject, specPath?: string): Sche
     }
   }
 
-  // 중첩 스키마 처리
+  // Process nested schemas
   if (result.properties) {
     result.properties = Object.fromEntries(
       Object.entries(result.properties).map(([key, propSchema]) => [
@@ -102,13 +102,13 @@ export function normalizeNullable(schema: SchemaObject, specPath?: string): Sche
     result.anyOf = result.anyOf.map(s => normalizeNullable(s as SchemaObject, specPath));
   }
 
-  // SchemaObject로 반환 (OpenAPI 3.0 호환을 위해 type을 string으로 변환)
-  // OpenAPI 3.1 배열 타입은 그대로 유지하면서 타입 캐스팅
+  // Return as SchemaObject (convert type to string for OpenAPI 3.0 compatibility)
+  // Keep OpenAPI 3.1 array types intact with type casting
   return result as unknown as SchemaObject;
 }
 
 /**
- * OpenAPI 3.1용 nullable 타입 생성
+ * Create nullable type for OpenAPI 3.1
  */
 function makeNullableType31(type: string | string[] | undefined): string[] {
   if (!type) {
@@ -121,11 +121,11 @@ function makeNullableType31(type: string | string[] | undefined): string[] {
 }
 
 // ============================================================================
-// 스키마 검증 옵션 처리
+// Schema validation options processing
 // ============================================================================
 
 /**
- * 스키마에 검증 옵션 적용
+ * Apply validation options to schema
  *
  * @example
  * applySchemaValidationOptions(schema, {
@@ -139,7 +139,7 @@ export function applySchemaValidationOptions(
 ): SchemaObject {
   const result = { ...schema };
 
-  // 전역 설정과 개별 옵션 병합
+  // Merge global config and individual options
   const noAdditionalProperties =
     options.openapiNoAdditionalProperties ??
     GlobalConfigManager.getNoAdditionalProperties();
@@ -147,17 +147,17 @@ export function applySchemaValidationOptions(
     options.openapiAllPropertiesRequired ??
     GlobalConfigManager.getAllPropertiesRequired();
 
-  // additionalProperties 처리
+  // Process additionalProperties
   if (noAdditionalProperties && result.type === 'object') {
     result.additionalProperties = false;
   }
 
-  // required 처리
+  // Process required
   if (allPropertiesRequired && result.type === 'object' && result.properties) {
     result.required = Object.keys(result.properties);
   }
 
-  // 중첩 스키마 처리
+  // Process nested schemas
   if (result.properties) {
     result.properties = Object.fromEntries(
       Object.entries(result.properties).map(([key, propSchema]) => [
@@ -187,7 +187,7 @@ export function applySchemaValidationOptions(
 }
 
 /**
- * 스키마 전처리 (nullable + 검증 옵션)
+ * Preprocess schema (nullable + validation options)
  *
  * @example
  * const processedSchema = processSchema(rawSchema, {
@@ -199,21 +199,21 @@ export function processSchema(
   options: ResponseOptions = {},
   specPath?: string
 ): SchemaObject {
-  // 1. Nullable 정규화
+  // 1. Normalize nullable
   let result = normalizeNullable(schema, specPath);
 
-  // 2. 검증 옵션 적용
+  // 2. Apply validation options
   result = applySchemaValidationOptions(result, options);
 
   return result;
 }
 
 // ============================================================================
-// 스키마 검증
+// Schema validation
 // ============================================================================
 
 /**
- * 스키마 검증 오류
+ * Schema validation error
  */
 export interface SchemaValidationError {
   path: string;
@@ -223,7 +223,7 @@ export interface SchemaValidationError {
 }
 
 /**
- * 응답 데이터가 스키마와 일치하는지 검증
+ * Validate if response data matches schema
  *
  * @example
  * const errors = validateAgainstSchema(responseBody, schema, {
@@ -239,12 +239,12 @@ export function validateAgainstSchema(
   const errors: SchemaValidationError[] = [];
   const processedSchema = applySchemaValidationOptions(schema, options);
 
-  // null 검증
+  // Validate null
   if (data === null) {
     if (!processedSchema.nullable && !isNullableType(processedSchema.type)) {
       errors.push({
         path,
-        message: 'null 값이 허용되지 않습니다',
+        message: 'null value is not allowed',
         expected: processedSchema.type,
         actual: 'null',
       });
@@ -252,50 +252,50 @@ export function validateAgainstSchema(
     return errors;
   }
 
-  // 타입 검증
+  // Validate type
   const expectedType = getBaseType(processedSchema.type);
   const actualType = getActualType(data);
 
   if (expectedType && actualType !== expectedType) {
     errors.push({
       path,
-      message: `타입이 일치하지 않습니다`,
+      message: `type does not match`,
       expected: expectedType,
       actual: actualType,
     });
     return errors;
   }
 
-  // 객체 검증
+  // Validate object
   if (processedSchema.type === 'object' && typeof data === 'object' && data !== null) {
     const dataObj = data as Record<string, unknown>;
 
-    // required 필드 검증
+    // Validate required fields
     if (processedSchema.required) {
       for (const requiredField of processedSchema.required) {
         if (!(requiredField in dataObj)) {
           errors.push({
             path: `${path}.${requiredField}`,
-            message: '필수 필드가 누락되었습니다',
+            message: 'required field is missing',
           });
         }
       }
     }
 
-    // additionalProperties 검증
+    // Validate additionalProperties
     if (processedSchema.additionalProperties === false && processedSchema.properties) {
       const allowedKeys = new Set(Object.keys(processedSchema.properties));
       for (const key of Object.keys(dataObj)) {
         if (!allowedKeys.has(key)) {
           errors.push({
             path: `${path}.${key}`,
-            message: '허용되지 않는 추가 속성입니다',
+            message: 'additional property is not allowed',
           });
         }
       }
     }
 
-    // 프로퍼티 재귀 검증
+    // Recursively validate properties
     if (processedSchema.properties) {
       for (const [key, propSchema] of Object.entries(processedSchema.properties)) {
         if (key in dataObj) {
@@ -305,7 +305,7 @@ export function validateAgainstSchema(
     }
   }
 
-  // 배열 검증
+  // Validate array
   if (processedSchema.type === 'array' && Array.isArray(data) && processedSchema.items) {
     data.forEach((item, index) => {
       errors.push(...validateAgainstSchema(item, processedSchema.items!, options, `${path}[${index}]`));
@@ -316,7 +316,7 @@ export function validateAgainstSchema(
 }
 
 /**
- * 타입이 nullable인지 확인 (OpenAPI 3.1 배열 타입)
+ * Check if type is nullable (OpenAPI 3.1 array type)
  */
 function isNullableType(type: string | string[] | undefined): boolean {
   if (Array.isArray(type)) {
@@ -326,7 +326,7 @@ function isNullableType(type: string | string[] | undefined): boolean {
 }
 
 /**
- * 배열 타입에서 기본 타입 추출
+ * Extract base type from array type
  */
 function getBaseType(type: string | string[] | undefined): string | undefined {
   if (Array.isArray(type)) {
@@ -336,7 +336,7 @@ function getBaseType(type: string | string[] | undefined): string | undefined {
 }
 
 /**
- * 데이터의 실제 타입 가져오기
+ * Get actual type of data
  */
 function getActualType(data: unknown): string {
   if (data === null) return 'null';
@@ -345,23 +345,23 @@ function getActualType(data: unknown): string {
 }
 
 // ============================================================================
-// Phase 5: $ref 스키마 참조 해석
+// Phase 5: $ref schema reference resolution
 // ============================================================================
 
 /**
- * 스키마 저장소 타입
+ * Schema registry type
  */
 export interface SchemaRegistry {
   [path: string]: SchemaObject;
 }
 
 /**
- * 글로벌 스키마 레지스트리
+ * Global schema registry
  */
 const globalSchemaRegistry: SchemaRegistry = {};
 
 /**
- * 스키마 레지스트리에 스키마 등록
+ * Register schema in schema registry
  *
  * @example
  * registerSchema('#/components/schemas/Blog', {
@@ -374,7 +374,7 @@ export function registerSchema(refPath: string, schema: SchemaObject): void {
 }
 
 /**
- * 스키마 레지스트리 초기화
+ * Clear schema registry
  */
 export function clearSchemaRegistry(): void {
   Object.keys(globalSchemaRegistry).forEach(key => {
@@ -383,18 +383,18 @@ export function clearSchemaRegistry(): void {
 }
 
 /**
- * 스키마 레지스트리에서 스키마 가져오기
+ * Get schema from schema registry
  */
 export function getRegisteredSchema(refPath: string): SchemaObject | undefined {
   return globalSchemaRegistry[refPath];
 }
 
 /**
- * $ref 스키마 참조 해석
+ * Resolve $ref schema reference
  *
- * @param schema - 참조가 포함된 스키마
- * @param registry - 스키마 레지스트리 (기본: 글로벌 레지스트리)
- * @returns 해석된 스키마
+ * @param schema - Schema containing references
+ * @param registry - Schema registry (default: global registry)
+ * @returns Resolved schema
  *
  * @example
  * const resolvedSchema = resolveSchemaRef({
@@ -402,7 +402,7 @@ export function getRegisteredSchema(refPath: string): SchemaObject | undefined {
  * });
  *
  * @example
- * // 중첩된 참조 해석
+ * // Resolve nested references
  * const resolvedSchema = resolveSchemaRef({
  *   type: 'object',
  *   properties: {
@@ -415,26 +415,26 @@ export function resolveSchemaRef(
   registry: SchemaRegistry = globalSchemaRegistry,
   visited: Set<string> = new Set()
 ): SchemaObject {
-  // $ref가 있으면 해석
+  // Resolve if $ref exists
   if (schema.$ref) {
-    // 순환 참조 방지
+    // Prevent circular references
     if (visited.has(schema.$ref)) {
-      return schema; // 순환 참조는 그대로 반환
+      return schema; // Return circular reference as is
     }
 
     visited.add(schema.$ref);
     const resolvedSchema = registry[schema.$ref];
 
     if (resolvedSchema) {
-      // 재귀적으로 해석
+      // Resolve recursively
       return resolveSchemaRef(resolvedSchema, registry, visited);
     }
 
-    // 해석되지 않은 참조는 그대로 반환
+    // Return unresolved reference as is
     return schema;
   }
 
-  // 중첩 스키마 해석
+  // Resolve nested schemas
   const result: SchemaObject = { ...schema };
 
   if (result.properties) {
@@ -480,7 +480,7 @@ export function resolveSchemaRef(
 }
 
 /**
- * OpenAPI 스펙에서 components/schemas를 레지스트리에 등록
+ * Register components/schemas from OpenAPI spec to registry
  *
  * @example
  * registerSchemasFromSpec({
@@ -490,7 +490,7 @@ export function resolveSchemaRef(
  *     }
  *   }
  * });
- * // 결과: '#/components/schemas/Blog'로 접근 가능
+ * // Result: Accessible via '#/components/schemas/Blog'
  */
 export function registerSchemasFromSpec(spec: {
   components?: {
@@ -505,12 +505,12 @@ export function registerSchemasFromSpec(spec: {
 }
 
 // ============================================================================
-// Phase 5: 복합 스키마 검증 (oneOf, anyOf, allOf)
+// Phase 5: Composite schema validation (oneOf, anyOf, allOf)
 // ============================================================================
 
 /**
- * oneOf 스키마 검증
- * 정확히 하나의 스키마와 일치해야 함
+ * Validate oneOf schema
+ * Must match exactly one schema
  *
  * @example
  * validateOneOf(data, [
@@ -539,14 +539,14 @@ export function validateOneOf(
   if (matchCount === 0) {
     return [{
       path,
-      message: `oneOf: 어떤 스키마와도 일치하지 않습니다 (${schemas.length}개 스키마 검사)`,
+      message: `oneOf: does not match any schema (checked ${schemas.length} schemas)`,
     }];
   }
 
   if (matchCount > 1) {
     return [{
       path,
-      message: `oneOf: 정확히 하나의 스키마와 일치해야 하지만 ${matchCount}개와 일치합니다`,
+      message: `oneOf: must match exactly one schema but matches ${matchCount}`,
     }];
   }
 
@@ -554,8 +554,8 @@ export function validateOneOf(
 }
 
 /**
- * anyOf 스키마 검증
- * 하나 이상의 스키마와 일치해야 함
+ * Validate anyOf schema
+ * Must match one or more schemas
  *
  * @example
  * validateAnyOf(data, [
@@ -572,19 +572,19 @@ export function validateAnyOf(
   for (const schema of schemas) {
     const errors = validateAgainstSchema(data, schema, options, path);
     if (errors.length === 0) {
-      return []; // 하나라도 일치하면 성공
+      return []; // Success if any match
     }
   }
 
   return [{
     path,
-    message: `anyOf: 어떤 스키마와도 일치하지 않습니다 (${schemas.length}개 스키마 검사)`,
+    message: `anyOf: does not match any schema (checked ${schemas.length} schemas)`,
   }];
 }
 
 /**
- * allOf 스키마 검증
- * 모든 스키마와 일치해야 함 (스키마 합성)
+ * Validate allOf schema
+ * Must match all schemas (schema composition)
  *
  * @example
  * validateAllOf(data, [
@@ -608,7 +608,7 @@ export function validateAllOf(
     if (errors.length > 0) {
       allErrors.push({
         path,
-        message: `allOf[${i}]: 스키마와 일치하지 않습니다`,
+        message: `allOf[${i}]: does not match schema`,
       });
       allErrors.push(...errors);
     }
@@ -618,7 +618,7 @@ export function validateAllOf(
 }
 
 /**
- * 복합 스키마가 포함된 전체 스키마 검증
+ * Validate complete schema including composite schemas
  *
  * @example
  * validateCompositeSchema(data, {
@@ -636,25 +636,25 @@ export function validateCompositeSchema(
 ): SchemaValidationError[] {
   const errors: SchemaValidationError[] = [];
 
-  // $ref 해석
+  // Resolve $ref
   const resolvedSchema = resolveSchemaRef(schema);
 
-  // oneOf 검증
+  // Validate oneOf
   if (resolvedSchema.oneOf && resolvedSchema.oneOf.length > 0) {
     errors.push(...validateOneOf(data, resolvedSchema.oneOf, options, path));
   }
 
-  // anyOf 검증
+  // Validate anyOf
   if (resolvedSchema.anyOf && resolvedSchema.anyOf.length > 0) {
     errors.push(...validateAnyOf(data, resolvedSchema.anyOf, options, path));
   }
 
-  // allOf 검증
+  // Validate allOf
   if (resolvedSchema.allOf && resolvedSchema.allOf.length > 0) {
     errors.push(...validateAllOf(data, resolvedSchema.allOf, options, path));
   }
 
-  // 복합 스키마가 없으면 기본 스키마 검증
+  // Validate basic schema if no composite schemas
   if (!resolvedSchema.oneOf && !resolvedSchema.anyOf && !resolvedSchema.allOf) {
     errors.push(...validateAgainstSchema(data, resolvedSchema, options, path));
   }
@@ -663,8 +663,8 @@ export function validateCompositeSchema(
 }
 
 /**
- * allOf 스키마 병합
- * 여러 스키마를 하나의 스키마로 병합합니다.
+ * Merge allOf schemas
+ * Merge multiple schemas into one schema.
  *
  * @example
  * const merged = mergeAllOfSchemas([
@@ -679,12 +679,12 @@ export function mergeAllOfSchemas(schemas: SchemaObject[]): SchemaObject {
   for (const schema of schemas) {
     const resolved = resolveSchemaRef(schema);
 
-    // 타입 병합 (첫 번째 유효한 타입 사용)
+    // Merge type (use first valid type)
     if (resolved.type && !result.type) {
       result.type = resolved.type;
     }
 
-    // properties 병합
+    // Merge properties
     if (resolved.properties) {
       result.properties = {
         ...result.properties,
@@ -692,13 +692,13 @@ export function mergeAllOfSchemas(schemas: SchemaObject[]): SchemaObject {
       };
     }
 
-    // required 병합 (중복 제거)
+    // Merge required (remove duplicates)
     if (resolved.required) {
       const existingRequired = result.required ?? [];
       result.required = [...new Set([...existingRequired, ...resolved.required])];
     }
 
-    // 기타 속성 병합
+    // Merge other properties
     if (resolved.additionalProperties !== undefined && result.additionalProperties === undefined) {
       result.additionalProperties = resolved.additionalProperties;
     }

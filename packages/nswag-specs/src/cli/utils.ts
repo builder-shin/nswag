@@ -1,17 +1,17 @@
 /**
- * CLI 유틸리티
- * 공통 CLI 헬퍼 함수들
+ * CLI utilities
+ * Common CLI helper functions
  */
 
 /**
- * ANSI 색상 코드
+ * ANSI color codes
  */
 export const colors = {
   reset: '\x1b[0m',
   bright: '\x1b[1m',
   dim: '\x1b[2m',
 
-  // 텍스트 색상
+  // Text colors
   red: '\x1b[31m',
   green: '\x1b[32m',
   yellow: '\x1b[33m',
@@ -20,7 +20,7 @@ export const colors = {
   cyan: '\x1b[36m',
   white: '\x1b[37m',
 
-  // 배경 색상
+  // Background colors
   bgRed: '\x1b[41m',
   bgGreen: '\x1b[42m',
   bgYellow: '\x1b[43m',
@@ -28,14 +28,14 @@ export const colors = {
 };
 
 /**
- * 색상 적용 헬퍼
+ * Color application helper
  */
 export function colorize(text: string, color: keyof typeof colors): string {
   return `${colors[color]}${text}${colors.reset}`;
 }
 
 /**
- * 로깅 유틸리티
+ * Logging utility
  */
 export const logger = {
   info(message: string): void {
@@ -72,7 +72,7 @@ export const logger = {
 };
 
 /**
- * CLI 인자 파서
+ * CLI argument parser
  */
 export interface ParsedArgs {
   command: string;
@@ -82,10 +82,10 @@ export interface ParsedArgs {
 }
 
 /**
- * CLI 인자 파싱
+ * Parse CLI arguments
  *
  * @param argv - process.argv
- * @returns 파싱된 인자
+ * @returns Parsed arguments
  */
 export function parseArgs(argv: string[]): ParsedArgs {
   const [, , command = 'generate', ...rest] = argv;
@@ -93,7 +93,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
   const args: string[] = [];
   const flags: Record<string, string | boolean> = {};
 
-  // 네임스페이스 명령어 처리 (e.g., ui:custom)
+  // Handle namespaced commands (e.g., ui:custom)
   const [mainCommand, subCommand] = command.split(':');
 
   let i = 0;
@@ -122,7 +122,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
         }
       }
     } else if (arg.startsWith('-')) {
-      // 짧은 플래그 처리
+      // Handle short flags
       const key = arg.slice(1);
       if (key) {
         const nextArg = rest[i + 1];
@@ -149,7 +149,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
 }
 
 /**
- * 스피너 유틸리티 (간단한 버전)
+ * Spinner utility (simple version)
  */
 export class Spinner {
   private interval?: NodeJS.Timeout;
@@ -183,7 +183,7 @@ export class Spinner {
 }
 
 /**
- * 버전 출력
+ * Print version
  */
 export async function printVersion(): Promise<void> {
   try {
@@ -197,36 +197,36 @@ export async function printVersion(): Promise<void> {
 }
 
 /**
- * 도움말 출력
+ * Print help message
  */
 export function printHelp(): void {
   console.log(`
-${colorize('nswag', 'bright')} - OpenAPI 스펙 생성 및 문서화 도구
+${colorize('nswag', 'bright')} - OpenAPI spec generation and documentation tool
 
-${colorize('사용법:', 'yellow')}
+${colorize('Usage:', 'yellow')}
   npx nswag [command] [options]
 
-${colorize('명령어:', 'yellow')}
-  init                    초기 설정 파일 생성
-  generate                OpenAPI 스펙 생성 (기본 명령어)
-  validate                스펙 검증
-  diff                    스펙 비교 (Breaking Change 감지)
-  ui:custom               커스텀 UI 템플릿 생성
-  ui:copy-assets <path>   정적 파일 복사
-  mock:start              모킹 서버 시작
+${colorize('Commands:', 'yellow')}
+  init                    Create initial configuration file
+  generate                Generate OpenAPI spec (default command)
+  validate                Validate spec
+  diff                    Compare specs (detect breaking changes)
+  ui:custom               Create custom UI template
+  ui:copy-assets <path>   Copy static files
+  mock:start              Start mocking server
 
-${colorize('옵션:', 'yellow')}
-  --config, -c <path>     설정 파일 경로
-  --watch, -w             감시 모드
-  --help, -h              도움말 출력
-  --version, -v           버전 출력
+${colorize('Options:', 'yellow')}
+  --config, -c <path>     Configuration file path
+  --watch, -w             Watch mode
+  --help, -h              Show help
+  --version, -v           Show version
 
-${colorize('환경 변수:', 'yellow')}
-  PATTERN                 테스트 파일 검색 패턴
-  NSWAG_DRY_RUN          dry-run 모드 ("0": 비활성화)
-  ADDITIONAL_TEST_OPTS    테스트 러너 추가 옵션
+${colorize('Environment Variables:', 'yellow')}
+  PATTERN                 Test file search pattern
+  NSWAG_DRY_RUN          Dry-run mode ("0": disable)
+  ADDITIONAL_TEST_OPTS    Additional test runner options
 
-${colorize('예제:', 'yellow')}
+${colorize('Examples:', 'yellow')}
   npx nswag init
   npx nswag generate --watch
   NSWAG_DRY_RUN=0 npx nswag generate
@@ -236,7 +236,7 @@ ${colorize('예제:', 'yellow')}
 }
 
 /**
- * 에러 핸들링 헬퍼
+ * Error handling helper
  */
 export function handleError(error: unknown): never {
   if (error instanceof Error) {
@@ -251,7 +251,7 @@ export function handleError(error: unknown): never {
 }
 
 /**
- * 시간 포맷
+ * Format duration
  */
 export function formatDuration(ms: number): string {
   if (ms < 1000) {
@@ -266,7 +266,7 @@ export function formatDuration(ms: number): string {
 }
 
 /**
- * 파일 크기 포맷
+ * Format file size
  */
 export function formatFileSize(bytes: number): string {
   if (bytes < 1024) {

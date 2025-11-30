@@ -1,26 +1,26 @@
 /**
- * 인증 핸들러
- * Basic, Bearer, API-Key 인증 지원
+ * Authentication handler
+ * Supports Basic, Bearer, and API-Key authentication
  */
 
 import type { AuthConfig } from './types.js';
 
 /**
- * 인증 결과 타입
+ * Authentication result type
  */
 export interface AuthResult {
-  /** 인증 성공 여부 */
+  /** Whether authentication succeeded */
   success: boolean;
-  /** 실패 시 에러 메시지 */
+  /** Error message on failure */
   error?: string;
-  /** WWW-Authenticate 헤더 값 */
+  /** WWW-Authenticate header value */
   wwwAuthenticate?: string;
 }
 
 /**
- * Basic 인증 자격 증명 파싱
- * @param authHeader - Authorization 헤더 값
- * @returns { username, password } 또는 null
+ * Parse Basic authentication credentials
+ * @param authHeader - Authorization header value
+ * @returns { username, password } or null
  */
 function parseBasicAuth(authHeader: string): { username: string; password: string } | null {
   const match = authHeader.match(/^Basic\s+(.+)$/i);
@@ -45,9 +45,9 @@ function parseBasicAuth(authHeader: string): { username: string; password: strin
 }
 
 /**
- * Bearer 토큰 파싱
- * @param authHeader - Authorization 헤더 값
- * @returns 토큰 문자열 또는 null
+ * Parse Bearer token
+ * @param authHeader - Authorization header value
+ * @returns Token string or null
  */
 function parseBearerToken(authHeader: string): string | null {
   const match = authHeader.match(/^Bearer\s+(.+)$/i);
@@ -55,16 +55,16 @@ function parseBearerToken(authHeader: string): string | null {
 }
 
 /**
- * 요청 헤더에서 인증 정보 검증
- * @param headers - 요청 헤더
- * @param authConfig - 인증 설정
- * @returns 인증 결과
+ * Validate authentication information from request headers
+ * @param headers - Request headers
+ * @param authConfig - Authentication configuration
+ * @returns Authentication result
  */
 export function validateAuth(
   headers: Record<string, string | string[] | undefined>,
   authConfig: AuthConfig
 ): AuthResult {
-  // 인증이 비활성화된 경우
+  // If authentication is disabled
   if (!authConfig.enabled) {
     return { success: true };
   }
@@ -165,16 +165,16 @@ export function validateAuth(
 }
 
 /**
- * 헤더에서 값 추출 (대소문자 무시)
- * @param headers - 요청 헤더
- * @param name - 헤더 이름 (소문자)
- * @returns 헤더 값 또는 undefined
+ * Extract value from headers (case-insensitive)
+ * @param headers - Request headers
+ * @param name - Header name (lowercase)
+ * @returns Header value or undefined
  */
 function getHeader(
   headers: Record<string, string | string[] | undefined>,
   name: string
 ): string | undefined {
-  // 직접 접근 시도
+  // Direct access attempt
   const direct = headers[name];
   if (typeof direct === 'string') {
     return direct;
@@ -183,7 +183,7 @@ function getHeader(
     return direct[0];
   }
 
-  // 대소문자 무시 검색
+  // Case-insensitive search
   const lowerName = name.toLowerCase();
   for (const [key, value] of Object.entries(headers)) {
     if (key.toLowerCase() === lowerName) {
@@ -200,11 +200,11 @@ function getHeader(
 }
 
 /**
- * 인증 실패 응답 생성을 위한 상태 코드 결정
- * @param authConfig - 인증 설정
- * @returns HTTP 상태 코드 (401 또는 403)
+ * Determine status code for authentication failure response
+ * @param authConfig - Authentication configuration
+ * @returns HTTP status code (401 or 403)
  */
 export function getAuthErrorStatusCode(authConfig: AuthConfig): number {
-  // Basic, Bearer는 401, API-Key는 403
+  // Basic and Bearer return 401, API-Key returns 403
   return authConfig.type === 'api-key' ? 403 : 401;
 }

@@ -1,15 +1,15 @@
 /**
- * require-tags 규칙
- * HTTP 메서드 블록 내 tags() 정의 권장
+ * require-tags rule
+ * Recommend tags() definition in HTTP method blocks
  */
 
 import type { Rule } from 'eslint';
 import type { CallExpression, Node } from 'estree';
 
-// HTTP 메서드 이름
+// HTTP method names
 const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'options', 'head'];
 
-// 노드가 HTTP 메서드 호출인지 확인
+// Check if node is an HTTP method call
 function isHttpMethodCall(node: Node): node is CallExpression {
   return (
     node.type === 'CallExpression' &&
@@ -18,7 +18,7 @@ function isHttpMethodCall(node: Node): node is CallExpression {
   );
 }
 
-// 노드가 tags() 호출인지 확인
+// Check if node is a tags() call
 function isTagsCall(node: CallExpression): boolean {
   return (
     node.callee.type === 'Identifier' &&
@@ -26,13 +26,13 @@ function isTagsCall(node: CallExpression): boolean {
   );
 }
 
-// HTTP 메서드 블록 내에서 tags 호출 찾기
+// Find tags call in HTTP method block
 function hasTagsInBlock(node: Node): boolean {
   if (node.type === 'CallExpression') {
     if (isTagsCall(node)) {
       return true;
     }
-    // 인자들 검사
+    // Check arguments
     for (const arg of node.arguments) {
       if (hasTagsInBlock(arg)) {
         return true;
@@ -71,14 +71,14 @@ const rule: Rule.RuleModule = {
   meta: {
     type: 'suggestion',
     docs: {
-      description: 'HTTP 메서드 블록 내 tags() 정의 권장',
+      description: 'Recommend tags() definition in HTTP method blocks',
       category: 'Best Practices',
       recommended: false,
     },
     schema: [],
     messages: {
       missingTags:
-        'HTTP 메서드 블록에 tags() 정의를 추가하는 것을 권장합니다. 태그는 API 문서 구조화에 도움이 됩니다.',
+        'Adding tags() definition to HTTP method block is recommended. Tags help structure API documentation.',
     },
   },
 
@@ -89,7 +89,7 @@ const rule: Rule.RuleModule = {
           return;
         }
 
-        // HTTP 메서드의 두 번째 인자가 콜백 함수여야 함
+        // Second argument of HTTP method should be a callback function
         const callback = node.arguments[1];
         if (!callback) {
           return;

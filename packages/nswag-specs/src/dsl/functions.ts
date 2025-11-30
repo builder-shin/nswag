@@ -1,8 +1,8 @@
 /**
- * DSL 함수 구현
- * Phase 3: nswag-specs 코어 - 기본 DSL
+ * DSL Function Implementations
+ * Phase 3: nswag-specs core - Basic DSL
  *
- * rswag 호환 DSL 함수들을 제공합니다.
+ * Provides rswag-compatible DSL functions.
  */
 
 import { getDSLContextManager } from './context.js';
@@ -32,16 +32,16 @@ import type {
 } from './types.js';
 
 // ============================================================================
-// 1. 구조 정의 함수
+// 1. Structure Definition Functions
 // ============================================================================
 
 /**
- * describe() 함수 - API 테스트 그룹 정의
+ * describe() function - Define API test group
  *
  * @example
  * describe('Users API', () => {
  *   path('/users', () => {
- *     get('사용자 목록 조회', () => { ... });
+ *     get('Get user list', () => { ... });
  *   });
  * });
  *
@@ -79,17 +79,17 @@ export function describe(
 }
 
 /**
- * path() 함수 - API 경로 정의
+ * path() function - Define API path
  *
  * @example
  * path('/users', () => {
- *   get('사용자 목록 조회', () => { ... });
+ *   get('Get user list', () => { ... });
  * });
  *
  * @example
  * path('/users/{id}', () => {
  *   parameter({ name: 'id', in: 'path', required: true, schema: { type: 'integer' } });
- *   get('사용자 상세 조회', () => { ... });
+ *   get('Get user detail', () => { ... });
  * });
  */
 export function path(pathTemplate: string, fn: () => void): void {
@@ -105,11 +105,11 @@ export function path(pathTemplate: string, fn: () => void): void {
 }
 
 // ============================================================================
-// 2. HTTP 메서드 함수
+// 2. HTTP Method Functions
 // ============================================================================
 
 /**
- * HTTP 메서드 함수 팩토리
+ * HTTP method function factory
  */
 function createHttpMethodFunction(method: HttpMethod) {
   return function (summary: string, fn: () => void): void {
@@ -126,11 +126,11 @@ function createHttpMethodFunction(method: HttpMethod) {
 }
 
 /**
- * GET 요청 정의
+ * Define GET request
  *
  * @example
- * get('사용자 목록 조회', () => {
- *   response(200, '성공', () => {
+ * get('Get user list', () => {
+ *   response(200, 'Success', () => {
  *     runTest();
  *   });
  * });
@@ -138,59 +138,59 @@ function createHttpMethodFunction(method: HttpMethod) {
 export const get = createHttpMethodFunction('GET');
 
 /**
- * POST 요청 정의
+ * Define POST request
  *
  * @example
- * post('사용자 생성', () => {
+ * post('Create user', () => {
  *   requestBody({
  *     required: true,
  *     content: { 'application/json': { schema: { type: 'object' } } }
  *   });
- *   response(201, '생성됨', () => { runTest(); });
+ *   response(201, 'Created', () => { runTest(); });
  * });
  */
 export const post = createHttpMethodFunction('POST');
 
 /**
- * PUT 요청 정의
+ * Define PUT request
  */
 export const put = createHttpMethodFunction('PUT');
 
 /**
- * PATCH 요청 정의
+ * Define PATCH request
  */
 export const patch = createHttpMethodFunction('PATCH');
 
 /**
- * DELETE 요청 정의 (delete는 예약어이므로 del 사용)
+ * Define DELETE request (using 'del' since delete is reserved keyword)
  *
  * @example
- * del('사용자 삭제', () => {
- *   response(204, '삭제됨', () => { runTest(); });
+ * del('Delete user', () => {
+ *   response(204, 'Deleted', () => { runTest(); });
  * });
  */
 export const del = createHttpMethodFunction('DELETE');
 
 /**
- * HEAD 요청 정의
+ * Define HEAD request
  */
 export const head = createHttpMethodFunction('HEAD');
 
 /**
- * OPTIONS 요청 정의
+ * Define OPTIONS request
  */
 export const options = createHttpMethodFunction('OPTIONS');
 
 // ============================================================================
-// 3. 메타데이터 함수
+// 3. Metadata Functions
 // ============================================================================
 
 /**
- * tags() 함수 - API 태그 정의
+ * tags() function - Define API tags
  *
  * @example
  * tags('Users', 'Admin');
- * // 또는
+ * // or
  * tags(['Users', 'Admin']);
  */
 export function tags(...tagList: string[]): void;
@@ -206,7 +206,7 @@ export function tags(firstArg: string | string[], ...rest: string[]): void {
 }
 
 /**
- * consumes() 함수 - 요청 미디어 타입 정의
+ * consumes() function - Define request media types
  *
  * @example
  * consumes('application/json', 'application/xml');
@@ -217,7 +217,7 @@ export function consumes(...mediaTypes: string[]): void {
 }
 
 /**
- * produces() 함수 - 응답 미디어 타입 정의
+ * produces() function - Define response media types
  *
  * @example
  * produces('application/json');
@@ -228,17 +228,17 @@ export function produces(...mediaTypes: string[]): void {
 }
 
 // ============================================================================
-// 3.1 Operation 메타데이터 함수 (Phase 4)
+// 3.1 Operation Metadata Functions (Phase 4)
 // ============================================================================
 
 /**
- * operationId() 함수 - Operation 식별자 정의
- * API 클라이언트 코드 생성 시 함수명으로 사용됨
+ * operationId() function - Define Operation identifier
+ * Used as function name for API client code generation
  *
  * @example
  * post('Creates a blog', () => {
  *   operationId('createBlog');
- *   // 생성된 클라이언트: api.createBlog(...)
+ *   // Generated client: api.createBlog(...)
  * });
  */
 export function operationId(id: string): void {
@@ -247,8 +247,8 @@ export function operationId(id: string): void {
 }
 
 /**
- * summary() 함수 - 짧은 요약 정의
- * Operation의 1줄 설명 (OpenAPI summary)
+ * summary() function - Define brief summary
+ * One-line description for Operation (OpenAPI summary)
  *
  * @example
  * post('Creates a blog', () => {
@@ -257,8 +257,8 @@ export function operationId(id: string): void {
  */
 export function summary(text: string): void {
   const manager = getDSLContextManager();
-  // summary는 HTTP 메서드 함수의 첫 번째 인자로도 설정 가능
-  // 여기서는 추가로 명시적으로 설정할 때 사용
+  // summary can also be set via first argument of HTTP method functions
+  // This is for setting it explicitly when needed
   const method = manager.getCurrentMethod();
   if (method) {
     method.summary = text;
@@ -266,8 +266,8 @@ export function summary(text: string): void {
 }
 
 /**
- * description() 함수 - 상세 설명 정의
- * Operation의 상세 설명 (OpenAPI description)
+ * description() function - Define detailed description
+ * Detailed description for Operation (OpenAPI description)
  *
  * @example
  * post('Creates a blog', () => {
@@ -280,17 +280,17 @@ export function description(text: string): void {
 }
 
 /**
- * deprecated() 함수 - 사용 중단 표시
- * 엔드포인트가 더 이상 사용되지 않음을 표시
+ * deprecated() function - Mark as deprecated
+ * Indicates that the endpoint is no longer recommended for use
  *
  * @example
  * get('Old endpoint', () => {
- *   deprecated();  // 기본값 true
+ *   deprecated();  // default true
  * });
  *
  * @example
  * get('Maybe deprecated', () => {
- *   deprecated(false);  // 명시적으로 false 설정
+ *   deprecated(false);  // explicitly set to false
  * });
  */
 export function deprecated(isDeprecated: boolean = true): void {
@@ -299,8 +299,8 @@ export function deprecated(isDeprecated: boolean = true): void {
 }
 
 /**
- * externalDocs() 함수 - 외부 문서 링크 정의
- * 추가 문서에 대한 참조 링크
+ * externalDocs() function - Define external documentation link
+ * Reference link to additional documentation
  *
  * @example
  * post('Creates a blog', () => {
@@ -316,11 +316,11 @@ export function externalDocs(docs: ExternalDocsObject): void {
 }
 
 // ============================================================================
-// 4. 파라미터 함수
+// 4. Parameter Functions
 // ============================================================================
 
 /**
- * parameter() 함수 - API 파라미터 정의
+ * parameter() function - Define API parameter
  *
  * @example
  * parameter({
@@ -328,15 +328,15 @@ export function externalDocs(docs: ExternalDocsObject): void {
  *   in: 'path',
  *   required: true,
  *   schema: { type: 'integer' },
- *   description: '사용자 ID'
+ *   description: 'User ID'
  * });
  *
  * @example
- * // nswag 확장: enum 값과 설명 매핑
+ * // nswag extension: enum value to description mapping
  * parameter({
  *   name: 'status',
  *   in: 'query',
- *   enum: { active: '활성', inactive: '비활성' }
+ *   enum: { active: 'Active', inactive: 'Inactive' }
  * });
  */
 export function parameter(param: ParameterObject): void {
@@ -345,11 +345,11 @@ export function parameter(param: ParameterObject): void {
 }
 
 /**
- * requestBody() 함수 - OpenAPI 3.0 네이티브 요청 본문 정의
+ * requestBody() function - Define OpenAPI 3.0 native request body
  *
  * @example
  * requestBody({
- *   description: '사용자 생성 요청',
+ *   description: 'User creation request',
  *   required: true,
  *   content: {
  *     'application/json': {
@@ -371,18 +371,18 @@ export function requestBody(body: RequestBodyObject): void {
 }
 
 /**
- * requestParams() 함수 - 테스트용 요청 파라미터 설정
+ * requestParams() function - Set request parameters for testing
  *
  * @example
- * // 정적 값
+ * // Static value
  * requestParams({ page: 1, limit: 10 });
  *
  * @example
- * // 동기 함수
+ * // Synchronous function
  * requestParams(() => ({ userId: currentUser.id }));
  *
  * @example
- * // 비동기 함수
+ * // Asynchronous function
  * requestParams(async () => {
  *   const user = await createTestUser();
  *   return { userId: user.id };
@@ -399,7 +399,7 @@ export function requestParams(
 }
 
 /**
- * requestHeaders() 함수 - 테스트용 요청 헤더 설정
+ * requestHeaders() function - Set request headers for testing
  *
  * @example
  * requestHeaders({
@@ -413,18 +413,18 @@ export function requestHeaders(headers: Record<string, string>): void {
 }
 
 // ============================================================================
-// 5. 스키마 함수
+// 5. Schema Functions
 // ============================================================================
 
 /**
- * schema() 함수 - 스키마 정의
+ * schema() function - Define schema
  *
- * Method 컨텍스트에서 호출하면 요청 스키마로,
- * Response 컨텍스트에서 호출하면 응답 스키마로 설정됩니다.
+ * When called in Method context, sets request schema,
+ * When called in Response context, sets response schema.
  *
  * @example
- * // 응답 스키마
- * response(200, '성공', () => {
+ * // Response schema
+ * response(200, 'Success', () => {
  *   schema({
  *     type: 'object',
  *     properties: {
@@ -441,11 +441,11 @@ export function schema(schemaObject: SchemaObject): void {
 }
 
 // ============================================================================
-// 6. 응답 정의 함수
+// 6. Response Definition Functions
 // ============================================================================
 
 /**
- * ResponseTag를 ResponseOptions로 변환
+ * Convert ResponseTag to ResponseOptions
  */
 function tagToOptions(tag: ResponseTag): ResponseOptions {
   switch (tag) {
@@ -463,23 +463,23 @@ function tagToOptions(tag: ResponseTag): ResponseOptions {
 }
 
 /**
- * response() 함수 - 응답 정의
+ * response() function - Define response
  *
  * @example
- * // 기본 사용
- * response(200, '성공', () => {
+ * // Basic usage
+ * response(200, 'Success', () => {
  *   runTest();
  * });
  *
  * @example
- * // 옵션 사용
- * response(200, '성공', { document: true }, () => {
+ * // With options
+ * response(200, 'Success', { document: true }, () => {
  *   runTest();
  * });
  *
  * @example
- * // 태그 사용 (rswag 호환)
- * response(200, '성공', ':document', () => {
+ * // With tag (rswag compatible)
+ * response(200, 'Success', ':document', () => {
  *   runTest();
  * });
  */
@@ -528,32 +528,32 @@ export function response(
 }
 
 // ============================================================================
-// 7. 테스트 실행 함수
+// 7. Test Execution Functions
 // ============================================================================
 
 /**
- * runTest() 함수 - 테스트 실행 정의
+ * runTest() function - Define test execution
  *
  * @example
- * // 기본 사용
+ * // Basic usage
  * runTest();
  *
  * @example
- * // 설명 추가
- * runTest('유효한 토큰으로 요청');
+ * // With description
+ * runTest('Request with valid token');
  *
  * @example
- * // 옵션 사용
+ * // With options
  * runTest({ focus: true, timeout: 5000 });
  *
  * @example
- * // 콜백 사용
+ * // With callback
  * runTest((response, request) => {
  *   expect(response.body).toContain('success');
  * });
  *
  * @example
- * // 옵션과 콜백 함께 사용
+ * // With options and callback
  * runTest({ vcr: { cassette: 'users', mode: 'playback' } }, (response) => {
  *   expect(response.statusCode).toBe(200);
  * });
@@ -589,7 +589,7 @@ export function runTest(
     // runTest(callback)
     testCallback = optionsOrDescOrCallback;
   } else {
-    // runTest(options) 또는 runTest(options, callback)
+    // runTest(options) or runTest(options, callback)
     options = optionsOrDescOrCallback;
     testCallback = callback;
   }
@@ -602,15 +602,15 @@ export function runTest(
 }
 
 /**
- * it() 함수 확장 - 테스트 케이스 정의
+ * it() function extension - Define test case
  *
  * @example
- * it('응답에 사용자 ID가 포함되어야 함', () => {
+ * it('Should include user ID in response', () => {
  *   expect(response.body.id).toBeDefined();
  * });
  *
  * @example
- * it('응답 데이터 검증', (example) => {
+ * it('Validate response data', (example) => {
  *   expect(example.response.statusCode).toBe(200);
  *   expect(example.request.method).toBe('GET');
  * });
@@ -619,11 +619,11 @@ export function it(
   description: string,
   fn: (() => void | Promise<void>) | ((example: ExampleContext) => void | Promise<void>),
 ): void {
-  // it 함수는 테스트 프레임워크에서 처리됨
-  // 여기서는 컨텍스트에 테스트를 등록
+  // it function is handled by test framework
+  // Here we register test to context
   const manager = getDSLContextManager();
 
-  // runTest 형태로 변환하여 등록
+  // Convert to runTest format and register
   manager.addTest({
     description,
     options: {},
@@ -632,13 +632,13 @@ export function it(
 }
 
 // ============================================================================
-// 8. 훅 함수
+// 8. Hook Functions
 // ============================================================================
 
 /**
- * beforeAll() 함수 - 전역 설정 훅
+ * beforeAll() function - Global setup hook
  *
- * Method 컨텍스트에서 사용하면 해당 HTTP 메서드의 모든 테스트 전에 실행됩니다.
+ * When used in Method context, runs before all tests of that HTTP method.
  *
  * @example
  * beforeAll(async () => {
@@ -651,7 +651,7 @@ export function beforeAll(fn: BeforeAllHook): void {
 }
 
 /**
- * afterAll() 함수 - 전역 정리 훅
+ * afterAll() function - Global cleanup hook
  *
  * @example
  * afterAll(async () => {
@@ -664,15 +664,15 @@ export function afterAll(fn: AfterAllHook): void {
 }
 
 /**
- * beforeEach() 함수 - 각 테스트 전 훅 (nswag 확장)
+ * beforeEach() function - Hook before each test (nswag extension)
  *
- * Response 컨텍스트에서 사용하면 컨텍스트가 주입됩니다.
+ * When used in Response context, context is injected.
  *
  * @example
- * response(200, '성공', () => {
+ * response(200, 'Success', () => {
  *   beforeEach((ctx) => {
- *     console.log('테스트 시작:', ctx.testName);
- *     console.log('메타데이터:', ctx.metadata);
+ *     console.log('Starting test:', ctx.testName);
+ *     console.log('Metadata:', ctx.metadata);
  *   });
  *   runTest();
  * });
@@ -683,13 +683,13 @@ export function beforeEach(fn: BeforeEachHook): void {
 }
 
 /**
- * afterEach() 함수 - 각 테스트 후 훅 (nswag 확장)
+ * afterEach() function - Hook after each test (nswag extension)
  *
  * @example
- * response(200, '성공', () => {
+ * response(200, 'Success', () => {
  *   afterEach((ctx) => {
- *     console.log('응답:', ctx.response);
- *     console.log('요청:', ctx.request);
+ *     console.log('Response:', ctx.response);
+ *     console.log('Request:', ctx.request);
  *   });
  *   runTest();
  * });
@@ -700,28 +700,28 @@ export function afterEach(fn: AfterEachHook): void {
 }
 
 // ============================================================================
-// 9. 명시적 요청/검증 API
+// 9. Explicit Request/Validation API
 // ============================================================================
 
 /**
- * submitRequest() 함수 - 명시적 요청 실행
+ * submitRequest() function - Execute request explicitly
  *
- * 메타데이터를 기반으로 HTTP 요청을 실행하고 결과를 반환합니다.
+ * Executes HTTP request based on metadata and returns the result.
  *
  * @example
  * const { request, response } = await submitRequest(metadata);
  * expect(response.statusCode).toBe(200);
  */
 export async function submitRequest(metadata: DSLRequestMetadata): Promise<SubmitRequestResult> {
-  // HTTP 클라이언트를 통해 요청 실행
-  // 실제 구현은 testing 모듈의 HTTP 클라이언트와 연동
+  // Execute request through HTTP client
+  // Actual implementation integrates with HTTP client from testing module
   const { createHttpClient } = await import('../testing/http-client.js');
   const client = createHttpClient();
 
-  // 요청 파라미터 빌드
+  // Build request parameters
   const requestParams = buildRequestParams(metadata);
 
-  // HTTP 메서드에 따라 요청 실행
+  // Execute request based on HTTP method
   let response: { status: number; headers: Record<string, string>; body: unknown; text: string };
 
   switch (metadata.method) {
@@ -741,7 +741,7 @@ export async function submitRequest(metadata: DSLRequestMetadata): Promise<Submi
       response = await client.delete(metadata.path, { headers: requestParams.headers });
       break;
     default:
-      throw new Error(`지원하지 않는 HTTP 메서드: ${metadata.method}`);
+      throw new Error(`Unsupported HTTP method: ${metadata.method}`);
   }
 
   const testRequest: TestRequest = {
@@ -761,7 +761,7 @@ export async function submitRequest(metadata: DSLRequestMetadata): Promise<Submi
 }
 
 /**
- * 메타데이터에서 요청 파라미터 빌드
+ * Build request parameters from metadata
  */
 function buildRequestParams(metadata: DSLRequestMetadata): {
   query: Record<string, unknown>;
@@ -772,7 +772,7 @@ function buildRequestParams(metadata: DSLRequestMetadata): {
   const headers: Record<string, string> = {};
   let body: unknown;
 
-  // 파라미터 처리
+  // Process parameters
   for (const param of metadata.parameters) {
     if (param.in === 'query' && param.example !== undefined) {
       query[param.name] = param.example;
@@ -783,7 +783,7 @@ function buildRequestParams(metadata: DSLRequestMetadata): {
     }
   }
 
-  // 요청 본문 처리
+  // Process request body
   if (metadata.requestBody?.content) {
     const contentType = Object.keys(metadata.requestBody.content)[0];
     if (contentType) {
@@ -799,9 +799,9 @@ function buildRequestParams(metadata: DSLRequestMetadata): {
 }
 
 /**
- * assertResponseMatchesMetadata() 함수 - 응답 메타데이터 검증
+ * assertResponseMatchesMetadata() function - Validate response metadata
  *
- * 응답이 메타데이터에 정의된 스키마와 일치하는지 검증합니다.
+ * Validates that the response matches the schema defined in metadata.
  *
  * @example
  * await assertResponseMatchesMetadata(extendedMetadata);
@@ -812,31 +812,31 @@ export async function assertResponseMatchesMetadata(
   const { getResponseValidator } = await import('../testing/response-validator.js');
   const validator = getResponseValidator();
 
-  // 응답 상태 코드 검증
+  // Validate response status code
   const expectedStatus = metadata.response.statusCode;
 
-  // 응답 스키마 검증
+  // Validate response schema
   if (metadata.response.schema) {
-    // JSON Schema 검증 로직
-    // validator 모듈을 사용하여 스키마 검증 수행
-    // TODO: 실제 검증 로직 구현
+    // JSON Schema validation logic
+    // Use validator module to perform schema validation
+    // TODO: Implement actual validation logic
     void validator;
     void expectedStatus;
   }
 
-  // 응답 헤더 검증
+  // Validate response headers
   if (metadata.response.headers) {
-    // 헤더 검증 로직
-    // TODO: 헤더 검증 구현
+    // Header validation logic
+    // TODO: Implement header validation
   }
 }
 
 // ============================================================================
-// 유틸리티 함수
+// Utility Functions
 // ============================================================================
 
 /**
- * 현재 메타데이터 조합하여 반환
+ * Get current metadata combined
  */
 export function getCurrentMetadata(): DSLRequestMetadata | null {
   const manager = getDSLContextManager();
@@ -866,13 +866,13 @@ export function getCurrentMetadata(): DSLRequestMetadata | null {
 }
 
 // ============================================================================
-// 10. Phase 5: 스키마 및 보안 함수
+// 10. Phase 5: Schema and Security Functions
 // ============================================================================
 
 /**
- * header() 함수 - 응답 헤더 검증 정의
+ * header() function - Define response header validation
  *
- * Response 컨텍스트 내에서 사용되어 응답 헤더를 정의합니다.
+ * Used within Response context to define response headers.
  *
  * @example
  * response(200, 'success', () => {
@@ -890,7 +890,7 @@ export function getCurrentMetadata(): DSLRequestMetadata | null {
  * });
  *
  * @example
- * // nullable 스키마와 required 옵션
+ * // Nullable schema with required option
  * header('X-Cursor', {
  *   schema: { type: 'string', nullable: true },
  *   description: 'Cursor for pagination',
@@ -903,9 +903,9 @@ export function header(name: string, options: HeaderOptions): void {
 }
 
 /**
- * example() 함수 - 수동 응답 예제 정의
+ * example() function - Define manual response example
  *
- * Response 컨텍스트 내에서 사용되어 응답 예제를 정의합니다.
+ * Used within Response context to define response examples.
  *
  * @example
  * response(200, 'blog found', () => {
@@ -935,9 +935,9 @@ export function example(
 }
 
 /**
- * requestBodyExample() 함수 - 요청 본문 예제 정의
+ * requestBodyExample() function - Define request body example
  *
- * Method 컨텍스트 내에서 requestBody 정의 후 사용합니다.
+ * Used within Method context after requestBody definition.
  *
  * @example
  * post('Create blog', () => {
@@ -971,29 +971,29 @@ export function requestBodyExample(options: RequestBodyExampleOptions): void {
 }
 
 /**
- * security() 함수 - 보안 요구사항 정의
+ * security() function - Define security requirements
  *
- * Method 컨텍스트 내에서 해당 Operation의 보안 요구사항을 정의합니다.
- * 전역 security를 비활성화하려면 빈 배열을 전달합니다.
+ * Used within Method context to define security requirements for that Operation.
+ * Pass empty array to disable global security.
  *
  * @example
- * // 단일 스키마
+ * // Single scheme
  * security([{ basic_auth: [] }]);
  *
  * @example
- * // 복합 스키마 (AND 조건 - 모두 충족해야 함)
+ * // Compound scheme (AND condition - must satisfy all)
  * security([{ basic_auth: [], api_key: [] }]);
  *
  * @example
- * // 스코프 지정 (OAuth2)
+ * // With scopes (OAuth2)
  * security([{ oauth2: ['read', 'write'] }]);
  *
  * @example
- * // 전역 security 비활성화
+ * // Disable global security
  * security([]);
  *
  * @example
- * // OR 조건 (둘 중 하나만 충족하면 됨)
+ * // OR condition (must satisfy one of them)
  * security([{ bearer_auth: [] }, { api_key: [] }]);
  */
 export function security(requirements: SecurityRequirement[]): void {

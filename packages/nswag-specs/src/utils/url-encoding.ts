@@ -1,14 +1,14 @@
 /**
- * URL 인코딩 유틸리티
- * HTML Safe 입력 처리 및 쿼리 파라미터 자동 인코딩
+ * URL Encoding Utilities
+ * HTML-safe input handling and automatic query parameter encoding
  */
 
 /**
- * 쿼리 파라미터 값을 URL 인코딩
- * 날짜/시간 등의 특수 문자를 안전하게 인코딩
+ * URL encode query parameter value
+ * Safely encode special characters like date/time
  *
- * @param value - 인코딩할 값
- * @returns URL 인코딩된 문자열
+ * @param value - Value to encode
+ * @returns URL-encoded string
  */
 export function encodeQueryValue(value: unknown): string {
   if (value === null || value === undefined) {
@@ -20,10 +20,10 @@ export function encodeQueryValue(value: unknown): string {
 }
 
 /**
- * 쿼리 파라미터 객체를 URL 쿼리 문자열로 변환
+ * Convert query parameter object to URL query string
  *
- * @param params - 쿼리 파라미터 객체
- * @returns URL 쿼리 문자열 (? 포함)
+ * @param params - Query parameter object
+ * @returns URL query string (including ?)
  */
 export function buildQueryString(params: Record<string, unknown>): string {
   const entries = Object.entries(params).filter(
@@ -36,7 +36,7 @@ export function buildQueryString(params: Record<string, unknown>): string {
 
   const queryParts = entries.map(([key, value]) => {
     if (Array.isArray(value)) {
-      // 배열인 경우 여러 개의 같은 키로 처리
+      // For arrays, use multiple instances of the same key
       return value
         .map((v) => `${encodeURIComponent(key)}=${encodeQueryValue(v)}`)
         .join('&');
@@ -48,12 +48,12 @@ export function buildQueryString(params: Record<string, unknown>): string {
 }
 
 /**
- * URL 경로와 쿼리 파라미터를 조합하여 완전한 URL 생성
+ * Build complete URL by combining base path and query parameters
  *
- * @param basePath - 기본 경로
- * @param pathParams - 경로 파라미터 (e.g., { id: 123 })
- * @param queryParams - 쿼리 파라미터
- * @returns 완성된 URL 문자열
+ * @param basePath - Base path
+ * @param pathParams - Path parameters (e.g., { id: 123 })
+ * @param queryParams - Query parameters
+ * @returns Complete URL string
  */
 export function buildUrl(
   basePath: string,
@@ -62,7 +62,7 @@ export function buildUrl(
 ): string {
   let url = basePath;
 
-  // 경로 파라미터 치환 (e.g., /users/{id} -> /users/123)
+  // Replace path parameters (e.g., /users/{id} -> /users/123)
   if (pathParams) {
     for (const [key, value] of Object.entries(pathParams)) {
       const encodedValue = encodeURIComponent(String(value));
@@ -71,7 +71,7 @@ export function buildUrl(
     }
   }
 
-  // 쿼리 파라미터 추가
+  // Add query parameters
   if (queryParams && Object.keys(queryParams).length > 0) {
     url += buildQueryString(queryParams);
   }
@@ -80,11 +80,11 @@ export function buildUrl(
 }
 
 /**
- * ISO 날짜/시간 문자열을 URL 안전하게 인코딩
- * 콜론(:)을 %3A로 변환
+ * URL-safe encoding of ISO date/time string
+ * Convert colons (:) to %3A
  *
- * @param dateTime - ISO 8601 형식의 날짜/시간 문자열
- * @returns URL 인코딩된 날짜/시간 문자열
+ * @param dateTime - Date/time string in ISO 8601 format
+ * @returns URL-encoded date/time string
  */
 export function encodeDateTime(dateTime: string | Date): string {
   const isoString = dateTime instanceof Date ? dateTime.toISOString() : dateTime;
@@ -92,11 +92,11 @@ export function encodeDateTime(dateTime: string | Date): string {
 }
 
 /**
- * HTML 특수 문자를 이스케이프 처리
- * XSS 방지를 위한 HTML 엔티티 변환
+ * Escape HTML special characters
+ * Convert to HTML entities to prevent XSS
  *
- * @param str - 이스케이프할 문자열
- * @returns 이스케이프된 문자열
+ * @param str - String to escape
+ * @returns Escaped string
  */
 export function escapeHtml(str: string): string {
   const htmlEntities: Record<string, string> = {
@@ -111,25 +111,25 @@ export function escapeHtml(str: string): string {
 }
 
 /**
- * URL 디코딩 (인코딩된 값을 원래 값으로 복원)
+ * URL decode (restore encoded value to original)
  *
- * @param encodedValue - URL 인코딩된 문자열
- * @returns 디코딩된 문자열
+ * @param encodedValue - URL-encoded string
+ * @returns Decoded string
  */
 export function decodeQueryValue(encodedValue: string): string {
   try {
     return decodeURIComponent(encodedValue);
   } catch {
-    // 잘못된 인코딩인 경우 원본 반환
+    // Return original if invalid encoding
     return encodedValue;
   }
 }
 
 /**
- * 쿼리 문자열을 파싱하여 객체로 변환
+ * Parse query string to object
  *
- * @param queryString - 쿼리 문자열 (? 포함 또는 미포함)
- * @returns 파싱된 파라미터 객체
+ * @param queryString - Query string (with or without ?)
+ * @returns Parsed parameter object
  */
 export function parseQueryString(queryString: string): Record<string, string | string[]> {
   const result: Record<string, string | string[]> = {};
@@ -147,7 +147,7 @@ export function parseQueryString(queryString: string): Record<string, string | s
     if (key) {
       const existing = result[key];
       if (existing !== undefined) {
-        // 이미 존재하는 키의 경우 배열로 변환
+        // Convert to array if key already exists
         if (Array.isArray(existing)) {
           existing.push(value);
         } else {
@@ -163,11 +163,11 @@ export function parseQueryString(queryString: string): Record<string, string | s
 }
 
 /**
- * 경로 파라미터 추출
- * /users/{id}/posts/{postId} 형식에서 파라미터 이름 추출
+ * Extract path parameters
+ * Extract parameter names from /users/{id}/posts/{postId} format
  *
- * @param pathTemplate - 경로 템플릿
- * @returns 파라미터 이름 배열
+ * @param pathTemplate - Path template
+ * @returns Array of parameter names
  */
 export function extractPathParams(pathTemplate: string): string[] {
   const params: string[] = [];

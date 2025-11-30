@@ -1,5 +1,5 @@
 /**
- * 스키마 변환기 유틸리티 테스트
+ * Schema converter utility tests
  */
 
 import { describe, it, expect } from 'vitest';
@@ -26,18 +26,18 @@ describe('Utils', () => {
   describe('WarningCollector', () => {
     it('should collect warnings', () => {
       const collector = new WarningCollector();
-      collector.add('unsupported-format', '지원하지 않는 format');
-      collector.addSimple('간단한 경고');
+      collector.add('unsupported-format', 'Unsupported format');
+      collector.addSimple('Simple warning');
 
       const warnings = collector.getWarnings();
       expect(warnings).toHaveLength(2);
-      expect(warnings[0]).toContain('지원하지 않는 format');
-      expect(warnings[1]).toContain('간단한 경고');
+      expect(warnings[0]).toContain('Unsupported format');
+      expect(warnings[1]).toContain('Simple warning');
     });
 
     it('should include path in warning message', () => {
       const collector = new WarningCollector();
-      collector.add('unsupported-type', '알 수 없는 타입', 'user.profile.type');
+      collector.add('unsupported-type', 'Unknown type', 'user.profile.type');
 
       const warnings = collector.getWarnings();
       expect(warnings[0]).toContain('[user.profile.type]');
@@ -47,25 +47,25 @@ describe('Utils', () => {
       const collector = new WarningCollector();
       expect(collector.hasWarnings()).toBe(false);
 
-      collector.addSimple('경고');
+      collector.addSimple('Warning');
       expect(collector.hasWarnings()).toBe(true);
     });
 
     it('should clear warnings', () => {
       const collector = new WarningCollector();
-      collector.addSimple('경고');
+      collector.addSimple('Warning');
       collector.clear();
       expect(collector.hasWarnings()).toBe(false);
     });
 
     it('should return detailed warnings', () => {
       const collector = new WarningCollector();
-      collector.add('unsupported-format', '메시지', 'path');
+      collector.add('unsupported-format', 'Message', 'path');
 
       const detailed = collector.getDetailedWarnings();
       expect(detailed[0]).toEqual({
         type: 'unsupported-format',
-        message: '메시지',
+        message: 'Message',
         path: 'path',
       });
     });
@@ -97,13 +97,13 @@ describe('Utils', () => {
 
     it('should throw for external refs', () => {
       expect(() => resolveRef('http://example.com/schema.json', spec)).toThrow(
-        '외부 참조는 지원하지 않습니다',
+        'External references are not supported',
       );
     });
 
     it('should throw for invalid refs', () => {
       expect(() => resolveRef('#/components/schemas/NonExistent', spec)).toThrow(
-        '$ref 참조를 찾을 수 없습니다',
+        'Cannot find $ref reference',
       );
     });
   });

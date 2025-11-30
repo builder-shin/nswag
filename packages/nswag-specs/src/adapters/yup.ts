@@ -1,18 +1,18 @@
 /**
- * Yup 어댑터
- * Yup 스키마를 OpenAPI 스키마로 변환
+ * Yup Adapter
+ * Convert Yup schemas to OpenAPI schemas
  *
- * 제한사항:
- * - yup.lazy(): 지연 스키마 미지원
- * - yup.ref(): 참조 미지원
- * - when() 조건부 스키마 미지원
- * - 커스텀 test() 미지원
+ * Limitations:
+ * - yup.lazy(): Lazy schemas not supported
+ * - yup.ref(): References not supported
+ * - when() conditional schemas not supported
+ * - Custom test() not supported
  */
 
 import type { Schema } from '../types/index.js';
 
 /**
- * Yup 스키마 타입 (간소화된 인터페이스)
+ * Yup schema type (simplified interface)
  */
 export interface YupSchema {
   type: string;
@@ -31,10 +31,10 @@ export interface YupSchema {
 }
 
 /**
- * Yup 스키마를 OpenAPI 스키마로 변환
+ * Convert Yup schema to OpenAPI schema
  *
- * @param yupSchema - 변환할 Yup 스키마
- * @returns OpenAPI 호환 스키마
+ * @param yupSchema - Yup schema to convert
+ * @returns OpenAPI compatible schema
  *
  * @example
  * ```typescript
@@ -85,13 +85,13 @@ export function yupToOpenApi(yupSchema: YupSchema): Schema {
 }
 
 /**
- * Yup String 변환
+ * Convert Yup String
  */
 function convertYupString(yupSchema: YupSchema): Schema {
   const schema: Schema = { type: 'string' };
   const tests = yupSchema.tests || [];
 
-  // enum 값 처리 (oneOf)
+  // Handle enum values (oneOf)
   if (yupSchema._whitelist && yupSchema._whitelist.list.size > 0) {
     const values = Array.from(yupSchema._whitelist.list);
     if (!values.includes(undefined)) {
@@ -99,7 +99,7 @@ function convertYupString(yupSchema: YupSchema): Schema {
     }
   }
 
-  // 테스트 검사에서 제약조건 추출
+  // Extract constraints from test checks
   for (const test of tests) {
     const { name, params } = test.OPTIONS || test;
 
@@ -137,12 +137,12 @@ function convertYupString(yupSchema: YupSchema): Schema {
     }
   }
 
-  // nullable 처리
+  // Handle nullable
   if (yupSchema.spec?.nullable) {
     schema.nullable = true;
   }
 
-  // default 값 처리
+  // Handle default value
   if (yupSchema.spec?.default !== undefined) {
     schema.default = yupSchema.spec.default;
   }
@@ -151,7 +151,7 @@ function convertYupString(yupSchema: YupSchema): Schema {
 }
 
 /**
- * Yup Number 변환
+ * Convert Yup Number
  */
 function convertYupNumber(yupSchema: YupSchema): Schema {
   const schema: Schema = { type: 'number' };
@@ -193,12 +193,12 @@ function convertYupNumber(yupSchema: YupSchema): Schema {
     }
   }
 
-  // nullable 처리
+  // Handle nullable
   if (yupSchema.spec?.nullable) {
     schema.nullable = true;
   }
 
-  // default 값 처리
+  // Handle default value
   if (yupSchema.spec?.default !== undefined) {
     schema.default = yupSchema.spec.default;
   }
@@ -207,7 +207,7 @@ function convertYupNumber(yupSchema: YupSchema): Schema {
 }
 
 /**
- * Yup Array 변환
+ * Convert Yup Array
  */
 function convertYupArray(yupSchema: YupSchema): Schema {
   const schema: Schema = {
@@ -240,12 +240,12 @@ function convertYupArray(yupSchema: YupSchema): Schema {
     }
   }
 
-  // nullable 처리
+  // Handle nullable
   if (yupSchema.spec?.nullable) {
     schema.nullable = true;
   }
 
-  // default 값 처리
+  // Handle default value
   if (yupSchema.spec?.default !== undefined) {
     schema.default = yupSchema.spec.default;
   }
@@ -254,7 +254,7 @@ function convertYupArray(yupSchema: YupSchema): Schema {
 }
 
 /**
- * Yup Object 변환
+ * Convert Yup Object
  */
 function convertYupObject(yupSchema: YupSchema): Schema {
   const { fields } = yupSchema;
@@ -267,9 +267,9 @@ function convertYupObject(yupSchema: YupSchema): Schema {
     const fieldSchema = value as YupSchema;
     properties[key] = yupToOpenApi(fieldSchema);
 
-    // spec.optional이 false이거나 없으면 필수 필드
+    // Required field if spec.optional is false or undefined
     if (!fieldSchema.spec?.optional && !fieldSchema.spec?.nullable) {
-      // 명시적으로 required 테스트가 있는지 확인
+      // Check if required test exists explicitly
       const hasRequired = (fieldSchema.tests || []).some(
         (t: { OPTIONS?: { name?: string }; name?: string }) =>
           (t.OPTIONS?.name || t.name) === 'required'
@@ -289,12 +289,12 @@ function convertYupObject(yupSchema: YupSchema): Schema {
     schema.required = required;
   }
 
-  // nullable 처리
+  // Handle nullable
   if (yupSchema.spec?.nullable) {
     schema.nullable = true;
   }
 
-  // default 값 처리
+  // Handle default value
   if (yupSchema.spec?.default !== undefined) {
     schema.default = yupSchema.spec.default;
   }
@@ -303,12 +303,12 @@ function convertYupObject(yupSchema: YupSchema): Schema {
 }
 
 /**
- * Yup Mixed 변환
+ * Convert Yup Mixed
  */
 function convertYupMixed(yupSchema: YupSchema): Schema {
   const schema: Schema = {};
 
-  // oneOf 값 처리
+  // Handle oneOf values
   if (yupSchema._whitelist && yupSchema._whitelist.list.size > 0) {
     const values = Array.from(yupSchema._whitelist.list);
     if (!values.includes(undefined)) {
@@ -316,12 +316,12 @@ function convertYupMixed(yupSchema: YupSchema): Schema {
     }
   }
 
-  // nullable 처리
+  // Handle nullable
   if (yupSchema.spec?.nullable) {
     schema.nullable = true;
   }
 
-  // default 값 처리
+  // Handle default value
   if (yupSchema.spec?.default !== undefined) {
     schema.default = yupSchema.spec.default;
   }
@@ -330,10 +330,10 @@ function convertYupMixed(yupSchema: YupSchema): Schema {
 }
 
 /**
- * Yup Tuple 변환
+ * Convert Yup Tuple
  */
 function convertYupTuple(yupSchema: YupSchema): Schema {
-  // Yup의 tuple은 spec.types에 타입 배열이 있음
+  // Yup tuple has types array in spec.types
   const types = (yupSchema.spec as { types?: YupSchema[] })?.types || [];
 
   return {

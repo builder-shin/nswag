@@ -1,12 +1,12 @@
 /**
- * valid-schema 규칙
- * 스키마 객체 구조 검증
+ * valid-schema rule
+ * Validate schema object structure
  */
 
 import type { Rule } from 'eslint';
 import type { CallExpression, ObjectExpression, Property, Node } from 'estree';
 
-// 유효한 스키마 타입
+// Valid schema types
 const VALID_SCHEMA_TYPES = [
   'string',
   'number',
@@ -17,7 +17,7 @@ const VALID_SCHEMA_TYPES = [
   'null',
 ];
 
-// 유효한 스키마 포맷
+// Valid schema formats
 const VALID_FORMATS = [
   'date',
   'date-time',
@@ -39,7 +39,7 @@ const VALID_FORMATS = [
   'password',
 ];
 
-// 유효한 스키마 속성
+// Valid schema properties
 const VALID_SCHEMA_PROPERTIES = new Set([
   'type',
   'format',
@@ -78,7 +78,7 @@ const VALID_SCHEMA_PROPERTIES = new Set([
   'examples',
 ]);
 
-// 노드가 schema() 호출인지 확인
+// Check if node is a schema() call
 function isSchemaCall(node: Node): node is CallExpression {
   return (
     node.type === 'CallExpression' &&
@@ -87,7 +87,7 @@ function isSchemaCall(node: Node): node is CallExpression {
   );
 }
 
-// 리터럴 값 추출
+// Extract literal value
 function getLiteralValue(node: Node): unknown {
   if (node.type === 'Literal') {
     return node.value;
@@ -95,7 +95,7 @@ function getLiteralValue(node: Node): unknown {
   return undefined;
 }
 
-// 속성 이름 추출
+// Extract property name
 function getPropertyName(prop: Property): string | undefined {
   if (prop.key.type === 'Identifier') {
     return prop.key.name;
@@ -106,7 +106,7 @@ function getPropertyName(prop: Property): string | undefined {
   return undefined;
 }
 
-// 스키마 객체 검증
+// Validate schema object
 function validateSchemaObject(
   node: ObjectExpression,
   context: Rule.RuleContext
@@ -120,7 +120,7 @@ function validateSchemaObject(
     const propName = getPropertyName(property);
     if (!propName) continue;
 
-    // 알려지지 않은 속성 검사
+    // Check unknown properties
     if (!VALID_SCHEMA_PROPERTIES.has(propName)) {
       context.report({
         node: property,
@@ -129,7 +129,7 @@ function validateSchemaObject(
       });
     }
 
-    // type 속성 검증
+    // Validate type property
     if (propName === 'type') {
       hasType = true;
       const value = getLiteralValue(property.value);
@@ -142,7 +142,7 @@ function validateSchemaObject(
       }
     }
 
-    // $ref 속성 검증
+    // Validate $ref property
     if (propName === '$ref') {
       hasRef = true;
       const value = getLiteralValue(property.value);
@@ -155,7 +155,7 @@ function validateSchemaObject(
       }
     }
 
-    // format 속성 검증
+    // Validate format property
     if (propName === 'format') {
       const value = getLiteralValue(property.value);
       if (typeof value === 'string' && !VALID_FORMATS.includes(value)) {
@@ -167,12 +167,12 @@ function validateSchemaObject(
       }
     }
 
-    // items 속성 검증 (array 타입에서만 유효)
+    // Validate items property (only valid for array type)
     if (propName === 'items' && property.value.type === 'ObjectExpression') {
       validateSchemaObject(property.value, context);
     }
 
-    // properties 속성 검증
+    // Validate properties property
     if (propName === 'properties' && property.value.type === 'ObjectExpression') {
       for (const prop of property.value.properties) {
         if (prop.type === 'Property' && prop.value.type === 'ObjectExpression') {
@@ -182,7 +182,7 @@ function validateSchemaObject(
     }
   }
 
-  // type 또는 $ref 중 하나는 있어야 함
+  // Must have either type or $ref
   if (!hasType && !hasRef) {
     const hasAllOf = node.properties.some(
       (p) => p.type === 'Property' && getPropertyName(p) === 'allOf'
@@ -207,22 +207,22 @@ const rule: Rule.RuleModule = {
   meta: {
     type: 'problem',
     docs: {
-      description: '스키마 객체 구조 검증',
+      description: 'Validate schema object structure',
       category: 'Possible Errors',
       recommended: true,
     },
     schema: [],
     messages: {
       invalidType:
-        '유효하지 않은 스키마 타입: "{{type}}". 유효한 타입: string, number, integer, boolean, array, object, null',
+        'Invalid schema type: "{{type}}". Valid types: string, number, integer, boolean, array, object, null',
       invalidRef:
-        '유효하지 않은 $ref: "{{ref}}". $ref는 "#/"로 시작해야 합니다.',
+        'Invalid $ref: "{{ref}}". $ref must start with "#/".',
       unknownProperty:
-        '알 수 없는 스키마 속성: "{{property}}"',
+        'Unknown schema property: "{{property}}"',
       unknownFormat:
-        '알 수 없는 format: "{{format}}"',
+        'Unknown format: "{{format}}"',
       missingTypeOrRef:
-        '스키마에는 type, $ref, allOf, oneOf, anyOf 중 하나가 필요합니다.',
+        'Schema requires one of: type, $ref, allOf, oneOf, anyOf.',
     },
   },
 

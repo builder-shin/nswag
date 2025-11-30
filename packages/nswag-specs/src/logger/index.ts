@@ -1,18 +1,18 @@
 /**
- * 디버그 로거
- * debug 패키지 통합으로 구현
+ * Debug logger
+ * Implemented with debug package integration
  *
- * 사용법:
+ * Usage:
  * DEBUG=nswag:* npx nswag generate
  * DEBUG=nswag:validation npx nswag generate
  * DEBUG=nswag:generate npx nswag generate
  * DEBUG=nswag:test npx nswag generate
  */
 
-// 로그 레벨 정의
+// Log level definition
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
-// 로거 인터페이스
+// Logger interface
 export interface Logger {
   debug: (...args: unknown[]) => void;
   info: (...args: unknown[]) => void;
@@ -21,7 +21,7 @@ export interface Logger {
   enabled: boolean;
 }
 
-// 디버그 네임스페이스 정의
+// Debug namespace definition
 export type DebugNamespace =
   | 'nswag'
   | 'nswag:validation'
@@ -32,7 +32,7 @@ export type DebugNamespace =
   | 'nswag:config'
   | 'nswag:compare';
 
-// 환경변수 기반 디버그 활성화 체크
+// Check if debug is enabled based on environment variable
 function isDebugEnabled(namespace: string): boolean {
   if (typeof process === 'undefined' || !process.env) {
     return false;
@@ -50,7 +50,7 @@ function isDebugEnabled(namespace: string): boolean {
       return true;
     }
 
-    // 와일드카드 패턴 지원 (예: nswag:*)
+    // Support wildcard patterns (e.g., nswag:*)
     if (pattern.endsWith('*')) {
       const prefix = pattern.slice(0, -1);
       if (namespace.startsWith(prefix)) {
@@ -58,7 +58,7 @@ function isDebugEnabled(namespace: string): boolean {
       }
     }
 
-    // 부정 패턴 지원 (예: -nswag:verbose)
+    // Support negative patterns (e.g., -nswag:verbose)
     if (pattern.startsWith('-')) {
       const negatedPattern = pattern.slice(1);
       if (namespace === negatedPattern) {
@@ -76,7 +76,7 @@ function isDebugEnabled(namespace: string): boolean {
   return false;
 }
 
-// 색상 코드 (터미널 출력용)
+// Color codes (for terminal output)
 const colors = {
   reset: '\x1b[0m',
   dim: '\x1b[2m',
@@ -88,7 +88,7 @@ const colors = {
   cyan: '\x1b[36m',
 };
 
-// 네임스페이스별 색상 할당
+// Color assignment by namespace
 const namespaceColors: Record<string, string> = {
   'nswag': colors.cyan,
   'nswag:validation': colors.green,
@@ -100,7 +100,7 @@ const namespaceColors: Record<string, string> = {
   'nswag:compare': colors.green,
 };
 
-// 로그 레벨별 색상
+// Color by log level
 const levelColors: Record<LogLevel, string> = {
   debug: colors.dim,
   info: colors.blue,
@@ -108,7 +108,7 @@ const levelColors: Record<LogLevel, string> = {
   error: colors.red,
 };
 
-// 타임스탬프 포맷
+// Timestamp format
 function formatTimestamp(): string {
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, '0');
@@ -118,7 +118,7 @@ function formatTimestamp(): string {
   return `${hours}:${minutes}:${seconds}.${ms}`;
 }
 
-// 인자를 문자열로 변환
+// Convert arguments to string
 function formatArgs(args: unknown[]): string {
   return args
     .map((arg) => {
@@ -137,7 +137,7 @@ function formatArgs(args: unknown[]): string {
     .join(' ');
 }
 
-// 디버그 로거 생성
+// Create debug logger
 function createDebugger(namespace: DebugNamespace): Logger {
   const enabled = isDebugEnabled(namespace);
   const nsColor = namespaceColors[namespace] || colors.cyan;
@@ -151,7 +151,7 @@ function createDebugger(namespace: DebugNamespace): Logger {
     const levelColor = levelColors[level];
 
     if (isTTY) {
-      // 컬러 출력 (터미널)
+      // Color output (terminal)
       console.log(
         `${colors.dim}${timestamp}${colors.reset} ` +
         `${nsColor}${namespace}${colors.reset} ` +
@@ -159,7 +159,7 @@ function createDebugger(namespace: DebugNamespace): Logger {
         message
       );
     } else {
-      // 플레인 텍스트 출력 (파일 리다이렉션 등)
+      // Plain text output (file redirection, etc.)
       console.log(`${timestamp} ${namespace} [${level.toUpperCase()}] ${message}`);
     }
   };
@@ -173,27 +173,27 @@ function createDebugger(namespace: DebugNamespace): Logger {
   };
 }
 
-// 사전 정의된 로거들
+// Predefined loggers
 export const loggers = {
-  /** 일반 로거 */
+  /** General logger */
   main: createDebugger('nswag'),
-  /** 검증 로거 */
+  /** Validation logger */
   validation: createDebugger('nswag:validation'),
-  /** 생성 로거 */
+  /** Generation logger */
   generate: createDebugger('nswag:generate'),
-  /** 테스트 로거 */
+  /** Test logger */
   test: createDebugger('nswag:test'),
-  /** Mock 서버 로거 */
+  /** Mock server logger */
   mock: createDebugger('nswag:mock'),
-  /** 플러그인 로거 */
+  /** Plugin logger */
   plugin: createDebugger('nswag:plugin'),
-  /** 설정 로거 */
+  /** Configuration logger */
   config: createDebugger('nswag:config'),
-  /** 스펙 비교 로거 */
+  /** Spec comparison logger */
   compare: createDebugger('nswag:compare'),
 };
 
-// 기본 내보내기
+// Default exports
 export const debug = loggers.main;
 export const debugValidation = loggers.validation;
 export const debugGenerate = loggers.generate;
@@ -204,22 +204,22 @@ export const debugConfig = loggers.config;
 export const debugCompare = loggers.compare;
 
 /**
- * 커스텀 네임스페이스로 로거 생성
- * @param namespace 네임스페이스 (예: 'nswag:my-plugin')
+ * Create logger with custom namespace
+ * @param namespace Namespace (e.g., 'nswag:my-plugin')
  */
 export function createLogger(namespace: string): Logger {
   return createDebugger(namespace as DebugNamespace);
 }
 
 /**
- * 특정 네임스페이스가 활성화되어 있는지 확인
+ * Check if specific namespace is enabled
  */
 export function isNamespaceEnabled(namespace: string): boolean {
   return isDebugEnabled(namespace);
 }
 
 /**
- * 함수 실행 시간 측정 헬퍼
+ * Function execution time measurement helper
  */
 export function measureTime<T>(
   logger: Logger,
@@ -244,7 +244,7 @@ export function measureTime<T>(
 }
 
 /**
- * 비동기 함수 실행 시간 측정 헬퍼
+ * Async function execution time measurement helper
  */
 export async function measureTimeAsync<T>(
   logger: Logger,

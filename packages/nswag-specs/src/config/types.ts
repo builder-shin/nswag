@@ -1,81 +1,81 @@
 /**
- * 설정 타입 정의
+ * Config type definitions
  */
 
 /**
- * 테스트 프레임워크 타입
+ * Test framework type
  */
 export type TestFramework = 'jest' | 'vitest' | 'mocha';
 
 /**
- * NswagPlugin 인터페이스
+ * NswagPlugin interface
  */
 export interface NswagPlugin {
-  /** 플러그인 이름 */
+  /** Plugin name */
   name: string;
-  /** 설정 훅 */
+  /** Setup hook */
   setup?: (config: NswagConfig) => void | Promise<void>;
-  /** 생성 전 훅 */
+  /** Pre-generation hook */
   beforeGenerate?: (spec: unknown) => void | Promise<void>;
-  /** 생성 후 훅 */
+  /** Post-generation hook */
   afterGenerate?: (spec: unknown, outputPath: string) => void | Promise<void>;
 }
 
 /**
- * Nswag 설정 인터페이스
+ * Nswag configuration interface
  */
 export interface NswagConfig {
   /**
-   * 테스트 프레임워크
+   * Test framework
    * @default 'jest'
    */
   testFramework?: TestFramework;
 
   /**
-   * 테스트 파일 검색 패턴
-   * glob 패턴 배열
+   * Test file search patterns
+   * Glob pattern array
    * @default ['spec/requests/**\/*_spec.ts']
    */
   testPatterns?: string[];
 
   /**
-   * 테스트 타임아웃 (밀리초)
+   * Test timeout (milliseconds)
    * @default 30000
    */
   testTimeout?: number;
 
   /**
-   * Dry-run 모드
-   * true면 실제 스펙 파일을 생성하지 않음
+   * Dry-run mode
+   * If true, doesn't actually generate spec files
    * @default true
    */
   dryRun?: boolean;
 
   /**
-   * 플러그인 배열
+   * Plugin array
    */
   plugins?: NswagPlugin[];
 
   /**
-   * 출력 디렉토리
+   * Output directory
    * @default './openapi'
    */
   outputDir?: string;
 
   /**
-   * 출력 포맷
+   * Output format
    * @default 'json'
    */
   outputFormat?: 'json' | 'yaml';
 
   /**
-   * 스펙 파일명 (확장자 제외)
+   * Spec filename (without extension)
    * @default 'openapi'
    */
   outputFileName?: string;
 
   /**
-   * OpenAPI 정보
+   * OpenAPI information
    */
   openapi?: {
     title?: string;
@@ -84,19 +84,19 @@ export interface NswagConfig {
   };
 
   /**
-   * 감시 모드 설정
+   * Watch mode settings
    */
   watch?: {
-    /** 감시할 파일 패턴 */
+    /** File patterns to watch */
     patterns?: string[];
-    /** 무시할 파일 패턴 */
+    /** File patterns to ignore */
     ignore?: string[];
   };
 }
 
 /**
- * 해석된 (resolved) 설정 인터페이스
- * 모든 필수 값이 기본값으로 채워진 상태
+ * Resolved configuration interface
+ * All required values filled with defaults
  */
 export interface ResolvedNswagConfig {
   testFramework: TestFramework;
@@ -119,13 +119,13 @@ export interface ResolvedNswagConfig {
 }
 
 /**
- * CLI 환경 변수 설정
+ * CLI environment variable configuration
  */
 export interface EnvironmentConfig {
-  /** 테스트 파일 패턴 (PATTERN) */
+  /** Test file pattern (PATTERN) */
   pattern?: string;
-  /** dry-run 모드 (NSWAG_DRY_RUN) */
+  /** dry-run mode (NSWAG_DRY_RUN) */
   dryRun?: boolean;
-  /** 추가 테스트 옵션 (ADDITIONAL_TEST_OPTS) */
+  /** Additional test options (ADDITIONAL_TEST_OPTS) */
   additionalTestOpts?: string;
 }

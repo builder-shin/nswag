@@ -1,12 +1,12 @@
 /**
- * no-empty-response 규칙
- * 빈 response() 블록 방지
+ * no-empty-response rule
+ * Prevent empty response() blocks
  */
 
 import type { Rule } from 'eslint';
 import type { CallExpression, Node } from 'estree';
 
-// 노드가 response() 호출인지 확인
+// Check if node is a response() call
 function isResponseCall(node: Node): node is CallExpression {
   return (
     node.type === 'CallExpression' &&
@@ -15,14 +15,14 @@ function isResponseCall(node: Node): node is CallExpression {
   );
 }
 
-// 블록이 비어있는지 확인
+// Check if block is empty
 function isEmptyBlock(node: Node): boolean {
   if (node.type === 'ArrowFunctionExpression' || node.type === 'FunctionExpression') {
     if (node.body.type === 'BlockStatement') {
-      // 빈 블록이거나 주석만 있는 경우
+      // Empty block or only comments
       return node.body.body.length === 0;
     }
-    // 표현식 본문 (빈 객체 등)
+    // Expression body (empty object, etc.)
     if (node.body.type === 'ObjectExpression' && node.body.properties.length === 0) {
       return true;
     }
@@ -38,11 +38,11 @@ function isEmptyBlock(node: Node): boolean {
   return false;
 }
 
-// 블록 내 유효한 내용이 있는지 확인
+// Check if block has valid content
 function hasValidContent(node: Node): boolean {
   if (node.type === 'ArrowFunctionExpression' || node.type === 'FunctionExpression') {
     if (node.body.type === 'BlockStatement') {
-      // 최소한 하나의 실행문이 있어야 함
+      // Must have at least one statement
       for (const stmt of node.body.body) {
         if (stmt.type === 'ExpressionStatement') {
           return true;
@@ -56,7 +56,7 @@ function hasValidContent(node: Node): boolean {
       }
       return false;
     }
-    // 표현식 본문이면 유효
+    // Expression body is valid
     return true;
   }
 
@@ -67,14 +67,14 @@ const rule: Rule.RuleModule = {
   meta: {
     type: 'problem',
     docs: {
-      description: '빈 response() 블록 방지',
+      description: 'Prevent empty response() blocks',
       category: 'Possible Errors',
       recommended: true,
     },
     schema: [],
     messages: {
       emptyResponse:
-        'response() 블록이 비어있습니다. schema(), runTest() 등을 추가해주세요.',
+        'response() block is empty. Please add schema(), runTest(), etc.',
     },
   },
 
@@ -85,7 +85,7 @@ const rule: Rule.RuleModule = {
           return;
         }
 
-        // response()의 두 번째 인자가 콜백 함수여야 함
+        // Second argument of response() should be a callback function
         const callback = node.arguments[1];
         if (!callback) {
           context.report({

@@ -1,6 +1,6 @@
 /**
- * Express 미들웨어
- * Express 앱에 Swagger UI 또는 Redoc 통합
+ * Express middleware
+ * Integrate Swagger UI or Redoc into Express app
  */
 
 import {
@@ -15,7 +15,7 @@ import type {
   RedocOptions,
 } from './types.js';
 
-// ========== Express 타입 정의 (의존성 없이 사용) ==========
+// ========== Express Type Definitions (used without dependencies) ==========
 
 type ExpressRequest = {
   headers: {
@@ -46,24 +46,24 @@ type ExpressRouter = {
   use(...handlers: ExpressMiddleware[]): void;
 };
 
-// ========== Swagger UI 미들웨어 ==========
+// ========== Swagger UI Middleware ==========
 
 /**
- * Swagger UI Express 미들웨어 생성
+ * Create Swagger UI Express middleware
  *
- * @param options - Swagger UI 옵션
- * @returns Express 미들웨어 (라우터처럼 사용)
+ * @param options - Swagger UI options
+ * @returns Express middleware (used like a router)
  *
  * @example
  * ```typescript
  * import { swaggerUi } from '@aspect/nswag-ui';
  *
- * // 단일 스펙
+ * // Single spec
  * app.use('/docs', swaggerUi({
  *   specUrl: '/api-docs/v1/openapi.json',
  * }));
  *
- * // 다중 스펙
+ * // Multiple specs
  * app.use('/docs', swaggerUi({
  *   specUrls: [
  *     { url: '/api-docs/v1/openapi.json', name: 'API V1 Docs' },
@@ -72,7 +72,7 @@ type ExpressRouter = {
  *   primaryName: 'API V2 Docs',
  * }));
  *
- * // Basic Auth 적용
+ * // Apply Basic Auth
  * app.use('/docs', swaggerUi({
  *   specUrl: '/api-docs/v1/openapi.json',
  *   basicAuth: {
@@ -83,20 +83,20 @@ type ExpressRouter = {
  * ```
  */
 export function swaggerUi(options: SwaggerUiOptions): ExpressMiddleware {
-  // HTML 생성 (한 번만)
+  // Generate HTML (only once)
   const html = generateSwaggerUIHtml(options);
 
-  // Basic Auth 미들웨어
+  // Basic Auth middleware
   const authMiddleware = createExpressBasicAuthMiddleware(options.basicAuth);
 
   return (req: ExpressRequest, res: ExpressResponse, next: ExpressNext) => {
-    // Basic Auth 검증
+    // Verify Basic Auth
     authMiddleware(req, res, () => {
-      // 루트 경로에서만 HTML 응답
+      // Respond with HTML only at root path
       if (req.path === '/' || req.path === '') {
         res.type('text/html').send(html);
       } else {
-        // 다른 경로는 다음 미들웨어로 전달
+        // Pass to next middleware for other paths
         next();
       }
     });
@@ -104,18 +104,18 @@ export function swaggerUi(options: SwaggerUiOptions): ExpressMiddleware {
 }
 
 /**
- * Swagger UI Express 미들웨어 생성 (별칭)
- * @deprecated swaggerUi를 사용하세요
+ * Create Swagger UI Express middleware (alias)
+ * @deprecated Use swaggerUi instead
  */
 export const createSwaggerUiMiddleware = swaggerUi;
 
-// ========== Redoc 미들웨어 ==========
+// ========== Redoc Middleware ==========
 
 /**
- * Redoc Express 미들웨어 생성
+ * Create Redoc Express middleware
  *
- * @param options - Redoc 옵션
- * @returns Express 미들웨어
+ * @param options - Redoc options
+ * @returns Express middleware
  *
  * @example
  * ```typescript
@@ -125,7 +125,7 @@ export const createSwaggerUiMiddleware = swaggerUi;
  *   specUrl: '/api-docs/v1/openapi.json',
  * }));
  *
- * // Basic Auth 적용
+ * // Apply Basic Auth
  * app.use('/redoc', redoc({
  *   specUrl: '/api-docs/v1/openapi.json',
  *   basicAuth: {
@@ -136,20 +136,20 @@ export const createSwaggerUiMiddleware = swaggerUi;
  * ```
  */
 export function redoc(options: RedocOptions): ExpressMiddleware {
-  // HTML 생성 (한 번만)
+  // Generate HTML (only once)
   const html = generateRedocHtml(options);
 
-  // Basic Auth 미들웨어
+  // Basic Auth middleware
   const authMiddleware = createExpressBasicAuthMiddleware(options.basicAuth);
 
   return (req: ExpressRequest, res: ExpressResponse, next: ExpressNext) => {
-    // Basic Auth 검증
+    // Verify Basic Auth
     authMiddleware(req, res, () => {
-      // 루트 경로에서만 HTML 응답
+      // Respond with HTML only at root path
       if (req.path === '/' || req.path === '') {
         res.type('text/html').send(html);
       } else {
-        // 다른 경로는 다음 미들웨어로 전달
+        // Pass to next middleware for other paths
         next();
       }
     });
@@ -157,18 +157,18 @@ export function redoc(options: RedocOptions): ExpressMiddleware {
 }
 
 /**
- * Redoc Express 미들웨어 생성 (별칭)
- * @deprecated redoc을 사용하세요
+ * Create Redoc Express middleware (alias)
+ * @deprecated Use redoc instead
  */
 export const createRedocMiddleware = redoc;
 
-// ========== 통합 라우터 생성 ==========
+// ========== Integrated Router Creation ==========
 
 /**
- * Swagger UI와 Redoc을 모두 포함하는 Express 라우터 설정
+ * Setup Express router including both Swagger UI and Redoc
  *
- * @param router - Express 라우터 인스턴스
- * @param options - 설정 옵션
+ * @param router - Express router instance
+ * @param options - Configuration options
  *
  * @example
  * ```typescript
@@ -211,7 +211,7 @@ export function setupDocsRouter(
     redocOptions = {},
   } = options;
 
-  // Swagger UI 라우트
+  // Swagger UI route
   const swaggerHtml = generateSwaggerUIHtml({
     specUrl,
     basicAuth,
@@ -224,7 +224,7 @@ export function setupDocsRouter(
     res.type('text/html').send(swaggerHtml);
   });
 
-  // Redoc 라우트
+  // Redoc route
   const redocHtml = generateRedocHtml({
     specUrl,
     basicAuth,

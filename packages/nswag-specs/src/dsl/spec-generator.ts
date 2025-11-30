@@ -1,8 +1,8 @@
 /**
- * DSL 기반 OpenAPI 스펙 생성기
- * Phase 4: API 버전 및 문서화 옵션
+ * DSL-based OpenAPI spec generator
+ * Phase 4: API version and documentation options
  *
- * DSL 컨텍스트에서 OpenAPI 스펙을 생성
+ * Generate OpenAPI spec from DSL context
  */
 
 import { stringify as yamlStringify } from 'yaml';
@@ -24,11 +24,11 @@ import {
 import { processSchema } from './schema-utils.js';
 
 // ============================================================================
-// OpenAPI 스펙 타입 (생성용)
+// OpenAPI spec types (for generation)
 // ============================================================================
 
 /**
- * 생성된 OpenAPI 스펙
+ * Generated OpenAPI spec
  */
 export interface GeneratedOpenAPISpec {
   openapi: string;
@@ -65,7 +65,7 @@ export interface GeneratedOpenAPISpec {
 }
 
 /**
- * 생성된 Path Item
+ * Generated Path Item
  */
 export interface GeneratedPathItem {
   summary?: string;
@@ -81,7 +81,7 @@ export interface GeneratedPathItem {
 }
 
 /**
- * 생성된 Operation
+ * Generated Operation
  */
 export interface GeneratedOperation {
   operationId?: string;
@@ -97,7 +97,7 @@ export interface GeneratedOperation {
 }
 
 /**
- * 생성된 Parameter
+ * Generated Parameter
  */
 export interface GeneratedParameter {
   name: string;
@@ -107,12 +107,12 @@ export interface GeneratedParameter {
   deprecated?: boolean;
   schema?: SchemaObject;
   example?: unknown;
-  /** x-enum-descriptions 확장 필드 (Enum 설명) */
+  /** x-enum-descriptions extension field (Enum descriptions) */
   'x-enum-descriptions'?: Record<string, string>;
 }
 
 /**
- * 생성된 RequestBody
+ * Generated RequestBody
  */
 export interface GeneratedRequestBody {
   description?: string;
@@ -121,7 +121,7 @@ export interface GeneratedRequestBody {
 }
 
 /**
- * 생성된 Response
+ * Generated Response
  */
 export interface GeneratedResponse {
   description: string;
@@ -130,11 +130,11 @@ export interface GeneratedResponse {
 }
 
 // ============================================================================
-// 스펙 생성기
+// Spec generator
 // ============================================================================
 
 /**
- * DSL 스펙 생성기 클래스
+ * DSL spec generator class
  */
 export class DSLSpecGenerator {
   private specPath?: string;
@@ -144,18 +144,18 @@ export class DSLSpecGenerator {
   }
 
   /**
-   * DSL 컨텍스트에서 OpenAPI 스펙 생성
+   * Generate OpenAPI spec from DSL context
    */
   generate(): GeneratedOpenAPISpec {
     const manager = getDSLContextManager();
     const rootDescribes = manager.getRootDescribes();
 
-    // 스펙 설정 가져오기
+    // Get spec config
     const specConfig = this.specPath
       ? GlobalConfigManager.getSpecConfig(this.specPath)
       : undefined;
 
-    // 기본 스펙 구조
+    // Base spec structure
     const spec: GeneratedOpenAPISpec = {
       openapi: specConfig?.openapi ?? GlobalConfigManager.getDefaultOpenAPIVersion(),
       info: {
@@ -172,15 +172,15 @@ export class DSLSpecGenerator {
       externalDocs: specConfig?.externalDocs,
     };
 
-    // 스펙 파일별 필터링
+    // Filter by spec file
     const targetDescribes = this.specPath
       ? rootDescribes.filter(d => d.options.openapiSpec === this.specPath)
       : rootDescribes;
 
-    // 수집된 태그
+    // Collected tags
     const collectedTags = new Set<string>();
 
-    // 각 Describe 처리
+    // Process each Describe
     for (const describe of targetDescribes) {
       const paths = extractPaths(describe);
       for (const pathCtx of paths) {
@@ -188,7 +188,7 @@ export class DSLSpecGenerator {
         if (pathItem && Object.keys(pathItem).length > 0) {
           const existingPath = spec.paths[pathCtx.pathTemplate];
           if (existingPath) {
-            // 기존 경로에 병합
+            // Merge with existing path
             spec.paths[pathCtx.pathTemplate] = {
               ...existingPath,
               ...pathItem,
@@ -200,7 +200,7 @@ export class DSLSpecGenerator {
       }
     }
 
-    // 수집된 태그 추가
+    // Add collected tags
     if (collectedTags.size > 0 && !spec.tags) {
       spec.tags = Array.from(collectedTags).map(name => ({ name }));
     }
@@ -209,7 +209,7 @@ export class DSLSpecGenerator {
   }
 
   /**
-   * Path Item 생성
+   * Build Path Item
    */
   private buildPathItem(
     pathCtx: PathContext,
@@ -217,12 +217,12 @@ export class DSLSpecGenerator {
   ): GeneratedPathItem | null {
     const pathItem: GeneratedPathItem = {};
 
-    // Path 레벨 파라미터
+    // Path level parameters
     if (pathCtx.parameters.length > 0) {
       pathItem.parameters = pathCtx.parameters.map(p => this.convertParameter(p));
     }
 
-    // 문서화 대상 메서드만 처리
+    // Process only documentable methods
     for (const methodCtx of pathCtx.methods) {
       const documentableResponses = filterDocumentableResponses(methodCtx.responses);
       if (documentableResponses.length === 0) {
@@ -239,14 +239,14 @@ export class DSLSpecGenerator {
   }
 
   /**
-   * Operation 생성
+   * Build Operation
    */
   private buildOperation(
     methodCtx: MethodContext,
     responses: ResponseContext[],
     collectedTags: Set<string>
   ): GeneratedOperation {
-    // 태그 수집
+    // Collect tags
     methodCtx.tags.forEach(tag => collectedTags.add(tag));
 
     const operation: GeneratedOperation = {
@@ -259,12 +259,12 @@ export class DSLSpecGenerator {
       operation.operationId = methodCtx.operationId;
     }
 
-    // 상세 설명
+    // Detailed description
     if (methodCtx.description) {
       operation.description = methodCtx.description;
     }
 
-    // 태그
+    // Tags
     if (methodCtx.tags.length > 0) {
       operation.tags = [...methodCtx.tags];
     }
@@ -279,23 +279,23 @@ export class DSLSpecGenerator {
       operation.externalDocs = methodCtx.externalDocs;
     }
 
-    // 파라미터
+    // Parameters
     if (methodCtx.parameters.length > 0) {
       operation.parameters = methodCtx.parameters.map(p => this.convertParameter(p));
     }
 
-    // 요청 본문
+    // Request body
     if (methodCtx.requestBody) {
       operation.requestBody = this.convertRequestBody(methodCtx.requestBody);
     }
 
-    // 응답
+    // Responses
     for (const responseCtx of responses) {
       const responseObj = this.buildResponse(responseCtx);
       operation.responses[String(responseCtx.statusCode)] = responseObj;
     }
 
-    // 보안 요구사항 (Phase 5)
+    // Security requirements (Phase 5)
     if (methodCtx.security && methodCtx.security.length > 0) {
       operation.security = methodCtx.security;
     }
@@ -304,14 +304,14 @@ export class DSLSpecGenerator {
   }
 
   /**
-   * Response 생성
+   * Build Response
    */
   private buildResponse(responseCtx: ResponseContext): GeneratedResponse {
     const response: GeneratedResponse = {
       description: responseCtx.description,
     };
 
-    // 헤더
+    // Headers
     if (responseCtx.headers) {
       response.headers = {};
       for (const [name, headerObj] of Object.entries(responseCtx.headers)) {
@@ -324,7 +324,7 @@ export class DSLSpecGenerator {
       }
     }
 
-    // 콘텐츠
+    // Content
     if (responseCtx.content) {
       response.content = {};
       for (const [mediaType, mediaTypeObj] of Object.entries(responseCtx.content)) {
@@ -336,7 +336,7 @@ export class DSLSpecGenerator {
         };
       }
     } else if (responseCtx.schema) {
-      // 스키마만 있는 경우 기본 content-type으로 래핑
+      // Wrap with default content-type if only schema exists
       response.content = {
         'application/json': {
           schema: processSchema(responseCtx.schema, responseCtx.options, this.specPath),
@@ -348,15 +348,15 @@ export class DSLSpecGenerator {
   }
 
   /**
-   * Parameter 변환
+   * Convert Parameter
    */
   private convertParameter(param: ParameterObject): GeneratedParameter {
-    // body 파라미터는 OpenAPI 3.0에서 지원하지 않음
+    // body parameter is not supported in OpenAPI 3.0
     if (param.in === 'body') {
-      // body는 requestBody로 변환해야 함
+      // body should be converted to requestBody
       return {
         name: param.name,
-        in: 'query', // 기본값으로 변환
+        in: 'query', // Convert to default
         description: param.description,
         required: param.required,
         deprecated: param.deprecated,
@@ -379,7 +379,7 @@ export class DSLSpecGenerator {
       example: param.example,
     };
 
-    // nswag 확장 Enum 처리: { value: description } 형태를 enum 배열 + x-enum-descriptions로 변환
+    // nswag extension Enum processing: convert { value: description } format to enum array + x-enum-descriptions
     if (param.enum && typeof param.enum === 'object') {
       const enumValues = Object.keys(param.enum);
       const enumDescriptions: Record<string, string> = {};
@@ -390,7 +390,7 @@ export class DSLSpecGenerator {
         }
       }
 
-      // 스키마에 enum 배열 추가
+      // Add enum array to schema
       if (result.schema) {
         result.schema = {
           ...result.schema,
@@ -403,7 +403,7 @@ export class DSLSpecGenerator {
         };
       }
 
-      // x-enum-descriptions 확장 필드 추가
+      // Add x-enum-descriptions extension field
       if (Object.keys(enumDescriptions).length > 0) {
         result['x-enum-descriptions'] = enumDescriptions;
       }
@@ -413,7 +413,7 @@ export class DSLSpecGenerator {
   }
 
   /**
-   * RequestBody 변환
+   * Convert RequestBody
    */
   private convertRequestBody(body: RequestBodyObject): GeneratedRequestBody {
     const result: GeneratedRequestBody = {
@@ -435,7 +435,7 @@ export class DSLSpecGenerator {
   }
 
   /**
-   * JSON으로 출력
+   * Output as JSON
    */
   toJSON(pretty = true): string {
     const spec = this.generate();
@@ -443,7 +443,7 @@ export class DSLSpecGenerator {
   }
 
   /**
-   * YAML로 출력
+   * Output as YAML
    */
   toYAML(): string {
     const spec = this.generate();
@@ -452,11 +452,11 @@ export class DSLSpecGenerator {
 }
 
 // ============================================================================
-// 다중 스펙 생성
+// Multiple spec generation
 // ============================================================================
 
 /**
- * 다중 스펙 생성 결과
+ * Multiple spec generation result
  */
 export interface MultiSpecResult {
   specPath: string;
@@ -466,13 +466,13 @@ export interface MultiSpecResult {
 }
 
 /**
- * 설정된 모든 스펙 파일 생성
+ * Generate all configured spec files
  */
 export function generateAllSpecs(): MultiSpecResult[] {
   const specPaths = GlobalConfigManager.getSpecPaths();
   const results: MultiSpecResult[] = [];
 
-  // 스펙 파일별 생성
+  // Generate by spec file
   for (const specPath of specPaths) {
     const generator = new DSLSpecGenerator(specPath);
     const spec = generator.generate();
@@ -485,7 +485,7 @@ export function generateAllSpecs(): MultiSpecResult[] {
     });
   }
 
-  // 기본 스펙 (openapiSpec 미지정 describe 포함)
+  // Default spec (includes describes without openapiSpec)
   if (specPaths.length === 0) {
     const generator = new DSLSpecGenerator();
     const spec = generator.generate();
@@ -502,7 +502,7 @@ export function generateAllSpecs(): MultiSpecResult[] {
 }
 
 /**
- * DSL 컨텍스트에서 단일 스펙 생성
+ * Generate single spec from DSL context
  */
 export function generateSpec(specPath?: string): GeneratedOpenAPISpec {
   const generator = new DSLSpecGenerator(specPath);
@@ -510,7 +510,7 @@ export function generateSpec(specPath?: string): GeneratedOpenAPISpec {
 }
 
 /**
- * DSL 컨텍스트에서 JSON 스펙 생성
+ * Generate JSON spec from DSL context
  */
 export function generateSpecJSON(specPath?: string, pretty = true): string {
   const generator = new DSLSpecGenerator(specPath);
@@ -518,7 +518,7 @@ export function generateSpecJSON(specPath?: string, pretty = true): string {
 }
 
 /**
- * DSL 컨텍스트에서 YAML 스펙 생성
+ * Generate YAML spec from DSL context
  */
 export function generateSpecYAML(specPath?: string): string {
   const generator = new DSLSpecGenerator(specPath);

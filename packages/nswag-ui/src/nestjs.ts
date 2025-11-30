@@ -1,6 +1,6 @@
 /**
- * NestJS 모듈
- * NestJS 앱에 Swagger UI 또는 Redoc 통합
+ * NestJS module
+ * Integrate Swagger UI or Redoc into NestJS app
  */
 
 import {
@@ -18,7 +18,7 @@ import type {
   RedocRawOptions,
 } from './types.js';
 
-// ========== NestJS 타입 정의 (의존성 없이 사용) ==========
+// ========== NestJS Type Definitions (used without dependencies) ==========
 
 type Constructor<T = object> = new (...args: unknown[]) => T;
 
@@ -31,17 +31,17 @@ interface DynamicModule {
   global?: boolean;
 }
 
-// ========== 토큰 상수 ==========
+// ========== Token Constants ==========
 
 /**
- * NswagUI 설정 주입 토큰
+ * NswagUI configuration injection token
  */
 export const NSWAG_UI_OPTIONS = 'NSWAG_UI_OPTIONS';
 
-// ========== NswagUiModule 클래스 ==========
+// ========== NswagUiModule Class ==========
 
 /**
- * NswagUI NestJS 모듈
+ * NswagUI NestJS module
  *
  * @example
  * ```typescript
@@ -69,16 +69,16 @@ export const NSWAG_UI_OPTIONS = 'NSWAG_UI_OPTIONS';
  */
 export class NswagUiModule {
   /**
-   * 정적 설정으로 모듈 초기화
+   * Initialize module with static configuration
    *
-   * @param options - UI 설정 옵션
-   * @returns 동적 모듈
+   * @param options - UI configuration options
+   * @returns Dynamic module
    */
   static forRoot(options: NswagUiModuleOptions): DynamicModule {
-    // HTML 생성
+    // Generate HTML
     const html = generateUiHtml(options);
 
-    // 핸들러 팩토리 생성
+    // Create handler factory
     const uiHandlerFactory = {
       provide: 'NSWAG_UI_HANDLER',
       useFactory: () => ({
@@ -90,7 +90,7 @@ export class NswagUiModule {
       }),
     };
 
-    // 옵션 프로바이더
+    // Options provider
     const optionsProvider = {
       provide: NSWAG_UI_OPTIONS,
       useValue: options,
@@ -105,10 +105,10 @@ export class NswagUiModule {
   }
 
   /**
-   * 비동기 설정으로 모듈 초기화
+   * Initialize module with async configuration
    *
-   * @param options - 비동기 설정 옵션
-   * @returns 동적 모듈
+   * @param options - Async configuration options
+   * @returns Dynamic module
    *
    * @example
    * ```typescript
@@ -166,14 +166,14 @@ export class NswagUiModule {
   }
 }
 
-// ========== 헬퍼 함수 ==========
+// ========== Helper Functions ==========
 
 /**
- * 옵션에 따른 UI HTML 생성
+ * Generate UI HTML based on options
  */
 function generateUiHtml(options: NswagUiModuleOptions): string {
   if (options.engine === 'redoc') {
-    // Redoc의 경우 첫 번째 specUrl 사용
+    // Use first specUrl for Redoc
     const specUrl = options.specUrls[0]?.url ?? '';
     const redocOptions: RedocOptions = {
       specUrl,
@@ -203,13 +203,13 @@ function generateUiHtml(options: NswagUiModuleOptions): string {
   return generateSwaggerUIHtml(swaggerOptions);
 }
 
-// ========== 핸들러 팩토리 (기존 호환) ==========
+// ========== Handler Factories (for existing compatibility) ==========
 
 /**
- * NestJS Swagger UI 핸들러 팩토리
+ * NestJS Swagger UI handler factory
  *
- * @param options - Swagger UI 옵션
- * @returns 컨트롤러 핸들러 및 경로 정보
+ * @param options - Swagger UI options
+ * @returns Controller handler and path information
  *
  * @example
  * ```typescript
@@ -243,14 +243,14 @@ export function createSwaggerUIHandlers(options: SwaggerUiOptions & { path?: str
 
   return {
     /**
-     * Swagger UI HTML 반환 핸들러
+     * Return Swagger UI HTML handler
      */
     getSwaggerUI() {
       return html;
     },
 
     /**
-     * 경로 정보
+     * Path information
      */
     path: options.path ?? '/docs',
 
@@ -260,7 +260,7 @@ export function createSwaggerUIHandlers(options: SwaggerUiOptions & { path?: str
     contentType: 'text/html',
 
     /**
-     * Basic Auth 검증
+     * Basic Auth verification
      */
     validateAuth(authHeader: string | undefined): boolean {
       return validateBasicAuth(authHeader, options.basicAuth);
@@ -269,24 +269,24 @@ export function createSwaggerUIHandlers(options: SwaggerUiOptions & { path?: str
 }
 
 /**
- * NestJS Redoc 핸들러 팩토리
+ * NestJS Redoc handler factory
  *
- * @param options - Redoc 옵션
- * @returns 컨트롤러 핸들러 및 경로 정보
+ * @param options - Redoc options
+ * @returns Controller handler and path information
  */
 export function createRedocHandlers(options: RedocOptions & { path?: string }) {
   const html = generateRedocHtml(options);
 
   return {
     /**
-     * Redoc HTML 반환 핸들러
+     * Return Redoc HTML handler
      */
     getRedoc() {
       return html;
     },
 
     /**
-     * 경로 정보
+     * Path information
      */
     path: options.path ?? '/redoc',
 
@@ -296,7 +296,7 @@ export function createRedocHandlers(options: RedocOptions & { path?: string }) {
     contentType: 'text/html',
 
     /**
-     * Basic Auth 검증
+     * Basic Auth verification
      */
     validateAuth(authHeader: string | undefined): boolean {
       return validateBasicAuth(authHeader, options.basicAuth);
@@ -304,11 +304,11 @@ export function createRedocHandlers(options: RedocOptions & { path?: string }) {
   };
 }
 
-// ========== 레거시 호환 함수 ==========
+// ========== Legacy Compatible Functions ==========
 
 /**
- * NestJS UI 모듈 팩토리 (레거시)
- * @deprecated NswagUiModule.forRoot()를 사용하세요
+ * NestJS UI module factory (legacy)
+ * @deprecated Use NswagUiModule.forRoot() instead
  */
 export function createNswagUIModule(options: {
   swagger?: SwaggerUiOptions & { path?: string };

@@ -1,6 +1,6 @@
 /**
- * Path 빌더
- * API 경로 정의를 위한 플루언트 빌더
+ * Path builder
+ * Fluent builder for API path definitions
  */
 
 import type { PathItem } from '../types/index.js';

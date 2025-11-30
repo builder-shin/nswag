@@ -1,24 +1,24 @@
 /**
- * 경로 포맷팅 유틸리티
+ * Path Formatting Utility
  */
 
 /**
- * API 경로를 OpenAPI 형식으로 변환
- * Express 스타일(:id)을 OpenAPI 스타일({id})로 변환
+ * Convert API path to OpenAPI format
+ * Convert Express style (:id) to OpenAPI style ({id})
  *
- * @param path - 변환할 경로
- * @returns OpenAPI 형식의 경로
+ * @param path - Path to convert
+ * @returns Path in OpenAPI format
  */
 export function formatPath(path: string): string {
-  // :param 형식을 {param} 형식으로 변환
+  // Convert :param format to {param} format
   return path.replace(/:([a-zA-Z_][a-zA-Z0-9_]*)/g, '{$1}');
 }
 
 /**
- * 경로에서 파라미터 추출
+ * Extract parameters from path
  *
- * @param path - 분석할 경로
- * @returns 파라미터 이름 배열
+ * @param path - Path to analyze
+ * @returns Array of parameter names
  */
 export function extractPathParams(path: string): string[] {
   const params: string[] = [];
@@ -35,11 +35,11 @@ export function extractPathParams(path: string): string[] {
 }
 
 /**
- * 기본 경로와 하위 경로를 결합
+ * Combine base path and sub path
  *
- * @param basePath - 기본 경로
- * @param subPath - 하위 경로
- * @returns 결합된 경로
+ * @param basePath - Base path
+ * @param subPath - Sub path
+ * @returns Combined path
  */
 export function joinPaths(basePath: string, subPath: string): string {
   const normalizedBase = basePath.replace(/\/+$/, '');

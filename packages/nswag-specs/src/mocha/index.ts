@@ -1,6 +1,6 @@
 /**
- * Mocha 통합 모듈
- * Mocha 테스트 프레임워크와의 통합 기능 제공
+ * Mocha Integration Module
+ * Provides integration features with Mocha test framework
  *
  * @example
  * // .mocharc.js
@@ -9,7 +9,7 @@
  * };
  *
  * @example
- * // Root Hook Plugin 사용
+ * // Using Root Hook Plugin
  * // .mocharc.js
  * module.exports = {
  *   require: ['@aspect/nswag-specs/mocha'],
@@ -24,13 +24,13 @@ import { getSpecCollector, resetSpecCollector } from '../testing/spec-collector.
 import { createHttpClient, resetHttpClient } from '../testing/http-client.js';
 import { getResponseValidator } from '../testing/response-validator.js';
 
-// Mocha 글로벌 타입 확장
+// Mocha global type extension
 declare global {
   var __NSWAG__: NswagGlobal;
 }
 
 /**
- * nswag 글로벌 API
+ * nswag Global API
  */
 interface NswagGlobal {
   configure: (options: ConfigureOptions) => void;
@@ -39,13 +39,13 @@ interface NswagGlobal {
   collect: (metadata: RequestMetadata) => void;
 }
 
-// 컨텍스트 관리자 인스턴스
+// Context manager instance
 const contextManager = getContextManager();
 const specCollector = getSpecCollector();
 const responseValidator = getResponseValidator();
 
 /**
- * 글로벌 nswag API 설정
+ * Setup Global nswag API
  */
 function setupGlobalApi(): void {
   globalThis.__NSWAG__ = {
@@ -66,10 +66,10 @@ function setupGlobalApi(): void {
       if (request && response) {
         specCollector.collect(metadata, request, response);
 
-        // 응답 검증
+        // Validate response
         const result = responseValidator.validate(metadata, response, 0);
         if (!result.validated && result.validationErrors?.length) {
-          console.warn('[nswag-specs] 응답 검증 경고:', result.validationErrors);
+          console.warn('[nswag-specs] Response validation warning:', result.validationErrors);
         }
       }
     },
@@ -78,7 +78,7 @@ function setupGlobalApi(): void {
 
 /**
  * Mocha Root Hook Plugin
- * Mocha 8.0+ 버전의 Root Hook Plugin API 사용
+ * Uses Mocha 8.0+ Root Hook Plugin API
  *
  * @see https://mochajs.org/#root-hook-plugins
  *
@@ -90,7 +90,7 @@ function setupGlobalApi(): void {
  */
 export const mochaHooks = {
   /**
-   * 모든 테스트 시작 전 (한 번만 실행)
+   * Before All Tests (runs once)
    */
   beforeAll(): void {
     setupGlobalApi();
@@ -100,21 +100,21 @@ export const mochaHooks = {
   },
 
   /**
-   * 모든 테스트 종료 후 (한 번만 실행)
+   * After All Tests (runs once)
    */
   afterAll(): void {
-    // 스펙 수집 결과 출력
+    // Output spec collection results
     if (specCollector.count > 0) {
-      console.log(`[nswag-specs] ${specCollector.count}개의 엔드포인트 수집됨`);
+      console.log(`[nswag-specs] ${specCollector.count} endpoints collected`);
     }
   },
 
   /**
-   * 각 테스트 시작 전
+   * Before Each Test
    */
   beforeEach(): void {
-    // Mocha에서 현재 테스트 정보 가져오기
-    // @ts-expect-error Mocha 글로벌 컨텍스트
+    // Get current test information from Mocha
+    // @ts-expect-error Mocha global context
     const currentTest = this?.currentTest || this?.test;
     const testName = currentTest?.title ?? 'unknown';
     const testFile = currentTest?.file ?? 'unknown';
@@ -123,7 +123,7 @@ export const mochaHooks = {
   },
 
   /**
-   * 각 테스트 종료 후
+   * After Each Test
    */
   afterEach(): void {
     contextManager.end();
@@ -131,9 +131,9 @@ export const mochaHooks = {
 };
 
 /**
- * Mocha hooks 생성 함수 (레거시 API)
+ * Mocha Hooks Creation Function (legacy API)
  *
- * @deprecated mochaHooks export 사용 권장
+ * @deprecated Use mochaHooks export instead
  */
 export function createMochaHooks(options?: ConfigureOptions) {
   if (options) {
@@ -149,9 +149,9 @@ export function createMochaHooks(options?: ConfigureOptions) {
 }
 
 /**
- * Mocha 환경 설정 함수
+ * Mocha Environment Setup Function
  *
- * @deprecated mochaHooks export 사용 권장
+ * @deprecated Use mochaHooks export instead
  */
 export function setupMocha(options?: ConfigureOptions): void {
   setupGlobalApi();
@@ -161,37 +161,37 @@ export function setupMocha(options?: ConfigureOptions): void {
 }
 
 /**
- * 현재 테스트 컨텍스트 조회
+ * Get Current Test Context
  */
 export function getContext() {
   return contextManager.getCurrent();
 }
 
 /**
- * 테스트 컨텍스트 정리
+ * Teardown Test Context
  */
 export function teardown(): void {
   resetContextManager();
   resetHttpClient();
 }
 
-// 편의 함수 export
+// Export convenience functions
 export { configure } from '../testing/configure.js';
 export { createHttpClient } from '../testing/http-client.js';
 export { getContextManager, getCurrentTestContext } from '../testing/context-manager.js';
 export { getSpecCollector } from '../testing/spec-collector.js';
 
 /**
- * Mocha 테스트 환경 옵션 타입
+ * Mocha Test Environment Options Type
  */
 export interface MochaTestEnvironmentOptions {
-  /** VCR 모드: record, playback, none */
+  /** VCR mode: record, playback, none */
   vcrMode?: 'record' | 'playback' | 'none';
-  /** 스펙 출력 경로 */
+  /** Spec output path */
   outputSpec?: string;
-  /** 응답 검증 활성화 */
+  /** Enable response validation */
   validateResponses?: boolean;
 }
 
-// 자동 초기화 (require 시 자동 실행)
+// Auto-initialize (runs automatically on require)
 setupGlobalApi();

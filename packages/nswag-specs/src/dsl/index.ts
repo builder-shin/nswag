@@ -1,26 +1,26 @@
 /**
- * DSL 빌더 모듈
- * OpenAPI 스펙을 생성하기 위한 플루언트 API 제공
+ * DSL Builder Module
+ * Provides fluent API for generating OpenAPI specs
  *
- * Phase 3: 기본 DSL
- * Phase 4: API 버전 및 문서화 옵션
- * Phase 5: 스키마 및 보안 기능
+ * Phase 3: Basic DSL
+ * Phase 4: API versioning and documentation options
+ * Phase 5: Schema and security features
  */
 
-// 기존 빌더 클래스
+// Existing builder classes
 export { PathBuilder } from './path-builder.js';
 export { OperationBuilder } from './operation-builder.js';
 export { SchemaBuilder } from './schema-builder.js';
 
-// DSL 타입 정의
+// DSL type definitions
 export type {
-  // OpenAPI 스펙 설정 타입 (Phase 4)
-  // OpenAPISpecInfo는 types/index.js에서 동일한 이름으로 내보내므로 DSL 버전은 별칭 사용
+  // OpenAPI spec configuration types (Phase 4)
+  // Using alias for DSL version as OpenAPISpecInfo is exported with same name from types/index.js
   OpenAPISpecInfo as DSLOpenAPISpecInfo,
   OpenAPISpecsConfig,
   GlobalConfigOptions,
   ExternalDocsObject,
-  // 컨텍스트 타입
+  // Context types
   DSLBlockType,
   HttpMethod,
   ResponseTag,
@@ -34,7 +34,7 @@ export type {
   HeaderObject,
   RequestBodyObject,
   ResponseOptions,
-  // VCROptions는 types/index.js에서 동일한 이름으로 내보내므로 DSL 버전은 별칭 사용
+  // Using alias for DSL version as VCROptions is exported with same name from types/index.js
   VCROptions as DSLVCROptions,
   RunTestOptions,
   TestResponse,
@@ -43,11 +43,11 @@ export type {
   DSLResponseMetadata,
   ExtendedDSLMetadata,
   OperationMetadata,
-  // SecurityRequirement는 types/index.js에서 동일한 이름으로 내보내므로 DSL 버전은 별칭 사용
+  // Using alias for DSL version as SecurityRequirement is exported with same name from types/index.js
   SecurityRequirement as DSLSecurityRequirement,
   DSLBeforeEachContext,
   DSLAfterEachContext,
-  // ExampleContext는 types/index.js에서 동일한 이름으로 내보내므로 DSL 버전은 별칭 사용
+  // Using alias for DSL version as ExampleContext is exported with same name from types/index.js
   ExampleContext as DSLExampleContext,
   SubmitRequestResult,
   DescribeContext,
@@ -61,7 +61,7 @@ export type {
   AfterAllHook,
   BeforeEachHook,
   AfterEachHook,
-  // Phase 5: 스키마 및 보안 기능 타입
+  // Phase 5: Schema and security feature types
   HeaderOptions,
   RequestBodyExampleOptions,
   SecuritySchemeType,
@@ -75,7 +75,7 @@ export type {
   EnumDescriptions,
 } from './types.js';
 
-// DSL 컨텍스트 관리
+// DSL context management
 export {
   DSLContextManager,
   getDSLContextManager,
@@ -83,7 +83,7 @@ export {
   getCurrentDSLContext,
 } from './context.js';
 
-// 전역 설정 관리 (Phase 4)
+// Global configuration management (Phase 4)
 export {
   GlobalConfigManager,
   configureOpenAPI,
@@ -93,12 +93,12 @@ export {
   getOpenAPIVersion,
 } from './global-config.js';
 
-// DSL 함수
+// DSL functions
 export {
-  // 구조 정의 함수
+  // Structure definition functions
   describe,
   path,
-  // HTTP 메서드 함수
+  // HTTP method functions
   get,
   post,
   put,
@@ -106,59 +106,59 @@ export {
   del,
   head,
   options,
-  // 메타데이터 함수
+  // Metadata functions
   tags,
   consumes,
   produces,
-  // Operation 메타데이터 함수 (Phase 4)
+  // Operation metadata functions (Phase 4)
   operationId,
   summary,
   description,
   deprecated,
   externalDocs,
-  // 파라미터 함수
+  // Parameter functions
   parameter,
   requestBody,
   requestParams,
   requestHeaders,
-  // 스키마 함수
+  // Schema functions
   schema,
-  // 응답 함수
+  // Response functions
   response,
-  // 테스트 함수
+  // Test functions
   runTest,
   it,
-  // 훅 함수
+  // Hook functions
   beforeAll,
   afterAll,
   beforeEach,
   afterEach,
-  // 명시적 요청/검증 API
+  // Explicit request/validation API
   submitRequest,
   assertResponseMatchesMetadata,
-  // 유틸리티
+  // Utilities
   getCurrentMetadata,
-  // Phase 5: 스키마 및 보안 기능
+  // Phase 5: Schema and security features
   header,
   example,
   requestBodyExample,
   security,
 } from './functions.js';
 
-// 스키마 유틸리티 (Phase 4)
+// Schema utilities (Phase 4)
 export {
   normalizeNullable,
   applySchemaValidationOptions,
   processSchema,
   validateAgainstSchema,
   isOpenAPI31,
-  // Phase 5: $ref 스키마 참조 해석
+  // Phase 5: $ref schema reference resolution
   registerSchema,
   clearSchemaRegistry,
   getRegisteredSchema,
   resolveSchemaRef,
   registerSchemasFromSpec,
-  // Phase 5: 복합 스키마 검증
+  // Phase 5: Composite schema validation
   validateOneOf,
   validateAnyOf,
   validateAllOf,
@@ -167,7 +167,7 @@ export {
 } from './schema-utils.js';
 export type { SchemaValidationError, SchemaRegistry } from './schema-utils.js';
 
-// 문서화 유틸리티 (Phase 4)
+// Documentation utilities (Phase 4)
 export {
   shouldDocument,
   shouldDocumentResponse,
@@ -182,7 +182,7 @@ export {
 } from './document-utils.js';
 export type { DocumentationStats } from './document-utils.js';
 
-// DSL 스펙 생성기 (Phase 4)
+// DSL spec generator (Phase 4)
 export {
   DSLSpecGenerator,
   generateAllSpecs,

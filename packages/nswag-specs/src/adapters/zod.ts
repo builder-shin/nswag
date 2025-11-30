@@ -1,19 +1,19 @@
 /**
- * Zod 어댑터
- * Zod 스키마를 OpenAPI 스키마로 변환
+ * Zod Adapter
+ * Convert Zod schemas to OpenAPI schemas
  *
- * 제한사항:
- * - z.lazy(): 재귀 스키마 미지원
- * - z.function(): 함수 타입 미지원
- * - z.promise(): Promise 타입 미지원
- * - z.effect(): 변환 효과 미지원
- * - z.brand(): 브랜드 타입 미지원
+ * Limitations:
+ * - z.lazy(): Recursive schemas not supported
+ * - z.function(): Function types not supported
+ * - z.promise(): Promise types not supported
+ * - z.effect(): Transform effects not supported
+ * - z.brand(): Brand types not supported
  */
 
 import type { Schema } from '../types/index.js';
 
 /**
- * Zod 스키마 타입 (간소화된 인터페이스)
+ * Zod schema type (simplified interface)
  */
 export interface ZodSchema {
   _def: {
@@ -24,7 +24,7 @@ export interface ZodSchema {
 }
 
 /**
- * Zod 타입 이름 상수
+ * Zod type name constants
  */
 const ZodTypeNames = {
   String: 'ZodString',
@@ -63,10 +63,10 @@ const ZodTypeNames = {
 } as const;
 
 /**
- * Zod 스키마를 OpenAPI 스키마로 변환
+ * Convert Zod schema to OpenAPI schema
  *
- * @param zodSchema - 변환할 Zod 스키마
- * @returns OpenAPI 호환 스키마
+ * @param zodSchema - Zod schema to convert
+ * @returns OpenAPI compatible schema
  *
  * @example
  * ```typescript
@@ -177,7 +177,7 @@ export function zodToOpenApi(zodSchema: ZodSchema): Schema {
     case ZodTypeNames.Catch:
       return zodToOpenApi(zodSchema._def.innerType);
 
-    // 미지원 타입들
+    // Unsupported types
     case ZodTypeNames.Lazy:
       console.warn('zodToOpenApi: z.lazy() is not supported');
       return {};
@@ -208,7 +208,7 @@ export function zodToOpenApi(zodSchema: ZodSchema): Schema {
 }
 
 /**
- * Zod String 변환
+ * Convert Zod String
  */
 function convertZodString(zodSchema: ZodSchema): Schema {
   const schema: Schema = { type: 'string' };
@@ -264,7 +264,7 @@ function convertZodString(zodSchema: ZodSchema): Schema {
 }
 
 /**
- * Zod Number 변환
+ * Convert Zod Number
  */
 function convertZodNumber(zodSchema: ZodSchema): Schema {
   const schema: Schema = { type: 'number' };
@@ -293,7 +293,7 @@ function convertZodNumber(zodSchema: ZodSchema): Schema {
         schema.multipleOf = check.value;
         break;
       case 'finite':
-        // OpenAPI에서는 별도 표현 없음
+        // No separate representation in OpenAPI
         break;
     }
   }
@@ -302,7 +302,7 @@ function convertZodNumber(zodSchema: ZodSchema): Schema {
 }
 
 /**
- * Zod Object 변환
+ * Convert Zod Object
  */
 function convertZodObject(zodSchema: ZodSchema): Schema {
   const shape = zodSchema._def.shape?.();
@@ -315,7 +315,7 @@ function convertZodObject(zodSchema: ZodSchema): Schema {
     const valueSchema = value as ZodSchema;
     properties[key] = zodToOpenApi(valueSchema);
 
-    // ZodOptional, ZodDefault가 아니면 필수 필드
+    // Required field if not ZodOptional or ZodDefault
     const isOptional =
       valueSchema._def.typeName === ZodTypeNames.Optional ||
       valueSchema._def.typeName === ZodTypeNames.Default;
@@ -334,7 +334,7 @@ function convertZodObject(zodSchema: ZodSchema): Schema {
     schema.required = required;
   }
 
-  // additionalProperties 처리
+  // Handle additionalProperties
   if (zodSchema._def.catchall && zodSchema._def.catchall._def.typeName !== ZodTypeNames.Never) {
     schema.additionalProperties = zodToOpenApi(zodSchema._def.catchall);
   } else if (zodSchema._def.unknownKeys === 'strict') {
@@ -345,7 +345,7 @@ function convertZodObject(zodSchema: ZodSchema): Schema {
 }
 
 /**
- * Zod Union 변환
+ * Convert Zod Union
  */
 function convertZodUnion(zodSchema: ZodSchema): Schema {
   const options = zodSchema._def.options as ZodSchema[];
@@ -355,7 +355,7 @@ function convertZodUnion(zodSchema: ZodSchema): Schema {
 }
 
 /**
- * Zod Discriminated Union 변환
+ * Convert Zod Discriminated Union
  */
 function convertZodDiscriminatedUnion(zodSchema: ZodSchema): Schema {
   const options = Array.from(zodSchema._def.optionsMap?.values() || []) as ZodSchema[];
@@ -370,7 +370,7 @@ function convertZodDiscriminatedUnion(zodSchema: ZodSchema): Schema {
 }
 
 /**
- * Zod Intersection 변환
+ * Convert Zod Intersection
  */
 function convertZodIntersection(zodSchema: ZodSchema): Schema {
   return {
@@ -382,7 +382,7 @@ function convertZodIntersection(zodSchema: ZodSchema): Schema {
 }
 
 /**
- * Zod Tuple 변환
+ * Convert Zod Tuple
  */
 function convertZodTuple(zodSchema: ZodSchema): Schema {
   const items = zodSchema._def.items as ZodSchema[];
@@ -397,7 +397,7 @@ function convertZodTuple(zodSchema: ZodSchema): Schema {
 }
 
 /**
- * Zod Literal 변환
+ * Convert Zod Literal
  */
 function convertZodLiteral(zodSchema: ZodSchema): Schema {
   const value = zodSchema._def.value;

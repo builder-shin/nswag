@@ -1,17 +1,17 @@
 /**
- * 검증기 모듈
- * JSON Schema 기반 응답 검증
+ * Validator module
+ * JSON Schema based response validation
  */
 
 import * as AjvModule from 'ajv';
 import type { Schema } from '../types/index.js';
 
-// ESM/CJS 호환성을 위한 Ajv 클래스 추출
+// Extract Ajv class for ESM/CJS compatibility
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const AjvConstructor = (AjvModule as any).default ?? AjvModule;
 
 /**
- * 검증 결과 인터페이스
+ * Validation result interface
  */
 export interface ValidationResult {
   valid: boolean;
@@ -19,7 +19,7 @@ export interface ValidationResult {
 }
 
 /**
- * 검증 오류 인터페이스
+ * Validation error interface
  */
 export interface ValidationError {
   instancePath: string;
@@ -30,7 +30,7 @@ export interface ValidationError {
 }
 
 /**
- * JSON Schema 검증기
+ * JSON Schema validator
  */
 export class SchemaValidator {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -47,7 +47,7 @@ export class SchemaValidator {
   }
 
   /**
-   * 스키마를 컴파일하고 캐싱
+   * Compile and cache schema
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   compile(schema: Schema, id?: string): any {
@@ -64,7 +64,7 @@ export class SchemaValidator {
   }
 
   /**
-   * 데이터를 스키마에 대해 검증
+   * Validate data against schema
    */
   validate(data: unknown, schema: Schema): ValidationResult {
     const validate = this.compile(schema);
@@ -78,7 +78,7 @@ export class SchemaValidator {
   }
 
   /**
-   * 캐시된 검증기 제거
+   * Clear cached validators
    */
   clear(): void {
     this.validators.clear();
@@ -86,6 +86,6 @@ export class SchemaValidator {
 }
 
 /**
- * 기본 검증기 인스턴스
+ * Default validator instance
  */
 export const defaultValidator = new SchemaValidator();

@@ -1,12 +1,12 @@
 /**
- * require-run-test 규칙
- * response() 블록 내에 runTest() 또는 it() 호출 필수
+ * require-run-test rule
+ * Require runTest() or it() call in response() blocks
  */
 
 import type { Rule } from 'eslint';
 import type { CallExpression, Node } from 'estree';
 
-// 노드가 response() 호출인지 확인
+// Check if node is a response() call
 function isResponseCall(node: Node): node is CallExpression {
   return (
     node.type === 'CallExpression' &&
@@ -15,7 +15,7 @@ function isResponseCall(node: Node): node is CallExpression {
   );
 }
 
-// 노드가 테스트 함수 호출인지 확인
+// Check if node is a test function call
 function isTestCall(node: CallExpression): boolean {
   if (node.callee.type === 'Identifier') {
     return ['runTest', 'it', 'test'].includes(node.callee.name);
@@ -23,13 +23,13 @@ function isTestCall(node: CallExpression): boolean {
   return false;
 }
 
-// response 블록 내에서 테스트 호출 찾기
+// Find test call in response block
 function hasTestInBlock(node: Node): boolean {
   if (node.type === 'CallExpression') {
     if (isTestCall(node)) {
       return true;
     }
-    // 인자들 검사
+    // Check arguments
     for (const arg of node.arguments) {
       if (hasTestInBlock(arg)) {
         return true;
@@ -68,14 +68,14 @@ const rule: Rule.RuleModule = {
   meta: {
     type: 'problem',
     docs: {
-      description: 'response() 블록 내에 runTest() 또는 it() 호출 필수',
+      description: 'Require runTest() or it() call in response() blocks',
       category: 'Possible Errors',
       recommended: true,
     },
     schema: [],
     messages: {
       missingTest:
-        'response() 블록에는 runTest() 또는 it() 호출이 필요합니다.',
+        'response() block requires runTest() or it() call.',
     },
   },
 
@@ -86,7 +86,7 @@ const rule: Rule.RuleModule = {
           return;
         }
 
-        // response()의 두 번째 인자가 콜백 함수여야 함
+        // Second argument of response() should be a callback function
         const callback = node.arguments[1];
         if (!callback) {
           return;

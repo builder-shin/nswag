@@ -1,6 +1,6 @@
 /**
- * Jest 통합 모듈
- * Jest 테스트 프레임워크와의 통합 기능 제공
+ * Jest Integration Module
+ * Provides integration features with Jest test framework
  *
  * @example
  * // jest.config.js
@@ -14,7 +14,7 @@ export { NswagTestEnvironment, JestEnvironment } from './environment.js';
 export * from './setup.js';
 
 /**
- * Jest 설정 생성 헬퍼
+ * Helper to create Jest configuration
  *
  * @example
  * // jest.config.js
@@ -38,13 +38,13 @@ export function createJestConfig(options?: {
 }
 
 /**
- * Jest 테스트 환경 옵션 타입
+ * Jest test environment options type
  */
 export interface JestTestEnvironmentOptions {
-  /** VCR 모드: record, playback, none */
+  /** VCR mode: record, playback, none */
   vcrMode?: 'record' | 'playback' | 'none';
-  /** 스펙 출력 경로 */
+  /** Spec output path */
   outputSpec?: string;
-  /** 응답 검증 활성화 */
+  /** Enable response validation */
   validateResponses?: boolean;
 }

@@ -1,6 +1,6 @@
 /**
- * HTML 생성기
- * Swagger UI 및 Redoc HTML 페이지 생성
+ * HTML generator
+ * Generate Swagger UI and Redoc HTML pages
  */
 
 import { readFileSync, existsSync } from 'fs';
@@ -13,13 +13,13 @@ import {
 } from './types.js';
 
 /**
- * Swagger UI HTML 페이지 생성
+ * Generate Swagger UI HTML page
  *
- * @param options - Swagger UI 옵션
- * @returns HTML 문자열
+ * @param options - Swagger UI options
+ * @returns HTML string
  */
 export function generateSwaggerUIHtml(options: SwaggerUiOptions): string {
-  // 커스텀 HTML 템플릿 사용
+  // Use custom HTML template
   if (options.customHtmlPath && existsSync(options.customHtmlPath)) {
     return readFileSync(options.customHtmlPath, 'utf-8');
   }
@@ -27,10 +27,10 @@ export function generateSwaggerUIHtml(options: SwaggerUiOptions): string {
   const title = options.customSiteTitle ?? DEFAULT_SWAGGER_UI_OPTIONS.customSiteTitle;
   const favicon = options.customFavicon ?? '/favicon.ico';
 
-  // 스펙 URL 설정 구성
+  // Build spec URL configuration
   const specConfig = buildSpecConfig(options);
 
-  // Swagger UI 설정 객체 구성
+  // Build Swagger UI configuration object
   const configObject = {
     dom_id: '#swagger-ui',
     presets: ['SwaggerUIBundle.presets.apis', 'SwaggerUIStandalonePreset'],
@@ -41,17 +41,17 @@ export function generateSwaggerUIHtml(options: SwaggerUiOptions): string {
     ...specConfig,
   };
 
-  // 설정 객체를 JavaScript 코드로 변환 (presets/plugins는 문자열이 아닌 참조)
+  // Convert configuration object to JavaScript code (presets/plugins are references, not strings)
   const configJs = buildConfigJs(configObject);
 
-  // CSS 스타일 구성
+  // Build CSS styles
   const cssStyles = buildCssStyles(options);
 
-  // JavaScript 구성
+  // Build JavaScript
   const jsScripts = buildJsScripts(options);
 
   return `<!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -76,34 +76,34 @@ ${jsScripts}
 }
 
 /**
- * Redoc HTML 페이지 생성
+ * Generate Redoc HTML page
  *
- * @param options - Redoc 옵션
- * @returns HTML 문자열
+ * @param options - Redoc options
+ * @returns HTML string
  */
 export function generateRedocHtml(options: RedocOptions): string {
   const title = options.customSiteTitle ?? DEFAULT_REDOC_OPTIONS.customSiteTitle;
   const favicon = options.customFavicon ?? '/favicon.ico';
 
-  // Redoc 옵션 구성
+  // Build Redoc options
   const redocOptions = {
     ...DEFAULT_REDOC_OPTIONS.options,
     ...options.options,
   };
 
-  // 옵션 속성 문자열
+  // Options attribute string
   const optionsAttr = Object.keys(redocOptions).length > 0
     ? ` options='${JSON.stringify(redocOptions)}'`
     : '';
 
-  // CSS 스타일 구성
+  // Build CSS styles
   const cssStyles = buildCssStyles(options);
 
-  // JavaScript 구성
+  // Build JavaScript
   const jsScripts = buildJsScripts(options);
 
   return `<!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -127,10 +127,10 @@ ${jsScripts}
 }
 
 /**
- * 스펙 URL 설정 구성
+ * Build spec URL configuration
  */
 function buildSpecConfig(options: SwaggerUiOptions): Record<string, unknown> {
-  // 다중 스펙 URL
+  // Multiple spec URLs
   if (options.specUrls && options.specUrls.length > 0) {
     const config: Record<string, unknown> = {
       urls: options.specUrls.map((spec: SpecUrl) => ({
@@ -139,7 +139,7 @@ function buildSpecConfig(options: SwaggerUiOptions): Record<string, unknown> {
       })),
     };
 
-    // 기본 선택 스펙 설정
+    // Set default selected spec
     if (options.primaryName) {
       const primaryIndex = options.specUrls.findIndex(
         (spec: SpecUrl) => spec.name === options.primaryName
@@ -152,7 +152,7 @@ function buildSpecConfig(options: SwaggerUiOptions): Record<string, unknown> {
     return config;
   }
 
-  // 단일 스펙 URL
+  // Single spec URL
   if (options.specUrl) {
     return { url: options.specUrl };
   }
@@ -161,14 +161,14 @@ function buildSpecConfig(options: SwaggerUiOptions): Record<string, unknown> {
 }
 
 /**
- * 설정 객체를 JavaScript 코드로 변환
+ * Convert configuration object to JavaScript code
  */
 function buildConfigJs(config: Record<string, unknown>): string {
   const entries: string[] = [];
 
   for (const [key, value] of Object.entries(config)) {
     if (key === 'presets' || key === 'plugins') {
-      // presets와 plugins는 문자열 배열이 아닌 실제 참조로 변환
+      // Convert presets and plugins to actual references, not string arrays
       const refs = (value as string[]).map((ref) => ref);
       entries.push(`${key}: [${refs.join(', ')}]`);
     } else if (key === 'layout') {
@@ -186,17 +186,17 @@ function buildConfigJs(config: Record<string, unknown>): string {
 }
 
 /**
- * CSS 스타일 구성
+ * Build CSS styles
  */
 function buildCssStyles(options: SwaggerUiOptions | RedocOptions): string {
   const styles: string[] = [];
 
-  // 외부 CSS URL
+  // External CSS URL
   if (options.customCssUrl) {
     styles.push(`  <link rel="stylesheet" type="text/css" href="${escapeHtml(options.customCssUrl)}">`);
   }
 
-  // 인라인 CSS
+  // Inline CSS
   if (options.customCss) {
     styles.push(`  <style>${options.customCss}</style>`);
   }
@@ -205,7 +205,7 @@ function buildCssStyles(options: SwaggerUiOptions | RedocOptions): string {
 }
 
 /**
- * JavaScript 구성
+ * Build JavaScript
  */
 function buildJsScripts(options: SwaggerUiOptions | RedocOptions): string {
   if (options.customJs) {
@@ -215,7 +215,7 @@ function buildJsScripts(options: SwaggerUiOptions | RedocOptions): string {
 }
 
 /**
- * HTML 이스케이프
+ * HTML escape
  */
 function escapeHtml(str: string): string {
   return str
@@ -227,11 +227,11 @@ function escapeHtml(str: string): string {
 }
 
 /**
- * 커스텀 템플릿용 기본 Swagger UI HTML 템플릿
+ * Default Swagger UI HTML template for custom templates
  */
 export function getSwaggerUiTemplate(): string {
   return `<!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -269,11 +269,11 @@ export function getSwaggerUiTemplate(): string {
 }
 
 /**
- * 커스텀 템플릿용 기본 Redoc HTML 템플릿
+ * Default Redoc HTML template for custom templates
  */
 export function getRedocTemplate(): string {
   return `<!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">

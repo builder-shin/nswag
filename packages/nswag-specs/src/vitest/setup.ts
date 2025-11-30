@@ -1,6 +1,6 @@
 /**
- * Vitest 셋업 파일
- * 테스트 실행 전 필요한 초기화 수행
+ * Vitest Setup File
+ * Performs necessary initialization before test execution
  *
  * @example
  * // vitest.config.ts
@@ -18,20 +18,20 @@ import { getSpecCollector, resetSpecCollector } from '../testing/spec-collector.
 import { createHttpClient, resetHttpClient } from '../testing/http-client.js';
 import { getResponseValidator } from '../testing/response-validator.js';
 
-// 테스트 프레임워크 글로벌 함수 타입
+// Test framework global function types
 declare function beforeAll(fn: () => void | Promise<void>): void;
 declare function afterAll(fn: () => void | Promise<void>): void;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare function beforeEach(fn: (context: any) => void | Promise<void>): void;
 declare function afterEach(fn: () => void | Promise<void>): void;
 
-// Vitest 글로벌 타입 확장
+// Vitest global type extension
 declare global {
   var __NSWAG__: NswagGlobal;
 }
 
 /**
- * nswag 글로벌 API
+ * nswag Global API
  */
 interface NswagGlobal {
   configure: (options: ConfigureOptions) => void;
@@ -40,13 +40,13 @@ interface NswagGlobal {
   collect: (metadata: RequestMetadata) => void;
 }
 
-// 컨텍스트 관리자 인스턴스
+// Context manager instance
 const contextManager = getContextManager();
 const specCollector = getSpecCollector();
 const responseValidator = getResponseValidator();
 
 /**
- * 글로벌 nswag API 설정
+ * Setup Global nswag API
  */
 function setupGlobalApi(): void {
   globalThis.__NSWAG__ = {
@@ -67,10 +67,10 @@ function setupGlobalApi(): void {
       if (request && response) {
         specCollector.collect(metadata, request, response);
 
-        // 응답 검증
+        // Validate response
         const result = responseValidator.validate(metadata, response, 0);
         if (!result.validated && result.validationErrors?.length) {
-          console.warn('[nswag-specs] 응답 검증 경고:', result.validationErrors);
+          console.warn('[nswag-specs] Response validation warning:', result.validationErrors);
         }
       }
     },
@@ -78,10 +78,10 @@ function setupGlobalApi(): void {
 }
 
 /**
- * Vitest 훅 설정
+ * Setup Vitest Hooks
  */
 function setupVitestHooks(): void {
-  // beforeAll: 테스트 스위트 시작
+  // beforeAll: Start test suite
   if (typeof beforeAll !== 'undefined') {
     beforeAll(() => {
       resetContextManager();
@@ -90,20 +90,20 @@ function setupVitestHooks(): void {
     });
   }
 
-  // afterAll: 테스트 스위트 종료
+  // afterAll: End test suite
   if (typeof afterAll !== 'undefined') {
     afterAll(() => {
-      // 스펙 수집 결과 출력
+      // Output spec collection results
       if (specCollector.count > 0) {
-        console.log(`[nswag-specs] ${specCollector.count}개의 엔드포인트 수집됨`);
+        console.log(`[nswag-specs] ${specCollector.count} endpoints collected`);
       }
     });
   }
 
-  // beforeEach: 각 테스트 시작
+  // beforeEach: Start each test
   if (typeof beforeEach !== 'undefined') {
     beforeEach((context) => {
-      // Vitest 컨텍스트에서 테스트 정보 가져오기
+      // Get test information from Vitest context
       const testName = (context as { task?: { name?: string } })?.task?.name ?? 'unknown';
       const testFile = (context as { task?: { file?: { name?: string } } })?.task?.file?.name ?? 'unknown';
 
@@ -111,7 +111,7 @@ function setupVitestHooks(): void {
     });
   }
 
-  // afterEach: 각 테스트 종료
+  // afterEach: End each test
   if (typeof afterEach !== 'undefined') {
     afterEach(() => {
       contextManager.end();
@@ -119,14 +119,14 @@ function setupVitestHooks(): void {
   }
 }
 
-// 자동 초기화
+// Auto-initialize
 setupGlobalApi();
 setupVitestHooks();
 
 /**
- * Vitest 환경 설정 함수 (수동 설정용)
+ * Vitest Environment Setup Function (for manual setup)
  *
- * @deprecated 자동 초기화 사용 권장
+ * @deprecated Auto-initialization is recommended
  */
 export function setupVitest(options?: ConfigureOptions): void {
   if (options) {
@@ -135,21 +135,21 @@ export function setupVitest(options?: ConfigureOptions): void {
 }
 
 /**
- * 현재 테스트 컨텍스트 조회
+ * Get Current Test Context
  */
 export function getContext() {
   return contextManager.getCurrent();
 }
 
 /**
- * 테스트 컨텍스트 정리
+ * Teardown Test Context
  */
 export function teardown(): void {
   resetContextManager();
   resetHttpClient();
 }
 
-// 편의 함수 export
+// Export convenience functions
 export { configure } from '../testing/configure.js';
 export { createHttpClient } from '../testing/http-client.js';
 export { getContextManager, getCurrentTestContext } from '../testing/context-manager.js';

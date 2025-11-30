@@ -1,6 +1,6 @@
 /**
- * Fastify 플러그인
- * Fastify 앱에서 OpenAPI 스펙을 JSON/YAML 엔드포인트로 노출
+ * Fastify plugin
+ * Exposes OpenAPI specs as JSON/YAML endpoints in Fastify apps
  *
  * @example
  * ```typescript
@@ -11,7 +11,7 @@
  *   openapiRoot: './openapi',
  * });
  *
- * // GET /api-docs/v1/openapi.json -> ./openapi/v1/openapi.json 내용 반환
+ * // GET /api-docs/v1/openapi.json -> returns ./openapi/v1/openapi.json contents
  * ```
  */
 
@@ -43,8 +43,8 @@ import {
 } from './types.js';
 
 /**
- * Fastify 플러그인
- * OpenAPI 스펙을 JSON/YAML 엔드포인트로 제공
+ * Fastify plugin
+ * Provides OpenAPI specs as JSON/YAML endpoints
  */
 export const nswagApiPlugin: FastifyPluginCallback<FastifyNswagApiOptions> = (
   fastify: FastifyInstance,
@@ -60,17 +60,17 @@ export const nswagApiPlugin: FastifyPluginCallback<FastifyNswagApiOptions> = (
     openapiHeaders = DEFAULT_OPTIONS.openapiHeaders,
   } = options;
 
-  // openapiRoot를 절대 경로로 변환
+  // Convert openapiRoot to absolute path
   const absoluteRoot = resolve(process.cwd(), openapiRoot);
 
-  // 와일드카드 라우트 등록 (모든 하위 경로 처리)
+  // Register wildcard route (handles all sub-paths)
   fastify.route({
     method: ['GET', 'OPTIONS'],
     url: '/*',
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
       const headers = request.headers as Record<string, string | string[] | undefined>;
 
-      // CORS preflight 요청 처리
+      // Handle CORS preflight request
       if (isPreflightRequest(request.method)) {
         if (cors.enabled) {
           const origin = getOriginFromHeaders(headers);
@@ -85,8 +85,8 @@ export const nswagApiPlugin: FastifyPluginCallback<FastifyNswagApiOptions> = (
         return reply.status(204).send();
       }
 
-      // 요청 경로 파싱 (prefix 제거)
-      const requestPath = request.url.replace(/\?.*$/, ''); // 쿼리 스트링 제거
+      // Parse request path (remove prefix)
+      const requestPath = request.url.replace(/\?.*$/, ''); // Remove query string
       const fileInfo = parseRequestPath(requestPath, absoluteRoot);
 
       if (!fileInfo) {
@@ -96,7 +96,7 @@ export const nswagApiPlugin: FastifyPluginCallback<FastifyNswagApiOptions> = (
         });
       }
 
-      // 인증 검증
+      // Validate authentication
       if (auth?.enabled) {
         const authResult = validateAuth(headers, auth);
 
@@ -111,7 +111,7 @@ export const nswagApiPlugin: FastifyPluginCallback<FastifyNswagApiOptions> = (
         }
       }
 
-      // CORS 헤더 설정
+      // Set CORS headers
       if (cors.enabled) {
         const origin = getOriginFromHeaders(headers);
         const corsHeaders = getCorsHeaders(origin, cors);
@@ -123,7 +123,7 @@ export const nswagApiPlugin: FastifyPluginCallback<FastifyNswagApiOptions> = (
         }
       }
 
-      // OpenAPI 파일 로드
+      // Load OpenAPI file
       let spec = loadOpenAPIFile(fileInfo.absolutePath, cache);
       if (!spec) {
         return reply.status(404).send({
@@ -132,10 +132,10 @@ export const nswagApiPlugin: FastifyPluginCallback<FastifyNswagApiOptions> = (
         });
       }
 
-      // 동적 필터 적용
+      // Apply dynamic filter
       if (openapiFilter) {
         try {
-          // 원본 수정 방지를 위해 복사본 생성
+          // Create a copy to prevent modifying the original
           spec = cloneOpenAPI(spec);
           const fastifyReq: FastifyRequestType = {
             headers,
@@ -152,16 +152,16 @@ export const nswagApiPlugin: FastifyPluginCallback<FastifyNswagApiOptions> = (
         }
       }
 
-      // 응답 헤더 설정
+      // Set response headers
       const contentType = getContentType(fileInfo.format);
       reply.header('Content-Type', contentType);
 
-      // 커스텀 헤더 적용
+      // Apply custom headers
       Object.entries(openapiHeaders).forEach(([key, value]) => {
         if (value) reply.header(key, value);
       });
 
-      // 응답 전송
+      // Send response
       const body = serializeOpenAPI(spec, fileInfo.format);
       return reply.send(body);
     },
@@ -170,9 +170,9 @@ export const nswagApiPlugin: FastifyPluginCallback<FastifyNswagApiOptions> = (
   done();
 };
 
-// 플러그인 메타데이터
+// Plugin metadata
 (nswagApiPlugin as unknown as Record<symbol, unknown>)[Symbol.for('fastify.display-name')] = 'nswag-api';
 (nswagApiPlugin as unknown as Record<symbol, unknown>)[Symbol.for('skip-override')] = true;
 
-// 기본 export
+// Default export
 export default nswagApiPlugin;

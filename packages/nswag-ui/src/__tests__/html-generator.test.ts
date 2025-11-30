@@ -1,5 +1,5 @@
 /**
- * HTML 생성기 테스트
+ * HTML generator tests
  */
 
 import { describe, it, expect } from 'vitest';
@@ -10,7 +10,7 @@ import {
 
 describe('HTML Generator', () => {
   describe('generateSwaggerUIHtml', () => {
-    it('단일 스펙 URL로 HTML을 생성해야 함', () => {
+    it('should generate HTML with single spec URL', () => {
       const html = generateSwaggerUIHtml({
         specUrl: '/api-docs/openapi.json',
       });
@@ -20,7 +20,7 @@ describe('HTML Generator', () => {
       expect(html).toContain('/api-docs/openapi.json');
     });
 
-    it('다중 스펙 URL로 HTML을 생성해야 함', () => {
+    it('should generate HTML with multiple spec URLs', () => {
       const html = generateSwaggerUIHtml({
         specUrls: [
           { url: '/api-docs/v1/openapi.json', name: 'API V1' },
@@ -36,7 +36,7 @@ describe('HTML Generator', () => {
       expect(html).toContain('API V2');
     });
 
-    it('커스텀 사이트 제목을 적용해야 함', () => {
+    it('should apply custom site title', () => {
       const html = generateSwaggerUIHtml({
         specUrl: '/api-docs/openapi.json',
         customSiteTitle: 'My API Docs',
@@ -45,7 +45,7 @@ describe('HTML Generator', () => {
       expect(html).toContain('<title>My API Docs</title>');
     });
 
-    it('커스텀 CSS를 포함해야 함', () => {
+    it('should include custom CSS', () => {
       const html = generateSwaggerUIHtml({
         specUrl: '/api-docs/openapi.json',
         customCss: '.swagger-ui { background: red; }',
@@ -54,7 +54,7 @@ describe('HTML Generator', () => {
       expect(html).toContain('.swagger-ui { background: red; }');
     });
 
-    it('커스텀 CSS URL을 포함해야 함', () => {
+    it('should include custom CSS URL', () => {
       const html = generateSwaggerUIHtml({
         specUrl: '/api-docs/openapi.json',
         customCssUrl: '/custom-swagger.css',
@@ -63,7 +63,7 @@ describe('HTML Generator', () => {
       expect(html).toContain('href="/custom-swagger.css"');
     });
 
-    it('커스텀 JavaScript를 포함해야 함', () => {
+    it('should include custom JavaScript', () => {
       const html = generateSwaggerUIHtml({
         specUrl: '/api-docs/openapi.json',
         customJs: 'console.log("custom");',
@@ -72,7 +72,7 @@ describe('HTML Generator', () => {
       expect(html).toContain('console.log("custom");');
     });
 
-    it('커스텀 파비콘을 적용해야 함', () => {
+    it('should apply custom favicon', () => {
       const html = generateSwaggerUIHtml({
         specUrl: '/api-docs/openapi.json',
         customFavicon: '/my-favicon.ico',
@@ -81,7 +81,7 @@ describe('HTML Generator', () => {
       expect(html).toContain('href="/my-favicon.ico"');
     });
 
-    it('Swagger UI 설정 객체를 적용해야 함', () => {
+    it('should apply Swagger UI configuration object', () => {
       const html = generateSwaggerUIHtml({
         specUrl: '/api-docs/openapi.json',
         configObject: {
@@ -96,7 +96,7 @@ describe('HTML Generator', () => {
   });
 
   describe('generateRedocHtml', () => {
-    it('스펙 URL로 HTML을 생성해야 함', () => {
+    it('should generate HTML with spec URL', () => {
       const html = generateRedocHtml({
         specUrl: '/api-docs/openapi.json',
       });
@@ -106,7 +106,7 @@ describe('HTML Generator', () => {
       expect(html).toContain('/api-docs/openapi.json');
     });
 
-    it('커스텀 사이트 제목을 적용해야 함', () => {
+    it('should apply custom site title', () => {
       const html = generateRedocHtml({
         specUrl: '/api-docs/openapi.json',
         customSiteTitle: 'My Redoc Docs',
@@ -115,7 +115,7 @@ describe('HTML Generator', () => {
       expect(html).toContain('<title>My Redoc Docs</title>');
     });
 
-    it('커스텀 CSS를 포함해야 함', () => {
+    it('should include custom CSS', () => {
       const html = generateRedocHtml({
         specUrl: '/api-docs/openapi.json',
         customCss: 'body { background: blue; }',
@@ -124,7 +124,7 @@ describe('HTML Generator', () => {
       expect(html).toContain('body { background: blue; }');
     });
 
-    it('Redoc 옵션을 적용해야 함', () => {
+    it('should apply Redoc options', () => {
       const html = generateRedocHtml({
         specUrl: '/api-docs/openapi.json',
         options: {

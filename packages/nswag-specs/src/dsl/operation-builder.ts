@@ -1,6 +1,6 @@
 /**
- * Operation 빌더
- * HTTP 오퍼레이션 정의를 위한 플루언트 빌더
+ * Operation builder
+ * Fluent builder for HTTP operation definitions
  */
 
 import type { Operation, Parameter, RequestBody, Response } from '../types/index.js';

@@ -1,6 +1,6 @@
 /**
- * Fastify 플러그인
- * Fastify 앱에 Swagger UI 또는 Redoc 통합
+ * Fastify plugin
+ * Integrate Swagger UI or Redoc into Fastify app
  */
 
 import type {
@@ -22,10 +22,10 @@ import type {
   FastifyRedocPluginOptions,
 } from './types.js';
 
-// ========== Swagger UI 플러그인 ==========
+// ========== Swagger UI Plugin ==========
 
 /**
- * Swagger UI Fastify 플러그인
+ * Swagger UI Fastify plugin
  *
  * @example
  * ```typescript
@@ -40,7 +40,7 @@ import type {
  *   primaryName: 'API V2 Docs',
  * });
  *
- * // Basic Auth 적용
+ * // Apply Basic Auth
  * await fastify.register(swaggerUiPlugin, {
  *   prefix: '/docs',
  *   specUrl: '/api-docs/v1/openapi.json',
@@ -57,20 +57,20 @@ export const swaggerUiPlugin: FastifyPluginAsync<FastifySwaggerUiPluginOptions> 
 ): Promise<void> => {
   const prefix = options.prefix ?? '/docs';
 
-  // HTML 생성 (한 번만)
+  // Generate HTML (only once)
   const html = generateSwaggerUIHtml(options);
 
   // Basic Auth Hook
   const authHook = createFastifyBasicAuthHook(options.basicAuth);
 
-  // 메인 라우트
+  // Main route
   fastify.get(prefix, {
     preHandler: authHook,
   }, async (_request: FastifyRequest, reply: FastifyReply) => {
     return reply.type('text/html').send(html);
   });
 
-  // 슬래시 포함 경로
+  // Path with trailing slash
   if (!prefix.endsWith('/')) {
     fastify.get(`${prefix}/`, {
       preHandler: authHook,
@@ -81,10 +81,10 @@ export const swaggerUiPlugin: FastifyPluginAsync<FastifySwaggerUiPluginOptions> 
 };
 
 /**
- * Swagger UI Fastify 플러그인 생성 (팩토리 함수)
+ * Create Swagger UI Fastify plugin (factory function)
  *
- * @param options - Swagger UI 옵션
- * @returns Fastify 플러그인
+ * @param options - Swagger UI options
+ * @returns Fastify plugin
  */
 export function createSwaggerUIPlugin(
   options: FastifySwaggerUiPluginOptions
@@ -112,10 +112,10 @@ export function createSwaggerUIPlugin(
   };
 }
 
-// ========== Redoc 플러그인 ==========
+// ========== Redoc Plugin ==========
 
 /**
- * Redoc Fastify 플러그인
+ * Redoc Fastify plugin
  *
  * @example
  * ```typescript
@@ -126,7 +126,7 @@ export function createSwaggerUIPlugin(
  *   specUrl: '/api-docs/v1/openapi.json',
  * });
  *
- * // Basic Auth 적용
+ * // Apply Basic Auth
  * await fastify.register(redocPlugin, {
  *   prefix: '/redoc',
  *   specUrl: '/api-docs/v1/openapi.json',
@@ -143,20 +143,20 @@ export const redocPlugin: FastifyPluginAsync<FastifyRedocPluginOptions> = async 
 ): Promise<void> => {
   const prefix = options.prefix ?? '/redoc';
 
-  // HTML 생성 (한 번만)
+  // Generate HTML (only once)
   const html = generateRedocHtml(options);
 
   // Basic Auth Hook
   const authHook = createFastifyBasicAuthHook(options.basicAuth);
 
-  // 메인 라우트
+  // Main route
   fastify.get(prefix, {
     preHandler: authHook,
   }, async (_request: FastifyRequest, reply: FastifyReply) => {
     return reply.type('text/html').send(html);
   });
 
-  // 슬래시 포함 경로
+  // Path with trailing slash
   if (!prefix.endsWith('/')) {
     fastify.get(`${prefix}/`, {
       preHandler: authHook,
@@ -167,10 +167,10 @@ export const redocPlugin: FastifyPluginAsync<FastifyRedocPluginOptions> = async 
 };
 
 /**
- * Redoc Fastify 플러그인 생성 (팩토리 함수)
+ * Create Redoc Fastify plugin (factory function)
  *
- * @param options - Redoc 옵션
- * @returns Fastify 플러그인
+ * @param options - Redoc options
+ * @returns Fastify plugin
  */
 export function createRedocPlugin(
   options: FastifyRedocPluginOptions
@@ -198,13 +198,13 @@ export function createRedocPlugin(
   };
 }
 
-// ========== 헬퍼 함수 ==========
+// ========== Helper Functions ==========
 
 /**
- * Fastify 인스턴스에 Swagger UI 등록
+ * Register Swagger UI on Fastify instance
  *
- * @param fastify - Fastify 인스턴스
- * @param options - Swagger UI 옵션
+ * @param fastify - Fastify instance
+ * @param options - Swagger UI options
  */
 export async function registerSwaggerUI(
   fastify: FastifyInstance,
@@ -214,10 +214,10 @@ export async function registerSwaggerUI(
 }
 
 /**
- * Fastify 인스턴스에 Redoc 등록
+ * Register Redoc on Fastify instance
  *
- * @param fastify - Fastify 인스턴스
- * @param options - Redoc 옵션
+ * @param fastify - Fastify instance
+ * @param options - Redoc options
  */
 export async function registerRedoc(
   fastify: FastifyInstance,
@@ -227,10 +227,10 @@ export async function registerRedoc(
 }
 
 /**
- * Swagger UI와 Redoc을 모두 등록
+ * Register both Swagger UI and Redoc
  *
- * @param fastify - Fastify 인스턴스
- * @param options - 설정 옵션
+ * @param fastify - Fastify instance
+ * @param options - Configuration options
  *
  * @example
  * ```typescript

@@ -1,27 +1,27 @@
 /**
- * 스펙 생성기 모듈
- * OpenAPI 스펙 파일을 JSON/YAML 형식으로 생성
+ * Spec generator module
+ * Generate OpenAPI spec files in JSON/YAML format
  */
 
 import { stringify as yamlStringify } from 'yaml';
 import type { OpenAPISpec, GeneratorOptions } from '../types/index.js';
 
 /**
- * OpenAPI 스펙을 JSON 문자열로 변환
+ * Convert OpenAPI spec to JSON string
  */
 export function toJSON(spec: OpenAPISpec, pretty = true): string {
   return pretty ? JSON.stringify(spec, null, 2) : JSON.stringify(spec);
 }
 
 /**
- * OpenAPI 스펙을 YAML 문자열로 변환
+ * Convert OpenAPI spec to YAML string
  */
 export function toYAML(spec: OpenAPISpec): string {
   return yamlStringify(spec, { indent: 2 });
 }
 
 /**
- * 스펙 생성기 클래스
+ * Spec generator class
  */
 export class SpecGenerator {
   private spec: Partial<OpenAPISpec> = {
@@ -56,7 +56,7 @@ export class SpecGenerator {
 
   build(): OpenAPISpec {
     if (!this.spec.info) {
-      throw new Error('OpenAPI 스펙에는 info 필드가 필요합니다');
+      throw new Error('OpenAPI spec requires info field');
     }
     return this.spec as OpenAPISpec;
   }

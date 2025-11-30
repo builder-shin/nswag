@@ -1,57 +1,57 @@
 /**
- * Basic Auth 처리 로직
- * Swagger UI 및 Redoc UI 보호를 위한 인증 미들웨어
+ * Basic Auth handling logic
+ * Authentication middleware for protecting Swagger UI and Redoc UI
  */
 
 import type { BasicAuthConfig } from './types.js';
 
 /**
- * 인증 결과 인터페이스
+ * Authentication result interface
  */
 export interface AuthResult {
-  /** 인증 성공 여부 */
+  /** Whether authentication succeeded */
   authenticated: boolean;
-  /** 인증 실패 시 응답 헤더 */
+  /** Response headers on authentication failure */
   headers?: Record<string, string>;
-  /** 인증 실패 시 상태 코드 */
+  /** Status code on authentication failure */
   statusCode?: number;
-  /** 인증 실패 시 응답 본문 */
+  /** Response body on authentication failure */
   body?: string;
 }
 
 /**
- * Basic Auth 검증
+ * Verify Basic Auth
  *
- * @param authHeader - Authorization 헤더 값
- * @param config - Basic Auth 설정
- * @returns 인증 결과
+ * @param authHeader - Authorization header value
+ * @param config - Basic Auth configuration
+ * @returns Authentication result
  */
 export function verifyBasicAuth(
   authHeader: string | undefined,
   config: BasicAuthConfig
 ): AuthResult {
-  // Basic Auth가 비활성화되어 있으면 항상 인증 성공
+  // Always succeed if Basic Auth is disabled
   if (!config.enabled) {
     return { authenticated: true };
   }
 
-  // Authorization 헤더가 없는 경우
+  // No Authorization header
   if (!authHeader) {
     return createUnauthorizedResponse();
   }
 
-  // Basic Auth 형식 검증
+  // Verify Basic Auth format
   if (!authHeader.startsWith('Basic ')) {
     return createUnauthorizedResponse();
   }
 
   try {
-    // Base64 디코딩
+    // Base64 decode
     const base64Credentials = authHeader.slice(6);
     const credentials = Buffer.from(base64Credentials, 'base64').toString('utf-8');
     const [username, password] = credentials.split(':');
 
-    // 자격 증명 검증
+    // Verify credentials
     if (
       username === config.credentials.username &&
       password === config.credentials.password
@@ -66,7 +66,7 @@ export function verifyBasicAuth(
 }
 
 /**
- * 401 Unauthorized 응답 생성
+ * Create 401 Unauthorized response
  */
 function createUnauthorizedResponse(): AuthResult {
   return {
@@ -80,16 +80,16 @@ function createUnauthorizedResponse(): AuthResult {
 }
 
 /**
- * Express용 Basic Auth 미들웨어 생성
+ * Create Basic Auth middleware for Express
  *
- * @param config - Basic Auth 설정
- * @returns Express 미들웨어 함수
+ * @param config - Basic Auth configuration
+ * @returns Express middleware function
  */
 export function createExpressBasicAuthMiddleware(
   config?: BasicAuthConfig
 ): (req: ExpressRequest, res: ExpressResponse, next: ExpressNext) => void {
   return (req: ExpressRequest, res: ExpressResponse, next: ExpressNext) => {
-    // Basic Auth가 설정되지 않았거나 비활성화된 경우 통과
+    // Pass through if Basic Auth is not configured or disabled
     if (!config || !config.enabled) {
       return next();
     }
@@ -101,7 +101,7 @@ export function createExpressBasicAuthMiddleware(
       return next();
     }
 
-    // 인증 실패 응답
+    // Authentication failure response
     if (result.headers) {
       Object.entries(result.headers).forEach(([key, value]) => {
         res.setHeader(key, value);
@@ -112,16 +112,16 @@ export function createExpressBasicAuthMiddleware(
 }
 
 /**
- * Fastify용 Basic Auth preHandler 생성
+ * Create Basic Auth preHandler for Fastify
  *
- * @param config - Basic Auth 설정
- * @returns Fastify preHandler 함수
+ * @param config - Basic Auth configuration
+ * @returns Fastify preHandler function
  */
 export function createFastifyBasicAuthHook(
   config?: BasicAuthConfig
 ): (request: FastifyRequest, reply: FastifyReply) => Promise<void> {
   return async (request: FastifyRequest, reply: FastifyReply) => {
-    // Basic Auth가 설정되지 않았거나 비활성화된 경우 통과
+    // Pass through if Basic Auth is not configured or disabled
     if (!config || !config.enabled) {
       return;
     }
@@ -133,7 +133,7 @@ export function createFastifyBasicAuthHook(
       return;
     }
 
-    // 인증 실패 응답
+    // Authentication failure response
     if (result.headers) {
       Object.entries(result.headers).forEach(([key, value]) => {
         reply.header(key, value);
@@ -144,11 +144,11 @@ export function createFastifyBasicAuthHook(
 }
 
 /**
- * NestJS용 Basic Auth Guard 로직
+ * Basic Auth Guard logic for NestJS
  *
- * @param authHeader - Authorization 헤더 값
- * @param config - Basic Auth 설정
- * @returns 인증 성공 여부
+ * @param authHeader - Authorization header value
+ * @param config - Basic Auth configuration
+ * @returns Whether authentication succeeded
  */
 export function validateBasicAuth(
   authHeader: string | undefined,
@@ -162,10 +162,10 @@ export function validateBasicAuth(
   return result.authenticated;
 }
 
-// ========== 타입 정의 (Express/Fastify 의존성 없이) ==========
+// ========== Type Definitions (without Express/Fastify dependencies) ==========
 
 /**
- * Express Request 타입 (의존성 없이 사용)
+ * Express Request type (used without dependencies)
  */
 interface ExpressRequest {
   headers: {
@@ -174,7 +174,7 @@ interface ExpressRequest {
 }
 
 /**
- * Express Response 타입 (의존성 없이 사용)
+ * Express Response type (used without dependencies)
  */
 interface ExpressResponse {
   setHeader(name: string, value: string): void;
@@ -183,12 +183,12 @@ interface ExpressResponse {
 }
 
 /**
- * Express Next 함수 타입
+ * Express Next function type
  */
 type ExpressNext = () => void;
 
 /**
- * Fastify Request 타입 (의존성 없이 사용)
+ * Fastify Request type (used without dependencies)
  */
 interface FastifyRequest {
   headers: {
@@ -197,7 +197,7 @@ interface FastifyRequest {
 }
 
 /**
- * Fastify Reply 타입 (의존성 없이 사용)
+ * Fastify Reply type (used without dependencies)
  */
 interface FastifyReply {
   header(name: string, value: string): FastifyReply;

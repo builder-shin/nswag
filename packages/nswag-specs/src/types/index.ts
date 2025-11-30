@@ -1,8 +1,8 @@
 /**
- * 공통 타입 정의
+ * Common type definitions
  */
 
-// OpenAPI 스펙 관련 타입
+// OpenAPI spec related types
 export interface OpenAPISpec {
   openapi: string;
   info: OpenAPIInfo;
@@ -140,24 +140,24 @@ export interface Schema {
   anyOf?: Schema[];
   not?: Schema;
   discriminator?: { propertyName: string; mapping?: Record<string, string> };
-  // String 제약조건
+  // String constraints
   minLength?: number;
   maxLength?: number;
   pattern?: string;
-  // Number 제약조건
+  // Number constraints
   minimum?: number;
   maximum?: number;
   exclusiveMinimum?: number;
   exclusiveMaximum?: number;
   multipleOf?: number;
-  // Array 제약조건
+  // Array constraints
   minItems?: number;
   maxItems?: number;
   uniqueItems?: boolean;
-  // Object 제약조건
+  // Object constraints
   minProperties?: number;
   maxProperties?: number;
-  // 메타데이터
+  // Metadata
   deprecated?: boolean;
   readOnly?: boolean;
   writeOnly?: boolean;
@@ -200,7 +200,7 @@ export interface OAuthFlow {
 
 export type SecurityRequirement = Record<string, string[]>;
 
-// HTTP 요청/응답 관련 타입
+// HTTP request/response related types
 export interface RequestData {
   path: string;
   method: string;
@@ -214,7 +214,7 @@ export interface ResponseData {
   body: string;
 }
 
-// 요청 메타데이터 타입
+// Request metadata type
 export interface RequestMetadata {
   operationId?: string;
   path: string;
@@ -227,7 +227,7 @@ export interface RequestMetadata {
   responses?: Record<string, Response>;
 }
 
-// 확장된 메타데이터 (응답 검증 후)
+// Extended metadata (after response validation)
 export interface ExtendedMetadata extends RequestMetadata {
   actualStatusCode: number;
   responseTime: number;
@@ -235,10 +235,10 @@ export interface ExtendedMetadata extends RequestMetadata {
   validationErrors?: string[];
 }
 
-// VCR 모드 타입
+// VCR mode type
 export type VCRMode = 'record' | 'playback' | 'none';
 
-// 기본 테스트 컨텍스트
+// Base test context
 export interface TestContext {
   testName: string;
   specFile: string;
@@ -247,53 +247,53 @@ export interface TestContext {
   [key: string]: unknown;
 }
 
-// 요청 컨텍스트 (supertest 요청 포함)
+// Request context (includes supertest request)
 export interface RequestContext extends TestContext {
-  request: unknown; // supertest request 타입
+  request: unknown; // supertest request type
 }
 
-// BeforeEach 훅 컨텍스트
+// BeforeEach hook context
 export interface BeforeEachContext extends TestContext {
   metadata: RequestMetadata;
 }
 
-// AfterEach 훅 컨텍스트
+// AfterEach hook context
 export interface AfterEachContext extends TestContext {
   metadata: ExtendedMetadata;
   request: RequestData;
   response: ResponseData;
 }
 
-// Example 컨텍스트 (AfterEach와 동일)
+// Example context (same as AfterEach)
 export type ExampleContext = AfterEachContext;
 
-// HTTP 클라이언트 설정 타입
+// HTTP client settings type
 export interface RequestDefaults {
   headers?: Record<string, string>;
   timeout?: number;
   followRedirects?: boolean;
 }
 
-// 앱 인스턴스 타입 (Express, Fastify, Koa, NestJS 등)
+// App instance type (Express, Fastify, Koa, NestJS, etc.)
 export type AppInstance = unknown;
 
-// VCR 설정 옵션
+// VCR configuration options
 export interface VCROptions {
-  /** VCR 활성화 여부 */
+  /** Whether VCR is enabled */
   enabled: boolean;
-  /** 카세트 저장 경로 */
+  /** Cassette save path */
   cassettePath: string;
-  /** VCR 모드 */
+  /** VCR mode */
   mode: VCRMode;
 }
 
-// 요청 인터셉터 타입
+// Request interceptor type
 export type RequestInterceptor = (
   request: unknown,
   context: TestContext
 ) => unknown;
 
-// OpenAPI 스펙 정보 타입
+// OpenAPI spec info type
 export interface OpenAPISpecInfo {
   openapi: string;
   info: OpenAPIInfo;
@@ -302,57 +302,57 @@ export interface OpenAPISpecInfo {
   security?: SecurityRequirement[];
 }
 
-// configure() 함수 옵션 (완전한 타입 정의)
+// configure() function options (complete type definition)
 export interface ConfigureOptions {
-  /** 앱 인스턴스 (Express, Fastify, Koa, NestJS 등) */
+  /** App instance (Express, Fastify, Koa, NestJS, etc.) */
   app?: AppInstance;
-  /** 실행 중인 서버 URL */
+  /** Running server URL */
   baseUrl?: string;
 
-  /** OpenAPI 스펙 파일 루트 디렉토리 */
+  /** OpenAPI spec file root directory */
   openapiRoot?: string;
-  /** OpenAPI 출력 포맷 */
+  /** OpenAPI output format */
   openapiFormat?: 'json' | 'yaml';
-  /** additionalProperties: false 강제 여부 */
+  /** Whether to enforce additionalProperties: false */
   openapiNoAdditionalProperties?: boolean;
-  /** 모든 프로퍼티 required 강제 여부 */
+  /** Whether to enforce all properties as required */
   openapiAllPropertiesRequired?: boolean;
 
-  /** OpenAPI 스펙 정의 (스펙 파일별 설정) */
+  /** OpenAPI spec definitions (per-spec file settings) */
   openapiSpecs?: Record<string, OpenAPISpecInfo>;
 
-  /** 기본 요청 옵션 */
+  /** Default request options */
   requestDefaults?: RequestDefaults;
 
-  /** VCR (HTTP 녹화/재생) 설정 */
+  /** VCR (HTTP recording/playback) settings */
   vcr?: Partial<VCROptions>;
 
-  /** 각 테스트 실행 전 훅 */
+  /** Hook to run before each test */
   beforeEach?: (context: BeforeEachContext) => void | Promise<void>;
-  /** 각 테스트 실행 후 훅 */
+  /** Hook to run after each test */
   afterEach?: (example: ExampleContext) => void | Promise<void>;
-  /** 요청 인터셉터 */
+  /** Request interceptor */
   requestInterceptor?: RequestInterceptor;
 
-  /** 플러그인 배열 */
+  /** Plugin array */
   plugins?: NswagPlugin[];
 }
 
-// 레거시 호환성을 위한 간단한 컨텍스트
+// Simple context for legacy compatibility
 export interface SimpleTestContext {
   app: unknown;
   baseUrl?: string;
   headers?: Record<string, string>;
 }
 
-// DSL 옵션 타입
+// DSL options type
 export interface DSLOptions {
   basePath?: string;
   defaultContentType?: string;
   validateResponses?: boolean;
 }
 
-// 스펙 생성 옵션
+// Spec generation options
 export interface GeneratorOptions {
   outputPath: string;
   format: 'json' | 'yaml';
@@ -361,7 +361,7 @@ export interface GeneratorOptions {
   description?: string;
 }
 
-// 테스트 정보 (플러그인용)
+// Test info (for plugins)
 export interface TestInfo {
   path: string;
   method: string;
@@ -375,7 +375,7 @@ export interface TestInfo {
   responses?: Record<string, Response>;
 }
 
-// 테스트 결과 (플러그인용)
+// Test result (for plugins)
 export interface TestResult {
   success: boolean;
   statusCode: number;
@@ -384,21 +384,21 @@ export interface TestResult {
   validationErrors?: { path: string; message: string }[];
 }
 
-// NswagPlugin 인터페이스 (Phase 9 명세서 기준)
+// NswagPlugin interface (based on Phase 9 specification)
 export interface NswagPlugin {
-  /** 플러그인 이름 */
+  /** Plugin name */
   name: string;
-  /** 테스트 실행 전 훅 */
+  /** Hook to run before test execution */
   beforeTest?: (testInfo: TestInfo) => Promise<void>;
-  /** 테스트 실행 후 훅 */
+  /** Hook to run after test execution */
   afterTest?: (testInfo: TestInfo, result: TestResult) => Promise<void>;
-  /** 스펙 생성 전 훅 */
+  /** Hook to run before spec generation */
   beforeGenerate?: (spec: OpenAPISpec) => Promise<OpenAPISpec>;
-  /** 스펙 생성 후 훅 */
+  /** Hook to run after spec generation */
   afterGenerate?: (spec: OpenAPISpec) => Promise<OpenAPISpec>;
 }
 
-// Breaking Change 관련 타입
+// Breaking change related types
 export interface BreakingChange {
   path: string;
   method?: string;
@@ -437,7 +437,7 @@ export interface CompareSpecsOptions {
   head: string;
 }
 
-// Mock 서버 관련 타입
+// Mock server related types
 export interface MockRequest {
   method: string;
   path: string;

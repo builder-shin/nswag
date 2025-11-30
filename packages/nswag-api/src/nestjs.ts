@@ -1,6 +1,6 @@
 /**
- * NestJS 모듈
- * NestJS 앱에서 OpenAPI 스펙을 JSON/YAML 엔드포인트로 노출
+ * NestJS module
+ * Exposes OpenAPI specs as JSON/YAML endpoints in NestJS apps
  *
  * @example
  * ```typescript
@@ -16,7 +16,7 @@
  * })
  * export class AppModule {}
  *
- * // GET /api-docs/v1/openapi.json -> ./openapi/v1/openapi.json 내용 반환
+ * // GET /api-docs/v1/openapi.json -> returns ./openapi/v1/openapi.json contents
  * ```
  */
 
@@ -45,14 +45,14 @@ import {
 } from './types.js';
 
 /**
- * NswagApi 모듈 옵션 토큰
+ * NswagApi module options token
  */
 export const NSWAG_API_OPTIONS = 'NSWAG_API_OPTIONS';
 
 /**
- * NswagApi 미들웨어 생성 팩토리
- * @param options - 모듈 옵션
- * @returns Express 미들웨어
+ * NswagApi middleware creation factory
+ * @param options - Module options
+ * @returns Express middleware
  */
 function createNswagApiMiddleware(options: NestJSNswagApiOptions) {
   const {
@@ -65,26 +65,26 @@ function createNswagApiMiddleware(options: NestJSNswagApiOptions) {
     openapiHeaders = DEFAULT_OPTIONS.openapiHeaders,
   } = options;
 
-  // openapiRoot를 절대 경로로 변환
+  // Convert openapiRoot to absolute path
   const absoluteRoot = resolve(process.cwd(), openapiRoot);
 
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    // GET 또는 OPTIONS 메서드만 처리
+    // Only handle GET or OPTIONS methods
     if (req.method !== 'GET' && req.method !== 'OPTIONS') {
       next();
       return;
     }
 
-    // basePath로 시작하는지 확인
+    // Check if path starts with basePath
     if (!req.path.startsWith(basePath)) {
       next();
       return;
     }
 
-    // basePath 제거한 경로
+    // Path with basePath removed
     const relativePath = req.path.slice(basePath.length);
 
-    // CORS preflight 요청 처리
+    // Handle CORS preflight request
     if (isPreflightRequest(req.method)) {
       if (cors.enabled) {
         const origin = getOriginFromHeaders(req.headers as Record<string, string | string[] | undefined>);
@@ -102,14 +102,14 @@ function createNswagApiMiddleware(options: NestJSNswagApiOptions) {
       return;
     }
 
-    // 요청 경로 파싱
+    // Parse request path
     const fileInfo = parseRequestPath(relativePath, absoluteRoot);
     if (!fileInfo) {
       next();
       return;
     }
 
-    // 인증 검증
+    // Validate authentication
     if (auth?.enabled) {
       const authResult = validateAuth(
         req.headers as Record<string, string | string[] | undefined>,
@@ -128,7 +128,7 @@ function createNswagApiMiddleware(options: NestJSNswagApiOptions) {
       }
     }
 
-    // CORS 헤더 설정
+    // Set CORS headers
     if (cors.enabled) {
       const origin = getOriginFromHeaders(req.headers as Record<string, string | string[] | undefined>);
       const corsHeaders = getCorsHeaders(origin, cors);
@@ -140,7 +140,7 @@ function createNswagApiMiddleware(options: NestJSNswagApiOptions) {
       }
     }
 
-    // OpenAPI 파일 로드
+    // Load OpenAPI file
     let spec = loadOpenAPIFile(fileInfo.absolutePath, cache);
     if (!spec) {
       res.status(404).json({
@@ -150,10 +150,10 @@ function createNswagApiMiddleware(options: NestJSNswagApiOptions) {
       return;
     }
 
-    // 동적 필터 적용
+    // Apply dynamic filter
     if (openapiFilter) {
       try {
-        // 원본 수정 방지를 위해 복사본 생성
+        // Create a copy to prevent modifying the original
         spec = cloneOpenAPI(spec);
         const expressReq: ExpressRequest = {
           headers: req.headers as Record<string, string | string[] | undefined>,
@@ -171,23 +171,23 @@ function createNswagApiMiddleware(options: NestJSNswagApiOptions) {
       }
     }
 
-    // 응답 헤더 설정
+    // Set response headers
     const contentType = getContentType(fileInfo.format);
     res.setHeader('Content-Type', contentType);
 
-    // 커스텀 헤더 적용
+    // Apply custom headers
     Object.entries(openapiHeaders).forEach(([key, value]) => {
       if (typeof value === 'string') res.setHeader(key, value);
     });
 
-    // 응답 전송
+    // Send response
     const body = serializeOpenAPI(spec, fileInfo.format);
     res.send(body);
   };
 }
 
 /**
- * NswagApi NestJS 동적 모듈
+ * NswagApi NestJS dynamic module
  *
  * @example
  * ```typescript
@@ -206,9 +206,9 @@ export class NswagApiModule {
   private static options: NestJSNswagApiOptions;
 
   /**
-   * 동적 모듈 생성
-   * @param options - 모듈 설정
-   * @returns 동적 모듈 정의
+   * Create dynamic module
+   * @param options - Module configuration
+   * @returns Dynamic module definition
    */
   static forRoot(options: NestJSNswagApiOptions): DynamicModule {
     NswagApiModule.options = options;
@@ -227,8 +227,8 @@ export class NswagApiModule {
   }
 
   /**
-   * 미들웨어 설정
-   * NestJS가 이 메서드를 호출하여 미들웨어를 등록
+   * Configure middleware
+   * NestJS calls this method to register middleware
    */
   configure(consumer: MiddlewareConsumer): void {
     const options = NswagApiModule.options;
@@ -239,7 +239,7 @@ export class NswagApiModule {
     const path = options.path || '/api-docs';
     const middleware = createNswagApiMiddleware(options);
 
-    // 미들웨어 등록
+    // Register middleware
     consumer
       .apply(middleware)
       .forRoutes(`${path}/*`);
@@ -247,13 +247,13 @@ export class NswagApiModule {
 }
 
 /**
- * NswagApi 미들웨어 팩토리 (수동 설정용)
- * @param options - 미들웨어 옵션
- * @returns Express 미들웨어
+ * NswagApi middleware factory (for manual configuration)
+ * @param options - Middleware options
+ * @returns Express middleware
  */
 export function createNswagApiNestMiddleware(options: NestJSNswagApiOptions) {
   return createNswagApiMiddleware(options);
 }
 
-// 기본 export
+// Default export
 export default NswagApiModule;

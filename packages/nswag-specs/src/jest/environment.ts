@@ -1,6 +1,6 @@
 /**
- * Jest 커스텀 환경
- * nswag-specs 테스트를 위한 Jest 환경 설정
+ * Jest Custom Environment
+ * Jest environment configuration for nswag-specs testing
  */
 
 import type {
@@ -18,7 +18,7 @@ import { getSpecCollector, resetSpecCollector } from '../testing/spec-collector.
 import { getResponseValidator } from '../testing/response-validator.js';
 import { createHttpClient, resetHttpClient } from '../testing/http-client.js';
 
-// Jest 환경 타입 (실제 jest 타입에 의존하지 않음)
+// Jest environment types (does not depend on actual jest types)
 type JestEnvironmentContext = {
   testPath: string;
   docblockPragmas: Record<string, string | string[]>;
@@ -35,8 +35,8 @@ type JestGlobal = typeof globalThis & {
 };
 
 /**
- * nswag-specs 전용 Jest 환경 클래스
- * 메타데이터 컨텍스트 주입, 스펙 수집, 응답 검증 자동화
+ * nswag-specs Dedicated Jest Environment Class
+ * Automates metadata context injection, spec collection, and response validation
  */
 export class NswagTestEnvironment {
   private global: JestGlobal;
@@ -51,17 +51,17 @@ export class NswagTestEnvironment {
     this.testPath = context.testPath;
     this.options = config.projectConfig.testEnvironmentOptions ?? {};
 
-    // 글로벌 nswag 컨텍스트 설정
+    // Setup global nswag context
     this.setupGlobalContext();
   }
 
   /**
-   * 글로벌 컨텍스트 설정
+   * Setup Global Context
    */
   private setupGlobalContext(): void {
     this.global.__NSWAG_CONTEXT__ = {
       configure: (options: ConfigureOptions) => {
-        // configure 함수 위임
+        // Delegate configure function
         const { configure } = require('../testing/configure.js');
         configure(options);
       },
@@ -78,39 +78,39 @@ export class NswagTestEnvironment {
   }
 
   /**
-   * 환경 설정 (테스트 스위트 시작 전)
+   * Setup Environment (before test suite starts)
    */
   async setup(): Promise<void> {
-    // 컨텍스트 관리자 초기화
+    // Initialize context manager
     resetContextManager();
     resetSpecCollector();
     resetHttpClient();
 
-    // 환경 옵션 적용
+    // Apply environment options
     if (this.options.vcrMode) {
       this.contextManager.setVCRMode(this.options.vcrMode as 'record' | 'playback' | 'none');
     }
   }
 
   /**
-   * 환경 정리 (테스트 스위트 종료 후)
+   * Teardown Environment (after test suite ends)
    */
   async teardown(): Promise<void> {
-    // 스펙 수집 결과 저장 (옵션에 따라)
+    // Save spec collection results (based on options)
     if (this.options.outputSpec) {
       await this.saveCollectedSpecs();
     }
 
-    // 리소스 정리
+    // Clean up resources
     resetContextManager();
     resetHttpClient();
 
-    // 글로벌 컨텍스트 제거
+    // Remove global context
     delete this.global.__NSWAG_CONTEXT__;
   }
 
   /**
-   * 각 테스트 시작 전
+   * Before Each Test
    */
   handleTestEvent(event: TestEvent): void {
     if (event.name === 'test_start') {
@@ -124,23 +124,23 @@ export class NswagTestEnvironment {
   }
 
   /**
-   * AfterEach 처리
+   * Handle AfterEach
    */
   private handleAfterEach(result: AfterEachResult): AfterEachContext | null {
     const { metadata, request, response } = result;
     const responseTime = this.contextManager.getElapsedTime();
 
-    // 응답 검증
+    // Validate response
     const extendedMetadata = this.responseValidator.validate(
       metadata,
       response,
       responseTime,
     );
 
-    // 스펙 수집
+    // Collect spec
     this.specCollector.collect(metadata, request, response);
 
-    // AfterEach 컨텍스트 생성
+    // Create AfterEach context
     return this.contextManager.createAfterEachContext(
       metadata,
       request,
@@ -153,7 +153,7 @@ export class NswagTestEnvironment {
   }
 
   /**
-   * 수집된 스펙 저장
+   * Save Collected Specs
    */
   private async saveCollectedSpecs(): Promise<void> {
     const spec = this.specCollector.toOpenAPISpec();
@@ -164,12 +164,12 @@ export class NswagTestEnvironment {
       const content = JSON.stringify(spec, null, 2);
       await fs.writeFile(outputPath, content, 'utf-8');
     } catch (error) {
-      console.error('스펙 파일 저장 실패:', error);
+      console.error('Failed to save spec file:', error);
     }
   }
 }
 
-// 타입 정의
+// Type definitions
 interface NswagTestContext {
   configure: (options: ConfigureOptions) => void;
   getContext: () => TestContext | null;
@@ -190,35 +190,35 @@ interface TestEvent {
   test?: { name: string };
 }
 
-// 레거시 호환성을 위한 간단한 환경 클래스
+// Simple environment class for legacy compatibility
 export class JestEnvironment {
   private context: TestContext | null = null;
 
   constructor() {
-    // Jest 환경 초기화
+    // Initialize Jest environment
   }
 
   /**
-   * 테스트 컨텍스트 설정
+   * Set Test Context
    */
   setContext(context: TestContext): void {
     this.context = context;
   }
 
   /**
-   * 테스트 컨텍스트 조회
+   * Get Test Context
    */
   getContext(): TestContext | null {
     return this.context;
   }
 
   /**
-   * 환경 정리
+   * Teardown Environment
    */
   teardown(): void {
     this.context = null;
   }
 }
 
-// 기본 export
+// Default export
 export default NswagTestEnvironment;

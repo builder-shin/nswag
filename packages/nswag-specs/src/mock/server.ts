@@ -1,6 +1,6 @@
 /**
- * Mock 서버 구현
- * Phase 9 명세서 기반 구현
+ * Mock server implementation
+ * Phase 9 specification-based implementation
  */
 
 import { createServer, IncomingMessage, ServerResponse, Server } from 'http';
@@ -24,7 +24,7 @@ import { debugMock } from '../logger/index.js';
 import { MockGenerator } from './index.js';
 
 /**
- * 기본 CORS 설정
+ * Default CORS settings
  */
 const DEFAULT_CORS: CorsOptions = {
   origin: '*',
@@ -36,7 +36,7 @@ const DEFAULT_CORS: CorsOptions = {
 };
 
 /**
- * 로거 인터페이스
+ * Logger interface
  */
 interface Logger {
   info: (msg: string) => void;
@@ -44,7 +44,7 @@ interface Logger {
 }
 
 /**
- * 스펙 파일 로드
+ * Load spec file
  */
 async function loadSpec(filePath: string): Promise<OpenAPISpec> {
   const content = await readFile(filePath, 'utf-8');
@@ -57,7 +57,7 @@ async function loadSpec(filePath: string): Promise<OpenAPISpec> {
 }
 
 /**
- * 경로 패턴 매칭 (OpenAPI 경로 변수 지원)
+ * Path pattern matching (OpenAPI path variable support)
  */
 function matchPath(
   pattern: string,
@@ -92,7 +92,7 @@ function matchPath(
 }
 
 /**
- * Mock 응답 생성
+ * Generate mock response
  */
 function generateMockResponse(
   operation: Operation,
@@ -101,7 +101,7 @@ function generateMockResponse(
   const responses = operation.responses || {};
   const mockGenerator = new MockGenerator();
 
-  // 성공 응답 코드 우선
+  // Prioritize success response codes
   const successCodes = ['200', '201', '204'];
   let responseCode = '200';
 
@@ -117,20 +117,20 @@ function generateMockResponse(
     return { status: 200, body: {} };
   }
 
-  // 컨텐츠 추출
+  // Extract content
   const content = (response as { content?: Record<string, { schema?: Schema; example?: unknown }> }).content;
   if (!content) {
     return { status: parseInt(responseCode, 10), body: null };
   }
 
-  // application/json 우선
+  // Prioritize application/json
   const firstKey = Object.keys(content)[0];
   const mediaType = content['application/json'] || (firstKey ? content[firstKey] : undefined);
   if (!mediaType) {
     return { status: parseInt(responseCode, 10), body: null };
   }
 
-  // example이 있으면 사용
+  // Use example if available
   if (mediaType.example) {
     return {
       status: parseInt(responseCode, 10),
@@ -138,9 +138,9 @@ function generateMockResponse(
     };
   }
 
-  // 스키마로부터 생성
+  // Generate from schema
   if (mediaType.schema) {
-    // $ref 해결
+    // Resolve $ref
     let schema = mediaType.schema;
     if (schema.$ref) {
       const refPath = schema.$ref.replace('#/', '').split('/');
@@ -163,7 +163,7 @@ function generateMockResponse(
 }
 
 /**
- * 요청 본문 파싱
+ * Parse request body
  */
 async function parseRequestBody(req: IncomingMessage): Promise<unknown> {
   return new Promise((resolve, reject) => {
@@ -187,7 +187,7 @@ async function parseRequestBody(req: IncomingMessage): Promise<unknown> {
 }
 
 /**
- * 쿼리 문자열 파싱
+ * Parse query string
  */
 function parseQuery(queryString: string | null): Record<string, string | string[]> {
   if (!queryString) return {};
@@ -212,7 +212,7 @@ function parseQuery(queryString: string | null): Record<string, string | string[
 }
 
 /**
- * 딜레이 적용
+ * Apply delay
  */
 function applyDelay(delay: MockServerOptions['delay']): Promise<void> {
   if (!delay) return Promise.resolve();
@@ -230,7 +230,7 @@ function applyDelay(delay: MockServerOptions['delay']): Promise<void> {
 }
 
 /**
- * CORS 헤더 적용
+ * Apply CORS headers
  */
 function applyCorsHeaders(
   res: ServerResponse,
@@ -266,7 +266,7 @@ function applyCorsHeaders(
 }
 
 /**
- * Mock 서버 생성
+ * Create mock server
  *
  * @example
  * const mockServer = createMockServer({
@@ -288,21 +288,21 @@ export function createMockServer(options: MockServerOptions): MockServer {
   let server: Server | null = null;
   const handlers: Map<string, MockHandler> = new Map();
 
-  // 로거 설정
+  // Configure logger
   const logger: Logger | null = options.logger === true
     ? { info: (msg) => console.log(`[mock] ${msg}`), error: (msg) => console.error(`[mock] ${msg}`) }
     : options.logger === false
     ? null
     : options.logger || null;
 
-  // CORS 설정
+  // Configure CORS
   const corsOptions: CorsOptions | null = options.cors === true
     ? DEFAULT_CORS
     : options.cors === false
     ? null
     : options.cors || null;
 
-  // 커스텀 핸들러 등록
+  // Register custom handlers
   if (options.handlers) {
     for (const [pattern, handler] of Object.entries(options.handlers)) {
       handlers.set(pattern, handler);
@@ -310,7 +310,7 @@ export function createMockServer(options: MockServerOptions): MockServer {
   }
 
   /**
-   * 요청 핸들러
+   * Request handler
    */
   async function handleRequest(
     req: IncomingMessage,
@@ -329,22 +329,22 @@ export function createMockServer(options: MockServerOptions): MockServer {
       return;
     }
 
-    // CORS 헤더 적용
+    // Apply CORS headers
     if (corsOptions) {
       applyCorsHeaders(res, corsOptions, req.headers.origin);
     }
 
     try {
-      // 딜레이 적용
+      // Apply delay
       await applyDelay(options.delay);
 
-      // 요청 본문 파싱
+      // Parse request body
       const body = await parseRequestBody(req);
 
-      // 쿼리 파라미터 파싱
+      // Parse query parameters
       const query = parseQuery(parsedUrl.search?.slice(1) || null);
 
-      // 커스텀 핸들러 확인
+      // Check custom handler
       const handlerKey = `${method} ${path}`;
       const customHandler = handlers.get(handlerKey);
 
@@ -371,7 +371,7 @@ export function createMockServer(options: MockServerOptions): MockServer {
         return;
       }
 
-      // OpenAPI 스펙 기반 응답
+      // OpenAPI spec-based response
       if (!spec) {
         throw new NswagMockServerError({
           errorType: 'routing',
@@ -380,7 +380,7 @@ export function createMockServer(options: MockServerOptions): MockServer {
         });
       }
 
-      // 경로 매칭
+      // Path matching
       const paths = spec.paths || {};
       let matchedPath: string | null = null;
       let matchedPathItem: PathItem | null = null;
@@ -389,7 +389,7 @@ export function createMockServer(options: MockServerOptions): MockServer {
         const result = matchPath(specPath, path);
         if (result.match) {
           matchedPath = specPath;
-          // TODO: matchedParams를 사용하여 경로 파라미터 검증 추가 예정
+          // TODO: Add path parameter validation using matchedParams
           // const matchedParams = result.params;
           matchedPathItem = pathItem as PathItem;
           break;
@@ -403,7 +403,7 @@ export function createMockServer(options: MockServerOptions): MockServer {
         return;
       }
 
-      // 메서드 확인
+      // Check method
       const operation = matchedPathItem[method.toLowerCase() as keyof PathItem] as Operation | undefined;
       if (!operation) {
         res.writeHead(405, { 'Content-Type': 'application/json' });
@@ -412,7 +412,7 @@ export function createMockServer(options: MockServerOptions): MockServer {
         return;
       }
 
-      // Mock 응답 생성
+      // Generate mock response
       const mockResponse = generateMockResponse(operation, spec);
       const responseTime = Date.now() - startTime;
 
@@ -440,7 +440,7 @@ export function createMockServer(options: MockServerOptions): MockServer {
 
   const mockServer: MockServer = {
     async listen(port: number): Promise<void> {
-      // 스펙 로드
+      // Load spec
       try {
         spec = await loadSpec(options.spec);
         debugMock.info(`Loaded spec from ${options.spec}`);
@@ -452,7 +452,7 @@ export function createMockServer(options: MockServerOptions): MockServer {
         });
       }
 
-      // 서버 시작
+      // Start server
       return new Promise((resolve, reject) => {
         server = createServer(handleRequest);
 

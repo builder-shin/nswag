@@ -1,14 +1,14 @@
 /**
- * 전역 설정 관리자
- * Phase 4: API 버전 및 문서화 옵션
+ * Global configuration manager
+ * Phase 4: API version and documentation options
  *
- * openapiSpecs 다중 버전 설정 및 전역 옵션 관리
+ * Manage openapiSpecs multi-version configuration and global options
  */
 
 import type { GlobalConfigOptions, OpenAPISpecInfo, OpenAPISpecsConfig } from './types.js';
 
 /**
- * 전역 설정 저장소
+ * Global configuration store
  */
 interface GlobalConfigStore {
   openapiRoot: string;
@@ -19,7 +19,7 @@ interface GlobalConfigStore {
 }
 
 /**
- * 기본 설정값
+ * Default configuration values
  */
 const defaultConfig: GlobalConfigStore = {
   openapiRoot: './openapi',
@@ -30,16 +30,16 @@ const defaultConfig: GlobalConfigStore = {
 };
 
 /**
- * 현재 설정 저장소
+ * Current configuration store
  */
 let currentConfig: GlobalConfigStore = { ...defaultConfig };
 
 /**
- * 전역 설정 관리자 클래스
+ * Global configuration manager class
  */
 export class GlobalConfigManager {
   /**
-   * 전역 설정 구성
+   * Configure global settings
    *
    * @example
    * GlobalConfigManager.configure({
@@ -69,70 +69,70 @@ export class GlobalConfigManager {
   }
 
   /**
-   * 현재 설정 가져오기
+   * Get current configuration
    */
   static getConfig(): Readonly<GlobalConfigStore> {
     return { ...currentConfig };
   }
 
   /**
-   * OpenAPI 루트 경로 가져오기
+   * Get OpenAPI root path
    */
   static getOpenapiRoot(): string {
     return currentConfig.openapiRoot;
   }
 
   /**
-   * 특정 스펙 파일의 설정 가져오기
+   * Get configuration for specific spec file
    */
   static getSpecConfig(specPath: string): Partial<OpenAPISpecInfo> | undefined {
     return currentConfig.openapiSpecs[specPath];
   }
 
   /**
-   * 모든 스펙 파일 경로 가져오기
+   * Get all spec file paths
    */
   static getSpecPaths(): string[] {
     return Object.keys(currentConfig.openapiSpecs);
   }
 
   /**
-   * 스펙 설정 존재 여부 확인
+   * Check if spec configuration exists
    */
   static hasSpec(specPath: string): boolean {
     return specPath in currentConfig.openapiSpecs;
   }
 
   /**
-   * 스펙 설정 추가/업데이트
+   * Add/update spec configuration
    */
   static setSpecConfig(specPath: string, config: Partial<OpenAPISpecInfo>): void {
     currentConfig.openapiSpecs[specPath] = config;
   }
 
   /**
-   * 전역 noAdditionalProperties 옵션 가져오기
+   * Get global noAdditionalProperties option
    */
   static getNoAdditionalProperties(): boolean {
     return currentConfig.openapiNoAdditionalProperties;
   }
 
   /**
-   * 전역 allPropertiesRequired 옵션 가져오기
+   * Get global allPropertiesRequired option
    */
   static getAllPropertiesRequired(): boolean {
     return currentConfig.openapiAllPropertiesRequired;
   }
 
   /**
-   * 기본 OpenAPI 버전 가져오기
+   * Get default OpenAPI version
    */
   static getDefaultOpenAPIVersion(): '3.0.3' | '3.1.0' {
     return currentConfig.defaultOpenAPIVersion;
   }
 
   /**
-   * 특정 스펙의 OpenAPI 버전 가져오기
+   * Get OpenAPI version for specific spec
    */
   static getOpenAPIVersion(specPath?: string): string {
     if (specPath && currentConfig.openapiSpecs[specPath]?.openapi) {
@@ -142,7 +142,7 @@ export class GlobalConfigManager {
   }
 
   /**
-   * 설정 초기화
+   * Reset configuration
    */
   static reset(): void {
     currentConfig = { ...defaultConfig };
@@ -150,11 +150,11 @@ export class GlobalConfigManager {
 }
 
 // ============================================================================
-// 편의 함수
+// Convenience functions
 // ============================================================================
 
 /**
- * 전역 설정 구성 함수
+ * Configure global settings function
  *
  * @example
  * configureOpenAPI({
@@ -174,28 +174,28 @@ export function configureOpenAPI(options: GlobalConfigOptions): void {
 }
 
 /**
- * 현재 전역 설정 가져오기
+ * Get current global configuration
  */
 export function getGlobalConfig(): Readonly<GlobalConfigStore> {
   return GlobalConfigManager.getConfig();
 }
 
 /**
- * 전역 설정 초기화
+ * Reset global configuration
  */
 export function resetGlobalConfig(): void {
   GlobalConfigManager.reset();
 }
 
 /**
- * 특정 스펙의 설정 가져오기
+ * Get configuration for specific spec
  */
 export function getSpecConfig(specPath: string): Partial<OpenAPISpecInfo> | undefined {
   return GlobalConfigManager.getSpecConfig(specPath);
 }
 
 /**
- * OpenAPI 버전 가져오기
+ * Get OpenAPI version
  */
 export function getOpenAPIVersion(specPath?: string): string {
   return GlobalConfigManager.getOpenAPIVersion(specPath);

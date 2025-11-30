@@ -1,12 +1,12 @@
 /**
- * valid-http-status 규칙
- * 유효한 HTTP 상태 코드만 사용 (100-599)
+ * valid-http-status rule
+ * Only allow valid HTTP status codes (100-599)
  */
 
 import type { Rule } from 'eslint';
 import type { CallExpression, Node } from 'estree';
 
-// 노드가 response() 호출인지 확인
+// Check if node is a response() call
 function isResponseCall(node: Node): node is CallExpression {
   return (
     node.type === 'CallExpression' &&
@@ -15,12 +15,12 @@ function isResponseCall(node: Node): node is CallExpression {
   );
 }
 
-// 리터럴 숫자 값 추출
+// Extract literal numeric value
 function getNumericValue(node: Node): number | undefined {
   if (node.type === 'Literal' && typeof node.value === 'number') {
     return node.value;
   }
-  // 문자열로 된 숫자도 허용
+  // Also allow string numbers
   if (node.type === 'Literal' && typeof node.value === 'string') {
     const parsed = parseInt(node.value, 10);
     if (!isNaN(parsed)) {
@@ -30,12 +30,12 @@ function getNumericValue(node: Node): number | undefined {
   return undefined;
 }
 
-// HTTP 상태 코드 유효성 검사
+// Validate HTTP status code
 function isValidHttpStatusCode(code: number): boolean {
   return Number.isInteger(code) && code >= 100 && code <= 599;
 }
 
-// 표준 HTTP 상태 코드 목록
+// Standard HTTP status codes list
 const STANDARD_STATUS_CODES = new Set([
   // 1xx Informational
   100, 101, 102, 103,
@@ -59,7 +59,7 @@ const rule: Rule.RuleModule = {
   meta: {
     type: 'problem',
     docs: {
-      description: '유효한 HTTP 상태 코드만 사용 (100-599)',
+      description: 'Only allow valid HTTP status codes (100-599)',
       category: 'Possible Errors',
       recommended: true,
     },
@@ -77,9 +77,9 @@ const rule: Rule.RuleModule = {
     ],
     messages: {
       invalidStatusCode:
-        '유효하지 않은 HTTP 상태 코드: {{code}}. 상태 코드는 100-599 범위여야 합니다.',
+        'Invalid HTTP status code: {{code}}. Status code must be in range 100-599.',
       nonStandardStatusCode:
-        '표준이 아닌 HTTP 상태 코드: {{code}}. RFC에 정의된 표준 상태 코드 사용을 권장합니다.',
+        'Non-standard HTTP status code: {{code}}. Using RFC-defined standard status codes is recommended.',
     },
   },
 
@@ -93,7 +93,7 @@ const rule: Rule.RuleModule = {
           return;
         }
 
-        // response()의 첫 번째 인자가 상태 코드
+        // First argument of response() is the status code
         const statusCodeArg = node.arguments[0];
         if (!statusCodeArg) {
           return;
@@ -101,7 +101,7 @@ const rule: Rule.RuleModule = {
 
         const statusCode = getNumericValue(statusCodeArg);
         if (statusCode === undefined) {
-          return; // 동적 값은 검사하지 않음
+          return; // Don't check dynamic values
         }
 
         if (!isValidHttpStatusCode(statusCode)) {

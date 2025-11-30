@@ -1,12 +1,12 @@
 /**
- * prefer-request-body 규칙
- * parameter({ in: 'body' }) 대신 requestBody() 권장
+ * prefer-request-body rule
+ * Recommend requestBody() instead of parameter({ in: 'body' })
  */
 
 import type { Rule } from 'eslint';
 import type { CallExpression, ObjectExpression, Property, Node } from 'estree';
 
-// 노드가 parameter() 호출인지 확인
+// Check if node is a parameter() call
 function isParameterCall(node: Node): node is CallExpression {
   return (
     node.type === 'CallExpression' &&
@@ -15,7 +15,7 @@ function isParameterCall(node: Node): node is CallExpression {
   );
 }
 
-// 속성 이름 추출
+// Extract property name
 function getPropertyName(prop: Property): string | undefined {
   if (prop.key.type === 'Identifier') {
     return prop.key.name;
@@ -26,7 +26,7 @@ function getPropertyName(prop: Property): string | undefined {
   return undefined;
 }
 
-// 리터럴 값 추출
+// Extract literal value
 function getLiteralValue(node: Node): unknown {
   if (node.type === 'Literal') {
     return node.value;
@@ -34,7 +34,7 @@ function getLiteralValue(node: Node): unknown {
   return undefined;
 }
 
-// parameter 호출에서 'in: body' 찾기
+// Find 'in: body' in parameter call
 function hasBodyLocation(node: ObjectExpression): boolean {
   for (const prop of node.properties) {
     if (prop.type !== 'Property') continue;
@@ -54,7 +54,7 @@ const rule: Rule.RuleModule = {
   meta: {
     type: 'suggestion',
     docs: {
-      description: 'parameter({ in: "body" }) 대신 requestBody() 권장',
+      description: 'Recommend requestBody() instead of parameter({ in: "body" })',
       category: 'Best Practices',
       recommended: false,
     },
@@ -62,7 +62,7 @@ const rule: Rule.RuleModule = {
     schema: [],
     messages: {
       preferRequestBody:
-        'parameter({ in: "body" }) 대신 requestBody()를 사용하세요. OpenAPI 3.0에서는 requestBody가 권장됩니다.',
+        'Use requestBody() instead of parameter({ in: "body" }). requestBody is recommended in OpenAPI 3.0.',
     },
   },
 
@@ -82,7 +82,7 @@ const rule: Rule.RuleModule = {
           context.report({
             node,
             messageId: 'preferRequestBody',
-            // 자동 수정은 복잡할 수 있으므로 제외
+            // Auto-fix can be complex, so excluded
           });
         }
       },

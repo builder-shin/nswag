@@ -1,21 +1,21 @@
 /**
- * TypeBox 어댑터
- * TypeBox 스키마를 OpenAPI 스키마로 변환
+ * TypeBox Adapter
+ * Convert TypeBox schemas to OpenAPI schemas
  *
- * TypeBox는 이미 JSON Schema를 기반으로 하므로 대부분 그대로 사용 가능합니다.
+ * TypeBox is already based on JSON Schema, so most conversions are straightforward.
  *
- * 제한사항:
- * - Type.Recursive(): 재귀 타입 미지원
- * - Type.This(): 자기 참조 타입 미지원
- * - Type.Unsafe(): 타입 안전하지 않은 타입 미지원
- * - Type.Transform(): 변환 타입 미지원
+ * Limitations:
+ * - Type.Recursive(): Recursive types not supported
+ * - Type.This(): Self-referencing types not supported
+ * - Type.Unsafe(): Unsafe types not supported
+ * - Type.Transform(): Transform types not supported
  */
 
 import type { Schema } from '../types/index.js';
 
 /**
- * TypeBox 스키마 타입 (간소화된 인터페이스)
- * TypeBox는 이미 JSON Schema 호환이므로 변환이 간단함
+ * TypeBox schema type (simplified interface)
+ * TypeBox is already JSON Schema compatible, so conversion is straightforward
  */
 export interface TypeBoxSchema {
   type?: string;
@@ -50,7 +50,7 @@ export interface TypeBoxSchema {
   readOnly?: boolean;
   writeOnly?: boolean;
   nullable?: boolean;
-  // TypeBox 전용 속성
+  // TypeBox-specific properties
   $id?: string;
   kind?: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -58,16 +58,16 @@ export interface TypeBoxSchema {
 }
 
 /**
- * OpenAPI에서 제거해야 할 TypeBox 전용 속성들
+ * TypeBox-specific properties to remove in OpenAPI
  */
 const TYPEBOX_ONLY_KEYS = ['$id', 'kind', '$static', 'transform', 'params'];
 
 /**
- * TypeBox 스키마를 OpenAPI 스키마로 변환
- * TypeBox는 이미 JSON Schema를 기반으로 하므로 대부분 그대로 사용 가능
+ * Convert TypeBox schema to OpenAPI schema
+ * TypeBox is already based on JSON Schema, so most conversions are straightforward
  *
- * @param typeboxSchema - 변환할 TypeBox 스키마
- * @returns OpenAPI 호환 스키마
+ * @param typeboxSchema - TypeBox schema to convert
+ * @returns OpenAPI compatible schema
  *
  * @example
  * ```typescript
@@ -84,21 +84,21 @@ const TYPEBOX_ONLY_KEYS = ['$id', 'kind', '$static', 'transform', 'params'];
  * ```
  */
 export function typeboxToOpenApi(typeboxSchema: TypeBoxSchema): Schema {
-  // TypeBox $id, kind 등 OpenAPI에서 불필요한 필드 제거
+  // Remove TypeBox-specific fields like $id, kind that are not needed in OpenAPI
   const cleanedSchema = cleanTypeBoxSchema(typeboxSchema);
 
-  // 재귀적으로 변환
+  // Recursively convert
   return convertSchema(cleanedSchema);
 }
 
 /**
- * TypeBox 전용 속성 제거
+ * Remove TypeBox-specific properties
  */
 function cleanTypeBoxSchema(schema: TypeBoxSchema): TypeBoxSchema {
   const cleaned: TypeBoxSchema = {};
 
   for (const [key, value] of Object.entries(schema)) {
-    // TypeBox 전용 속성 건너뛰기
+    // Skip TypeBox-specific properties
     if (TYPEBOX_ONLY_KEYS.includes(key)) {
       continue;
     }
@@ -110,12 +110,12 @@ function cleanTypeBoxSchema(schema: TypeBoxSchema): TypeBoxSchema {
 }
 
 /**
- * 스키마 변환
+ * Convert schema
  */
 function convertSchema(schema: TypeBoxSchema): Schema {
   const result: Schema = {};
 
-  // 기본 타입
+  // Basic type
   if (schema.type) {
     result.type = schema.type;
   }
@@ -135,7 +135,7 @@ function convertSchema(schema: TypeBoxSchema): Schema {
     result.enum = schema.enum;
   }
 
-  // const (OpenAPI 3.1+에서 지원, 3.0에서는 enum으로 변환)
+  // const (supported in OpenAPI 3.1+, converted to enum in 3.0)
   if (schema.const !== undefined) {
     result.enum = [schema.const];
   }
@@ -150,7 +150,7 @@ function convertSchema(schema: TypeBoxSchema): Schema {
     result.nullable = schema.nullable;
   }
 
-  // String 제약조건
+  // String constraints
   if (schema.minLength !== undefined) {
     result.minLength = schema.minLength;
   }
@@ -161,7 +161,7 @@ function convertSchema(schema: TypeBoxSchema): Schema {
     result.pattern = schema.pattern;
   }
 
-  // Number 제약조건
+  // Number constraints
   if (schema.minimum !== undefined) {
     result.minimum = schema.minimum;
   }
@@ -178,7 +178,7 @@ function convertSchema(schema: TypeBoxSchema): Schema {
     result.multipleOf = schema.multipleOf;
   }
 
-  // Array 제약조건
+  // Array constraints
   if (schema.minItems !== undefined) {
     result.minItems = schema.minItems;
   }
@@ -189,7 +189,7 @@ function convertSchema(schema: TypeBoxSchema): Schema {
     result.uniqueItems = schema.uniqueItems;
   }
 
-  // Object 제약조건
+  // Object constraints
   if (schema.minProperties !== undefined) {
     result.minProperties = schema.minProperties;
   }
@@ -222,7 +222,7 @@ function convertSchema(schema: TypeBoxSchema): Schema {
   // items (Array)
   if (schema.items) {
     if (Array.isArray(schema.items)) {
-      // Tuple: items가 배열인 경우
+      // Tuple: items is an array
       result.items = {
         oneOf: schema.items.map((item) => typeboxToOpenApi(item)),
       };
@@ -253,12 +253,12 @@ function convertSchema(schema: TypeBoxSchema): Schema {
     result.not = typeboxToOpenApi(schema.not);
   }
 
-  // $ref 처리
+  // Handle $ref
   if (schema.$ref) {
     result.$ref = schema.$ref;
   }
 
-  // 기타 메타데이터
+  // Other metadata
   if (schema.title) {
     result.title = schema.title;
   }
@@ -276,11 +276,11 @@ function convertSchema(schema: TypeBoxSchema): Schema {
 }
 
 /**
- * TypeBox 스키마에서 참조($ref)를 해석
+ * Resolve references ($ref) in TypeBox schema
  *
- * @param schema - 해석할 스키마
- * @param definitions - 정의된 스키마들
- * @returns 해석된 스키마
+ * @param schema - Schema to resolve
+ * @param definitions - Defined schemas
+ * @returns Resolved schema
  */
 export function resolveTypeBoxRefs(
   schema: TypeBoxSchema,

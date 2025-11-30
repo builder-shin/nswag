@@ -1,5 +1,5 @@
 /**
- * CLI 메인 진입점
+ * CLI main entry point
  */
 
 import { parseArgs, printHelp, printVersion, handleError, logger } from './utils.js';
@@ -11,25 +11,25 @@ import { runUiCustom, runUiCopyAssets } from './commands/ui.js';
 import { runMockStart } from './commands/mock.js';
 
 /**
- * CLI 메인 함수
+ * CLI main function
  */
 export async function main(): Promise<void> {
   const args = parseArgs(process.argv);
 
-  // 도움말 플래그 체크
+  // Check help flag
   if (args.flags.help || args.flags.h) {
     printHelp();
     return;
   }
 
-  // 버전 플래그 체크
+  // Check version flag
   if (args.flags.version || args.flags.v) {
     await printVersion();
     return;
   }
 
   try {
-    // 명령어 라우팅
+    // Command routing
     switch (args.command) {
       case 'init':
         await runInit(args);
@@ -48,7 +48,7 @@ export async function main(): Promise<void> {
         break;
 
       case 'ui':
-        // 네임스페이스 명령어 처리
+        // Handle namespaced command
         switch (args.subCommand) {
           case 'custom':
             await runUiCustom(args);
@@ -57,32 +57,32 @@ export async function main(): Promise<void> {
             await runUiCopyAssets(args);
             break;
           default:
-            logger.error(`알 수 없는 ui 서브커맨드: ${args.subCommand}`);
-            logger.info('사용 가능한 명령어: ui:custom, ui:copy-assets');
+            logger.error(`Unknown ui subcommand: ${args.subCommand}`);
+            logger.info('Available commands: ui:custom, ui:copy-assets');
             process.exit(1);
         }
         break;
 
       case 'mock':
-        // 네임스페이스 명령어 처리
+        // Handle namespaced command
         switch (args.subCommand) {
           case 'start':
             await runMockStart(args);
             break;
           default:
-            logger.error(`알 수 없는 mock 서브커맨드: ${args.subCommand}`);
-            logger.info('사용 가능한 명령어: mock:start');
+            logger.error(`Unknown mock subcommand: ${args.subCommand}`);
+            logger.info('Available commands: mock:start');
             process.exit(1);
         }
         break;
 
       default:
-        // 기본 명령어는 generate
+        // Default command is generate
         if (!args.command || args.command === 'nswag') {
           args.command = 'generate';
           await runGenerate(args);
         } else {
-          logger.error(`알 수 없는 명령어: ${args.command}`);
+          logger.error(`Unknown command: ${args.command}`);
           printHelp();
           process.exit(1);
         }

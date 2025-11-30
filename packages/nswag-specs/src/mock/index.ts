@@ -1,26 +1,26 @@
 /**
- * Mock 모듈
- * 테스트를 위한 Mock 데이터 생성 및 Mock 서버
+ * Mock module
+ * Mock data generation and mock server for testing
  */
 
 import type { Schema } from '../types/index.js';
 
-// Mock 서버 re-export
+// Mock server re-export
 export { createMockServer } from './server.js';
 
 /**
- * 스키마 기반 Mock 데이터 생성기
+ * Schema-based mock data generator
  */
 export class MockGenerator {
   /**
-   * 스키마를 기반으로 Mock 데이터 생성
+   * Generate mock data based on schema
    *
-   * @param schema - OpenAPI 스키마
-   * @returns Mock 데이터
+   * @param schema - OpenAPI schema
+   * @returns Mock data
    */
   generate(schema: Schema): unknown {
     if (schema.$ref) {
-      // $ref는 외부에서 해결되어야 함
+      // $ref must be resolved externally
       return {};
     }
 
@@ -98,12 +98,12 @@ export class MockGenerator {
 }
 
 /**
- * 기본 Mock 생성기 인스턴스
+ * Default mock generator instance
  */
 export const mockGenerator = new MockGenerator();
 
 /**
- * 스키마 기반 Mock 데이터 생성 헬퍼
+ * Schema-based mock data generation helper
  */
 export function generateMock(schema: Schema): unknown {
   return mockGenerator.generate(schema);

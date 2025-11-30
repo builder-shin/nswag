@@ -1,26 +1,26 @@
 /**
- * Vitest 플러그인
- * 가상 모듈 주입, HMR 통합, 리포터 자동 등록
+ * Vitest Plugin
+ * Virtual module injection, HMR integration, automatic reporter registration
  */
 
 import type { ConfigureOptions } from '../types/index.js';
 
 /**
- * Vitest 플러그인 옵션
+ * Vitest Plugin Options
  */
 export interface NswagPluginOptions {
-  /** VCR 모드 */
+  /** VCR mode */
   vcrMode?: 'record' | 'playback' | 'none';
-  /** 스펙 출력 경로 */
+  /** Spec output path */
   outputSpec?: string;
-  /** 응답 검증 활성화 */
+  /** Enable response validation */
   validateResponses?: boolean;
-  /** 글로벌 설정 */
+  /** Global configuration */
   configure?: ConfigureOptions;
 }
 
 /**
- * Vite 플러그인 타입 (간소화)
+ * Vite Plugin Type (simplified)
  */
 interface VitePlugin {
   name: string;
@@ -32,7 +32,7 @@ interface VitePlugin {
 }
 
 /**
- * nswag-specs Vitest 플러그인
+ * nswag-specs Vitest plugin
  *
  * @example
  * // vitest.config.ts
@@ -55,17 +55,17 @@ export function nswagPlugin(options: NswagPluginOptions = {}): VitePlugin {
     enforce: 'pre',
 
     /**
-     * 설정 해결 후 처리
+     * Process after config resolution
      */
     configResolved(_config: unknown) {
-      // 플러그인 옵션 저장
+      // Store plugin options
       if (options.configure) {
-        // 글로벌 설정은 setup 파일에서 처리
+        // Global configuration is handled in setup file
       }
     },
 
     /**
-     * 가상 모듈 ID 해결
+     * Resolve virtual module ID
      */
     resolveId(id: string): string | undefined {
       if (id === virtualModuleId) {
@@ -75,21 +75,21 @@ export function nswagPlugin(options: NswagPluginOptions = {}): VitePlugin {
     },
 
     /**
-     * 가상 모듈 로드
+     * Load virtual module
      */
     load(id: string): string | undefined {
       if (id === resolvedVirtualModuleId) {
-        // 가상 모듈 내용 생성
+        // Generate virtual module content
         return generateVirtualModule(options);
       }
       return undefined;
     },
 
     /**
-     * 개발 서버 설정 (HMR 통합)
+     * Configure dev server (HMR integration)
      */
     configureServer(server: unknown) {
-      // HMR 이벤트 처리
+      // Handle HMR events
       const viteServer = server as {
         ws?: {
           on: (event: string, callback: (data: unknown) => void) => void;
@@ -102,7 +102,7 @@ export function nswagPlugin(options: NswagPluginOptions = {}): VitePlugin {
 
       if (viteServer.ws) {
         viteServer.ws.on('nswag:reload', () => {
-          // 모듈 캐시 무효화
+          // Invalidate module cache
           if (viteServer.moduleGraph) {
             const mod = viteServer.moduleGraph.getModuleById(resolvedVirtualModuleId);
             if (mod) {
@@ -116,18 +116,18 @@ export function nswagPlugin(options: NswagPluginOptions = {}): VitePlugin {
 }
 
 /**
- * 가상 모듈 코드 생성
+ * Generate virtual module code
  */
 function generateVirtualModule(options: NswagPluginOptions): string {
   return `
-// 자동 생성된 nswag-specs 가상 모듈
+// Auto-generated nswag-specs virtual module
 export const nswagOptions = ${JSON.stringify(options, null, 2)};
 
 export const vcrMode = "${options.vcrMode ?? 'none'}";
 export const validateResponses = ${options.validateResponses ?? true};
 export const outputSpec = ${options.outputSpec ? `"${options.outputSpec}"` : 'undefined'};
 
-// 설정 가져오기
+// Get configuration
 export { configure, getConfiguration } from '@aspect/nswag-specs/testing';
 export { createHttpClient } from '@aspect/nswag-specs/testing';
 export { getContextManager } from '@aspect/nswag-specs/testing';
@@ -136,6 +136,6 @@ export { getSpecCollector } from '@aspect/nswag-specs/testing';
 }
 
 /**
- * 기본 export
+ * Default export
  */
 export default nswagPlugin;

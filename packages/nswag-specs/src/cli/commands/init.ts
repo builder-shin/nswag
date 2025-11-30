@@ -1,6 +1,6 @@
 /**
- * init 서브커맨드
- * 초기 설정 파일 및 예제 파일 생성
+ * init subcommand
+ * Create initial configuration and example files
  */
 
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
@@ -8,63 +8,63 @@ import { resolve } from 'path';
 import { logger, type ParsedArgs } from '../utils.js';
 
 /**
- * nswag.config.ts 템플릿
+ * nswag.config.ts template
  */
 const CONFIG_TEMPLATE = `import { defineConfig } from '@aspect/nswag-specs';
 
 export default defineConfig({
-  // 테스트 프레임워크 설정 ('jest' | 'vitest' | 'mocha')
+  // Test framework configuration ('jest' | 'vitest' | 'mocha')
   testFramework: 'jest',
 
-  // 테스트 파일 검색 패턴
+  // Test file search patterns
   testPatterns: [
     'spec/requests/**/*_spec.ts',
     'spec/api/**/*_spec.ts',
     'spec/integration/**/*_spec.ts',
   ],
 
-  // 테스트 타임아웃 (밀리초)
+  // Test timeout (milliseconds)
   testTimeout: 30000,
 
-  // dry-run 모드 (true면 실제 파일 생성하지 않음)
+  // Dry-run mode (if true, actual files won't be generated)
   dryRun: true,
 
-  // 출력 설정
+  // Output settings
   outputDir: './openapi',
   outputFormat: 'json', // 'json' | 'yaml'
   outputFileName: 'openapi',
 
-  // OpenAPI 정보
+  // OpenAPI info
   openapi: {
     title: 'API Documentation',
     version: '1.0.0',
-    description: 'OpenAPI 스펙 문서',
+    description: 'OpenAPI specification document',
   },
 
-  // 플러그인
+  // Plugins
   plugins: [],
 });
 `;
 
 /**
- * openapi_helper.ts 템플릿
+ * openapi_helper.ts template
  */
 const OPENAPI_HELPER_TEMPLATE = `import { configure } from '@aspect/nswag-specs';
 
-// 앱 인스턴스 가져오기 (프로젝트에 맞게 수정)
+// Import app instance (modify according to your project)
 // import { app } from '../src/app';
 
 /**
- * OpenAPI 스펙 테스트를 위한 설정
+ * Configuration for OpenAPI spec testing
  */
 configure({
-  // 앱 인스턴스 (Express, Fastify, Koa 등)
+  // App instance (Express, Fastify, Koa, etc.)
   // app: app,
 
-  // 또는 baseUrl 사용 (외부 서버 테스트)
+  // Or use baseUrl (for testing external server)
   // baseUrl: 'http://localhost:3000',
 
-  // 기본 요청 설정
+  // Default request settings
   requestDefaults: {
     headers: {
       'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ configure({
 `;
 
 /**
- * 예제 스펙 파일 템플릿
+ * Example spec file template
  */
 const EXAMPLE_SPEC_TEMPLATE = `import {
   path,
@@ -90,19 +90,19 @@ const EXAMPLE_SPEC_TEMPLATE = `import {
 } from '@aspect/nswag-specs';
 import '../openapi_helper';
 
-// /api/v1/blogs 경로 정의
+// Define path /api/v1/blogs
 path('/api/v1/blogs', () => {
-  // GET /api/v1/blogs - 블로그 목록 조회
-  get('블로그 목록 조회', {
+  // GET /api/v1/blogs - List blogs
+  get('List blogs', {
     operationId: 'listBlogs',
-    tags: ['블로그'],
+    tags: ['Blogs'],
   }, () => {
-    // 쿼리 파라미터 정의
+    // Define query parameters
     parameter({ name: 'page', in: 'query', schema: { type: 'integer' } });
     parameter({ name: 'limit', in: 'query', schema: { type: 'integer' } });
 
-    // 200 성공 응답
-    response(200, '블로그 목록', () => {
+    // 200 success response
+    response(200, 'Blog list', () => {
       requestParams({ page: 1, limit: 10 });
 
       runTest(async (response, request) => {
@@ -112,12 +112,12 @@ path('/api/v1/blogs', () => {
     });
   });
 
-  // POST /api/v1/blogs - 블로그 생성
-  post('블로그 생성', {
+  // POST /api/v1/blogs - Create blog
+  post('Create blog', {
     operationId: 'createBlog',
-    tags: ['블로그'],
+    tags: ['Blogs'],
   }, () => {
-    // 요청 본문 정의
+    // Define request body
     requestBody('application/json', {
       type: 'object',
       properties: {
@@ -127,16 +127,16 @@ path('/api/v1/blogs', () => {
       required: ['title', 'content'],
     });
 
-    // 201 생성 성공 응답
-    response(201, '블로그 생성 성공', () => {
+    // 201 creation success response
+    response(201, 'Blog created successfully', () => {
       runTest(async (response, request) => {
         expect(response.status).toBe(201);
         expect(response.body).toHaveProperty('id');
       });
     });
 
-    // 400 잘못된 요청 응답
-    response(400, '잘못된 요청', () => {
+    // 400 bad request response
+    response(400, 'Bad request', () => {
       runTest(async (response, request) => {
         expect(response.status).toBe(400);
       });
@@ -144,17 +144,17 @@ path('/api/v1/blogs', () => {
   });
 });
 
-// /api/v1/blogs/{id} 경로 정의
+// Define path /api/v1/blogs/{id}
 path('/api/v1/blogs/{id}', () => {
-  // 경로 파라미터 정의
+  // Define path parameter
   parameter({ name: 'id', in: 'path', required: true, schema: { type: 'integer' } });
 
-  // GET /api/v1/blogs/{id} - 단일 블로그 조회
-  get('블로그 상세 조회', {
+  // GET /api/v1/blogs/{id} - Get single blog
+  get('Get blog details', {
     operationId: 'getBlog',
-    tags: ['블로그'],
+    tags: ['Blogs'],
   }, () => {
-    response(200, '블로그 상세', () => {
+    response(200, 'Blog details', () => {
       requestParams({ id: 1 });
 
       runTest(async (response, request) => {
@@ -164,7 +164,7 @@ path('/api/v1/blogs/{id}', () => {
       });
     });
 
-    response(404, '블로그 없음', () => {
+    response(404, 'Blog not found', () => {
       requestParams({ id: 99999 });
 
       runTest(async (response, request) => {
@@ -176,59 +176,59 @@ path('/api/v1/blogs/{id}', () => {
 `;
 
 /**
- * init 커맨드 실행
+ * Run init command
  */
 export async function runInit(args: ParsedArgs): Promise<void> {
   const cwd = process.cwd();
   const force = args.flags.force === true || args.flags.f === true;
 
-  logger.title('nswag 프로젝트 초기화');
+  logger.title('Initialize nswag project');
 
-  // 1. nswag.config.ts 생성
+  // 1. Create nswag.config.ts
   const configPath = resolve(cwd, 'nswag.config.ts');
   await createFile(configPath, CONFIG_TEMPLATE, 'nswag.config.ts', force);
 
-  // 2. spec 디렉토리 생성
+  // 2. Create spec directory
   const specDir = resolve(cwd, 'spec');
   if (!existsSync(specDir)) {
     mkdirSync(specDir, { recursive: true });
-    logger.success('spec 디렉토리 생성됨');
+    logger.success('spec directory created');
   }
 
-  // 3. spec/openapi_helper.ts 생성
+  // 3. Create spec/openapi_helper.ts
   const helperPath = resolve(specDir, 'openapi_helper.ts');
   await createFile(helperPath, OPENAPI_HELPER_TEMPLATE, 'spec/openapi_helper.ts', force);
 
-  // 4. spec/requests 디렉토리 생성
+  // 4. Create spec/requests directory
   const requestsDir = resolve(specDir, 'requests');
   if (!existsSync(requestsDir)) {
     mkdirSync(requestsDir, { recursive: true });
-    logger.success('spec/requests 디렉토리 생성됨');
+    logger.success('spec/requests directory created');
   }
 
-  // 5. 예제 스펙 파일 생성
+  // 5. Create example spec file
   const examplePath = resolve(requestsDir, 'blogs_spec.ts');
   await createFile(examplePath, EXAMPLE_SPEC_TEMPLATE, 'spec/requests/blogs_spec.ts', force);
 
-  // 6. openapi 출력 디렉토리 생성
+  // 6. Create openapi output directory
   const openapiDir = resolve(cwd, 'openapi', 'v1');
   if (!existsSync(openapiDir)) {
     mkdirSync(openapiDir, { recursive: true });
-    logger.success('openapi/v1 디렉토리 생성됨');
+    logger.success('openapi/v1 directory created');
   }
 
   logger.newline();
-  logger.success('초기화 완료!');
+  logger.success('Initialization completed!');
   logger.newline();
-  logger.info('다음 단계:');
-  logger.info('  1. spec/openapi_helper.ts에서 앱 인스턴스 설정');
-  logger.info('  2. spec/requests/ 디렉토리에 스펙 테스트 작성');
-  logger.info('  3. npx nswag generate 실행');
+  logger.info('Next steps:');
+  logger.info('  1. Configure app instance in spec/openapi_helper.ts');
+  logger.info('  2. Write spec tests in spec/requests/ directory');
+  logger.info('  3. Run npx nswag generate');
   logger.newline();
 }
 
 /**
- * 파일 생성 헬퍼
+ * File creation helper
  */
 async function createFile(
   filePath: string,
@@ -237,10 +237,10 @@ async function createFile(
   force: boolean
 ): Promise<void> {
   if (existsSync(filePath) && !force) {
-    logger.warn(`${displayName} 이미 존재함 (덮어쓰려면 --force 사용)`);
+    logger.warn(`${displayName} already exists (use --force to overwrite)`);
     return;
   }
 
   writeFileSync(filePath, content, 'utf-8');
-  logger.success(`${displayName} 생성됨`);
+  logger.success(`${displayName} created`);
 }

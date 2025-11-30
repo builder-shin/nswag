@@ -1,26 +1,26 @@
 /**
- * Nswag 에러 클래스 정의
- * Phase 9 명세서 기반 구현
+ * Nswag error class definitions
+ * Implementation based on Phase 9 specification
  */
 
 import type { Schema, OpenAPISpec } from '../types/index.js';
 
 /**
- * 스키마 검증 실패 에러
- * 응답 본문이 OpenAPI 스키마와 일치하지 않을 때 발생
+ * Schema validation error
+ * Thrown when the response body does not match the OpenAPI schema
  */
 export class NswagSchemaValidationError extends Error {
-  /** 검증 오류 목록 */
+  /** List of validation errors */
   errors: { path: string; message: string }[];
-  /** 예상 스키마 */
+  /** Expected schema */
   expectedSchema: Schema;
-  /** 실제 응답 */
+  /** Actual response */
   actualResponse: unknown;
-  /** HTTP 경로 */
+  /** HTTP path */
   requestPath?: string;
-  /** HTTP 메서드 */
+  /** HTTP method */
   requestMethod?: string;
-  /** HTTP 상태 코드 */
+  /** HTTP status code */
   statusCode?: number;
 
   constructor(options: {
@@ -41,7 +41,7 @@ export class NswagSchemaValidationError extends Error {
     this.requestMethod = options.requestMethod;
     this.statusCode = options.statusCode;
 
-    // Error 스택 트레이스 유지
+    // Preserve Error stack trace
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, NswagSchemaValidationError);
     }
@@ -88,17 +88,17 @@ export class NswagSchemaValidationError extends Error {
 }
 
 /**
- * 설정 오류 에러
- * configure() 함수나 nswag.config.ts의 잘못된 설정 시 발생
+ * Configuration error
+ * Thrown when configure() function or nswag.config.ts has invalid settings
  */
 export class NswagConfigurationError extends Error {
-  /** 잘못된 설정 키 */
+  /** Invalid configuration key */
   configKey: string;
-  /** 잘못된 값 */
+  /** Invalid value */
   invalidValue: unknown;
-  /** 예상 타입 */
+  /** Expected type */
   expectedType: string;
-  /** 추가 힌트 */
+  /** Additional hint */
   hint?: string;
 
   constructor(options: {
@@ -143,19 +143,19 @@ export class NswagConfigurationError extends Error {
 }
 
 /**
- * 테스트 실행 오류 에러
- * 테스트 실행 중 발생하는 오류
+ * Test execution error
+ * Thrown during test execution
  */
 export class NswagTestError extends Error {
-  /** 테스트 이름 */
+  /** Test name */
   testName: string;
-  /** HTTP 경로 */
+  /** HTTP path */
   path: string;
-  /** HTTP 메서드 */
+  /** HTTP method */
   method: string;
-  /** 원인 에러 */
+  /** Cause error */
   cause?: Error;
-  /** 실패 단계 */
+  /** Failure phase */
   phase?: 'setup' | 'request' | 'validation' | 'teardown';
 
   constructor(options: {
@@ -209,17 +209,17 @@ export class NswagTestError extends Error {
 }
 
 /**
- * 스펙 생성 오류 에러
- * OpenAPI 스펙 파일 생성 중 발생하는 오류
+ * Spec generation error
+ * Thrown during OpenAPI spec file generation
  */
 export class NswagGenerationError extends Error {
-  /** 스펙 파일 경로 */
+  /** Spec file path */
   specFile: string;
-  /** 실패 이유 */
+  /** Failure reason */
   reason: string;
-  /** 부분적으로 생성된 스펙 */
+  /** Partially generated spec */
   partialSpec?: OpenAPISpec;
-  /** 실패한 테스트 목록 */
+  /** List of failed tests */
   failedTests?: string[];
 
   constructor(options: {
@@ -265,15 +265,15 @@ export class NswagGenerationError extends Error {
 }
 
 /**
- * 플러그인 오류 에러
- * 플러그인 실행 중 발생하는 오류
+ * Plugin error
+ * Thrown during plugin execution
  */
 export class NswagPluginError extends Error {
-  /** 플러그인 이름 */
+  /** Plugin name */
   pluginName: string;
-  /** 훅 이름 */
+  /** Hook name */
   hookName: string;
-  /** 원인 에러 */
+  /** Cause error */
   cause?: Error;
 
   constructor(options: {
@@ -297,15 +297,15 @@ export class NswagPluginError extends Error {
 }
 
 /**
- * Mock 서버 오류 에러
- * Mock 서버 실행 중 발생하는 오류
+ * Mock server error
+ * Thrown during mock server execution
  */
 export class NswagMockServerError extends Error {
-  /** 오류 유형 */
+  /** Error type */
   errorType: 'startup' | 'routing' | 'validation' | 'handler' | 'shutdown';
-  /** 관련 경로 */
+  /** Related path */
   path?: string;
-  /** 원인 에러 */
+  /** Cause error */
   cause?: Error;
 
   constructor(options: {
@@ -327,7 +327,7 @@ export class NswagMockServerError extends Error {
 }
 
 /**
- * 에러 유틸리티 함수
+ * Error utility function
  */
 export function isNswagError(error: unknown): error is Error {
   return (
@@ -341,8 +341,8 @@ export function isNswagError(error: unknown): error is Error {
 }
 
 /**
- * 에러 래핑 헬퍼
- * 일반 에러를 Nswag 에러로 래핑
+ * Error wrapping helper
+ * Wraps general errors into Nswag errors
  */
 export function wrapError(error: unknown, context: {
   testName?: string;

@@ -1,5 +1,5 @@
 /**
- * TypeBox 변환기 테스트
+ * TypeBox converter tests
  */
 
 import { describe, it, expect } from 'vitest';

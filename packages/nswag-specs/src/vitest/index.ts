@@ -1,6 +1,6 @@
 /**
- * Vitest 통합 모듈
- * Vitest 테스트 프레임워크와의 통합 기능 제공
+ * Vitest Integration Module
+ * Provides integration features with Vitest test framework
  *
  * @example
  * // vitest.config.ts
@@ -20,7 +20,7 @@ export { setupVitest, getContext, teardown } from './setup.js';
 export * from './setup.js';
 
 /**
- * Vitest 설정 생성 헬퍼
+ * Helper to create Vitest configuration
  *
  * @example
  * // vitest.config.ts
@@ -43,20 +43,20 @@ export function createVitestConfig(options?: {
         '@aspect/nswag-specs/vitest/setup',
         ...(options?.setupFiles ?? []),
       ],
-      // 글로벌 설정
+      // Global configuration
       globals: true,
     },
   };
 }
 
 /**
- * Vitest 테스트 환경 옵션 타입
+ * Vitest test environment options type
  */
 export interface VitestTestEnvironmentOptions {
-  /** VCR 모드: record, playback, none */
+  /** VCR mode: record, playback, none */
   vcrMode?: 'record' | 'playback' | 'none';
-  /** 스펙 출력 경로 */
+  /** Spec output path */
   outputSpec?: string;
-  /** 응답 검증 활성화 */
+  /** Enable response validation */
   validateResponses?: boolean;
 }

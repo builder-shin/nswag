@@ -1,6 +1,6 @@
 /**
- * HTTP 클라이언트
- * supertest를 래핑하여 스펙 수집 및 응답 검증 기능 제공
+ * HTTP Client
+ * Wraps supertest to provide spec collection and response validation capabilities
  */
 
 import type {
@@ -11,7 +11,7 @@ import type {
 } from '../types/index.js';
 import { getTestTarget, getRequestDefaults } from './configure.js';
 
-// supertest 타입 (선택적 의존성)
+// supertest types (optional dependency)
 type SuperTestRequest = {
   set: (key: string, value: string) => SuperTestRequest;
   send: (body: unknown) => SuperTestRequest;
@@ -39,15 +39,15 @@ type SuperTestAgent = {
 };
 
 /**
- * HTTP 클라이언트 클래스
- * supertest를 래핑하여 요청/응답 데이터 수집
+ * HTTP Client Class
+ * Wraps supertest to collect request/response data
  */
 export class HttpClient {
   private agent: SuperTestAgent | null = null;
   private supertest: ((app: unknown) => SuperTestAgent) | null = null;
   private defaults: RequestDefaults;
 
-  // 마지막 요청/응답 데이터 저장
+  // Store last request/response data
   private lastRequest: RequestData | null = null;
   private lastResponse: ResponseData | null = null;
   private lastMetadata: RequestMetadata | null = null;
@@ -58,25 +58,25 @@ export class HttpClient {
   }
 
   /**
-   * supertest 초기화 (동적 import)
+   * Initialize supertest (dynamic import)
    */
   private async initSupertest(): Promise<void> {
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const supertestModule = await import('supertest');
-      // supertest 타입 호환성 처리
+      // Handle supertest type compatibility
       this.supertest = (supertestModule.default || supertestModule) as unknown as (app: unknown) => SuperTestAgent;
     } catch {
-      // supertest가 설치되지 않은 경우 무시
+      // Ignore if supertest is not installed
     }
   }
 
   /**
-   * 에이전트 생성 또는 캐시된 에이전트 반환
+   * Create Agent or Return Cached Agent
    */
   private getAgent(): SuperTestAgent {
     if (!this.supertest) {
-      throw new Error('supertest가 설치되지 않았습니다. npm install supertest를 실행하세요.');
+      throw new Error('supertest is not installed. Run npm install supertest.');
     }
 
     if (!this.agent) {
@@ -88,19 +88,19 @@ export class HttpClient {
   }
 
   /**
-   * 요청에 기본 설정 적용
+   * Apply Default Settings to Request
    */
   private applyDefaults(req: SuperTestRequest): SuperTestRequest {
     let request = req;
 
-    // 기본 헤더 적용
+    // Apply default headers
     if (this.defaults.headers) {
       for (const [key, value] of Object.entries(this.defaults.headers)) {
         request = request.set(key, value);
       }
     }
 
-    // 타임아웃 적용
+    // Apply timeout
     if (this.defaults.timeout) {
       request = request.timeout(this.defaults.timeout);
     }
@@ -109,7 +109,7 @@ export class HttpClient {
   }
 
   /**
-   * 요청 데이터 저장
+   * Record Request Data
    */
   private recordRequest(
     method: string,
@@ -126,7 +126,7 @@ export class HttpClient {
   }
 
   /**
-   * 응답 데이터 저장
+   * Record Response Data
    */
   private recordResponse(response: SuperTestResponse): void {
     this.lastResponse = {
@@ -137,7 +137,7 @@ export class HttpClient {
   }
 
   /**
-   * GET 요청
+   * GET Request
    */
   async get(
     path: string,
@@ -169,7 +169,7 @@ export class HttpClient {
   }
 
   /**
-   * POST 요청
+   * POST Request
    */
   async post(
     path: string,
@@ -202,7 +202,7 @@ export class HttpClient {
   }
 
   /**
-   * PUT 요청
+   * PUT Request
    */
   async put(
     path: string,
@@ -235,7 +235,7 @@ export class HttpClient {
   }
 
   /**
-   * PATCH 요청
+   * PATCH Request
    */
   async patch(
     path: string,
@@ -268,7 +268,7 @@ export class HttpClient {
   }
 
   /**
-   * DELETE 요청
+   * DELETE Request
    */
   async delete(
     path: string,
@@ -296,35 +296,35 @@ export class HttpClient {
   }
 
   /**
-   * 마지막 요청 데이터 조회
+   * Get Last Request Data
    */
   getLastRequest(): RequestData | null {
     return this.lastRequest;
   }
 
   /**
-   * 마지막 응답 데이터 조회
+   * Get Last Response Data
    */
   getLastResponse(): ResponseData | null {
     return this.lastResponse;
   }
 
   /**
-   * 마지막 메타데이터 조회
+   * Get Last Metadata
    */
   getLastMetadata(): RequestMetadata | null {
     return this.lastMetadata;
   }
 
   /**
-   * 메타데이터 설정 (테스트 프레임워크에서 사용)
+   * Set Metadata (used by test frameworks)
    */
   setMetadata(metadata: RequestMetadata): void {
     this.lastMetadata = metadata;
   }
 
   /**
-   * 에이전트 리셋
+   * Reset Agent
    */
   reset(): void {
     this.agent = null;
@@ -334,11 +334,11 @@ export class HttpClient {
   }
 }
 
-// 싱글톤 인스턴스
+// Singleton instance
 let httpClientInstance: HttpClient | null = null;
 
 /**
- * HTTP 클라이언트 생성 또는 기존 인스턴스 반환
+ * Create HTTP Client or Return Existing Instance
  */
 export function createHttpClient(defaults?: RequestDefaults): HttpClient {
   if (!httpClientInstance) {
@@ -348,7 +348,7 @@ export function createHttpClient(defaults?: RequestDefaults): HttpClient {
 }
 
 /**
- * HTTP 클라이언트 인스턴스 리셋
+ * Reset HTTP Client Instance
  */
 export function resetHttpClient(): void {
   if (httpClientInstance) {

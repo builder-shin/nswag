@@ -1,12 +1,12 @@
 /**
- * CORS 핸들러
- * Cross-Origin Resource Sharing 처리
+ * CORS handler
+ * Cross-Origin Resource Sharing processing
  */
 
 import type { CorsConfig } from './types.js';
 
 /**
- * CORS 응답 헤더 타입
+ * CORS response headers type
  */
 export interface CorsHeaders {
   'Access-Control-Allow-Origin': string;
@@ -18,19 +18,19 @@ export interface CorsHeaders {
 }
 
 /**
- * CORS preflight 요청인지 확인
- * @param method - HTTP 메서드
- * @returns preflight 요청 여부
+ * Check if request is a CORS preflight request
+ * @param method - HTTP method
+ * @returns Whether it's a preflight request
  */
 export function isPreflightRequest(method: string): boolean {
   return method.toUpperCase() === 'OPTIONS';
 }
 
 /**
- * 요청 오리진이 허용된 목록에 있는지 확인
- * @param origin - 요청 오리진
- * @param allowedOrigins - 허용된 오리진 목록
- * @returns 허용 여부
+ * Check if request origin is in the allowed list
+ * @param origin - Request origin
+ * @param allowedOrigins - List of allowed origins
+ * @returns Whether origin is allowed
  */
 export function isOriginAllowed(
   origin: string | undefined,
@@ -40,27 +40,27 @@ export function isOriginAllowed(
     return false;
   }
 
-  // 모든 오리진 허용 (*)
+  // Allow all origins (*)
   if (allowedOrigins.includes('*')) {
     return true;
   }
 
-  // 정확히 일치하는지 확인
+  // Check for exact match
   if (allowedOrigins.includes(origin)) {
     return true;
   }
 
-  // 와일드카드 패턴 확인 (예: *.example.com)
+  // Check wildcard patterns (e.g., *.example.com)
   for (const allowed of allowedOrigins) {
     if (allowed.startsWith('*.')) {
       const domain = allowed.slice(2);
       if (origin.endsWith(domain)) {
-        // 서브도메인 확인 (예: sub.example.com)
+        // Check subdomain (e.g., sub.example.com)
         const subdomain = origin.slice(0, -domain.length);
         if (subdomain.endsWith('.') || subdomain === '') {
           continue;
         }
-        // https://sub.example.com -> 프로토콜 + 서브도메인
+        // https://sub.example.com -> protocol + subdomain
         const match = origin.match(new RegExp(`^(https?://)?[^/]+\\.${escapeRegExp(domain)}$`));
         if (match) {
           return true;
@@ -73,28 +73,28 @@ export function isOriginAllowed(
 }
 
 /**
- * 정규식 특수문자 이스케이프
+ * Escape regex special characters
  */
 function escapeRegExp(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /**
- * CORS 헤더 생성
- * @param origin - 요청 오리진
- * @param corsConfig - CORS 설정
- * @returns CORS 헤더 객체 또는 null (CORS 비활성화 또는 허용되지 않은 오리진)
+ * Generate CORS headers
+ * @param origin - Request origin
+ * @param corsConfig - CORS configuration
+ * @returns CORS headers object or null (CORS disabled or origin not allowed)
  */
 export function getCorsHeaders(
   origin: string | undefined,
   corsConfig: CorsConfig
 ): Partial<CorsHeaders> | null {
-  // CORS가 비활성화된 경우
+  // If CORS is disabled
   if (!corsConfig.enabled) {
     return null;
   }
 
-  // 오리진이 없거나 허용되지 않은 경우
+  // If origin is missing or not allowed
   if (!isOriginAllowed(origin, corsConfig.origins)) {
     return null;
   }
@@ -105,16 +105,16 @@ export function getCorsHeaders(
     'Access-Control-Allow-Origin': allowedOrigin,
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-API-Key',
-    'Access-Control-Max-Age': '86400', // 24시간
+    'Access-Control-Max-Age': '86400', // 24 hours
     'Vary': 'Origin',
   };
 }
 
 /**
- * preflight 요청에 대한 응답 헤더 생성
- * @param origin - 요청 오리진
- * @param corsConfig - CORS 설정
- * @returns preflight 응답 헤더 또는 null
+ * Generate response headers for preflight request
+ * @param origin - Request origin
+ * @param corsConfig - CORS configuration
+ * @returns Preflight response headers or null
  */
 export function getPreflightHeaders(
   origin: string | undefined,
@@ -132,9 +132,9 @@ export function getPreflightHeaders(
 }
 
 /**
- * 헤더에서 오리진 추출
- * @param headers - 요청 헤더
- * @returns 오리진 문자열 또는 undefined
+ * Extract origin from headers
+ * @param headers - Request headers
+ * @returns Origin string or undefined
  */
 export function getOriginFromHeaders(
   headers: Record<string, string | string[] | undefined>

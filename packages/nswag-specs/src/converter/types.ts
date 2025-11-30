@@ -1,150 +1,150 @@
 /**
- * 스키마 변환기 공통 타입 정의
- * OpenAPI JSON Schema와 런타임 스키마 검증 라이브러리 간의 양방향 변환을 위한 타입
+ * Schema converter common type definitions
+ * Types for bidirectional conversion between OpenAPI JSON Schema and runtime schema validation libraries
  */
 
 import type { Schema, OpenAPISpec } from '../types/index.js';
 
 /**
- * 변환 옵션
- * 스키마 변환 시 사용할 수 있는 공통 옵션
+ * Conversion options
+ * Common options that can be used during schema conversion
  */
 export interface ConvertOptions {
   /**
-   * nullable 처리 방식
-   * - 'optional': 스키마를 선택적으로 처리 (Zod: .optional())
-   * - 'null': null 값 허용 (Zod: .nullable())
-   * - 'nullish': undefined 또는 null 허용 (Zod: .nullish())
+   * Nullable handling method
+   * - 'optional': Treat schema as optional (Zod: .optional())
+   * - 'null': Allow null values (Zod: .nullable())
+   * - 'nullish': Allow undefined or null (Zod: .nullish())
    * @default 'null'
    */
   nullable?: 'optional' | 'null' | 'nullish';
 
   /**
-   * 추가 속성 허용 여부
-   * false인 경우 정의되지 않은 속성을 거부함
+   * Allow additional properties
+   * If false, reject undefined properties
    * @default true
    */
   additionalProperties?: boolean;
 
   /**
-   * 필수 속성 기본값
-   * true인 경우 모든 속성을 필수로 처리
+   * Required properties default
+   * If true, treat all properties as required
    * @default false
    */
   defaultRequired?: boolean;
 
   /**
-   * 코드 생성 시 import 문 포함 여부
+   * Include import statements in code generation
    * @default true
    */
   includeImports?: boolean;
 
   /**
-   * 스키마 이름 (코드 생성용)
-   * 생성된 코드에서 스키마 변수 이름으로 사용
+   * Schema name (for code generation)
+   * Used as schema variable name in generated code
    */
   schemaName?: string;
 
   /**
-   * 스키마 export 여부
-   * true인 경우 'export const' 형태로 생성
+   * Export schema
+   * If true, generate as 'export const' form
    * @default true
    */
   exportSchema?: boolean;
 
   /**
-   * 타입 추론 생성 여부 (TypeBox 전용)
-   * true인 경우 Static<typeof Schema> 타입도 생성
+   * Generate type inference (TypeBox only)
+   * If true, also generate Static<typeof Schema> type
    * @default true
    */
   generateTypeInference?: boolean;
 
   /**
-   * $ref 참조 해석을 위한 루트 스펙
-   * $ref를 포함하는 스키마 변환 시 필요
+   * Root spec for resolving $ref references
+   * Required when converting schemas containing $ref
    */
   rootSpec?: OpenAPISpec;
 
   /**
-   * 참조 스키마 정의 맵
-   * $ref 해석 시 사용할 스키마 정의
+   * Reference schema definition map
+   * Schema definitions to use when resolving $ref
    */
   definitions?: Record<string, Schema>;
 
   /**
-   * 코드 생성 시 들여쓰기 문자열
-   * @default '  ' (공백 2칸)
+   * Indentation string for code generation
+   * @default '  ' (2 spaces)
    */
   indent?: string;
 
   /**
-   * strict 모드 사용 여부
-   * true인 경우 더 엄격한 검증 적용
+   * Use strict mode
+   * If true, apply stricter validation
    * @default false
    */
   strict?: boolean;
 }
 
 /**
- * 변환 결과
- * 런타임 스키마 객체와 관련 메타데이터를 포함
+ * Conversion result
+ * Contains runtime schema object and related metadata
  *
- * @template T - 런타임 스키마 타입 (ZodSchema, YupSchema, TSchema 등)
+ * @template T - Runtime schema type (ZodSchema, YupSchema, TSchema, etc.)
  */
 export interface ConvertResult<T> {
   /**
-   * 런타임 스키마 객체
-   * 실제 유효성 검증에 사용할 수 있는 스키마 인스턴스
+   * Runtime schema object
+   * Schema instance that can be used for actual validation
    */
   schema: T;
 
   /**
-   * TypeScript 코드 문자열 (코드 생성용)
-   * 생성된 스키마를 파일로 저장할 때 사용
+   * TypeScript code string (for code generation)
+   * Used when saving generated schema to file
    */
   code?: string;
 
   /**
-   * 경고 메시지 (지원하지 않는 기능 등)
-   * 변환 중 발생한 비치명적 문제들
+   * Warning messages (unsupported features, etc.)
+   * Non-fatal issues that occurred during conversion
    */
   warnings?: string[];
 }
 
 /**
- * 코드 생성 결과
- * 스키마 코드와 관련 메타데이터를 포함
+ * Code generation result
+ * Contains schema code and related metadata
  */
 export interface CodeGenerationResult {
   /**
-   * 생성된 TypeScript 코드
+   * Generated TypeScript code
    */
   code: string;
 
   /**
-   * 사용된 import 문
+   * Used import statements
    */
   imports: string[];
 
   /**
-   * 경고 메시지
+   * Warning messages
    */
   warnings: string[];
 }
 
 /**
- * 지원되는 대상 라이브러리
+ * Supported target libraries
  */
 export type TargetLibrary = 'zod' | 'yup' | 'typebox';
 
 /**
- * OpenAPI 스키마 타입
- * type 필드에 사용할 수 있는 값들
+ * OpenAPI schema type
+ * Values that can be used in type field
  */
 export type OpenAPISchemaType = 'string' | 'number' | 'integer' | 'boolean' | 'array' | 'object' | 'null';
 
 /**
- * OpenAPI string format 타입
+ * OpenAPI string format type
  */
 export type OpenAPIStringFormat =
   | 'email'
@@ -164,46 +164,46 @@ export type OpenAPIStringFormat =
   | 'password';
 
 /**
- * OpenAPI number format 타입
+ * OpenAPI number format type
  */
 export type OpenAPINumberFormat = 'int32' | 'int64' | 'float' | 'double';
 
 /**
- * 변환기 인터페이스
- * 각 라이브러리별 변환기가 구현해야 하는 공통 인터페이스
+ * Converter interface
+ * Common interface that each library-specific converter must implement
  *
- * @template T - 런타임 스키마 타입
+ * @template T - Runtime schema type
  */
 export interface SchemaConverter<T> {
   /**
-   * OpenAPI 스키마를 런타임 스키마로 변환
+   * Convert OpenAPI schema to runtime schema
    *
-   * @param schema - OpenAPI 스키마
-   * @param options - 변환 옵션
-   * @returns 변환 결과
+   * @param schema - OpenAPI schema
+   * @param options - Conversion options
+   * @returns Conversion result
    */
   fromOpenAPI(schema: Schema, options?: ConvertOptions): ConvertResult<T>;
 
   /**
-   * 런타임 스키마를 OpenAPI 스키마로 변환
+   * Convert runtime schema to OpenAPI schema
    *
-   * @param schema - 런타임 스키마
-   * @returns OpenAPI 스키마
+   * @param schema - Runtime schema
+   * @returns OpenAPI schema
    */
   toOpenAPI(schema: T): Schema;
 
   /**
-   * OpenAPI 스키마에서 TypeScript 코드 생성
+   * Generate TypeScript code from OpenAPI schema
    *
-   * @param schema - OpenAPI 스키마
-   * @param options - 변환 옵션
-   * @returns 생성된 TypeScript 코드
+   * @param schema - OpenAPI schema
+   * @param options - Conversion options
+   * @returns Generated TypeScript code
    */
   generateCode(schema: Schema, options?: ConvertOptions): string;
 }
 
 /**
- * 변환 경고 유형
+ * Conversion warning type
  */
 export type WarningType =
   | 'unsupported-format'
@@ -214,21 +214,21 @@ export type WarningType =
   | 'fallback-used';
 
 /**
- * 변환 경고
+ * Conversion warning
  */
 export interface ConvertWarning {
   /**
-   * 경고 유형
+   * Warning type
    */
   type: WarningType;
 
   /**
-   * 경고 메시지
+   * Warning message
    */
   message: string;
 
   /**
-   * 경고가 발생한 스키마 경로
+   * Schema path where warning occurred
    */
   path?: string;
 }

@@ -1,6 +1,6 @@
 /**
- * 설정 모듈
- * nswag.config.ts 로더 및 설정 유틸리티
+ * Config module
+ * nswag.config.ts loader and config utilities
  */
 
 import { existsSync } from 'fs';
@@ -22,7 +22,7 @@ export type {
 } from './types.js';
 
 /**
- * 기본 설정값
+ * Default configuration values
  */
 export const DEFAULT_CONFIG: ResolvedNswagConfig = {
   testFramework: 'jest',
@@ -49,7 +49,7 @@ export const DEFAULT_CONFIG: ResolvedNswagConfig = {
 };
 
 /**
- * 설정 파일 이름 목록 (우선순위 순)
+ * Config file name list (in order of priority)
  */
 const CONFIG_FILE_NAMES = [
   'nswag.config.ts',
@@ -59,11 +59,11 @@ const CONFIG_FILE_NAMES = [
 ];
 
 /**
- * 설정 객체 정의 헬퍼 함수
- * TypeScript 타입 지원을 위한 래퍼
+ * Config object definition helper function
+ * Wrapper for TypeScript type support
  *
- * @param config - 사용자 설정
- * @returns 그대로 반환된 설정 객체
+ * @param config - User configuration
+ * @returns Configuration object returned as-is
  *
  * @example
  * ```typescript
@@ -82,27 +82,27 @@ export function defineConfig(config: NswagConfig): NswagConfig {
 }
 
 /**
- * 환경 변수에서 설정 읽기
+ * Read configuration from environment variables
  *
- * @returns 환경 변수 기반 설정
+ * @returns Environment variable-based configuration
  */
 export function getEnvironmentConfig(): EnvironmentConfig {
   const envConfig: EnvironmentConfig = {};
 
-  // PATTERN 환경 변수
+  // PATTERN environment variable
   const pattern = process.env.PATTERN;
   if (pattern) {
     envConfig.pattern = pattern;
   }
 
-  // NSWAG_DRY_RUN 환경 변수
+  // NSWAG_DRY_RUN environment variable
   const dryRunEnv = process.env.NSWAG_DRY_RUN;
   if (dryRunEnv !== undefined) {
-    // "0" 또는 "false"면 비활성화, 그 외는 활성화
+    // Disable if "0" or "false", otherwise enable
     envConfig.dryRun = dryRunEnv !== '0' && dryRunEnv.toLowerCase() !== 'false';
   }
 
-  // ADDITIONAL_TEST_OPTS 환경 변수
+  // ADDITIONAL_TEST_OPTS environment variable
   const additionalOpts = process.env.ADDITIONAL_TEST_OPTS;
   if (additionalOpts) {
     envConfig.additionalTestOpts = additionalOpts;
@@ -112,10 +112,10 @@ export function getEnvironmentConfig(): EnvironmentConfig {
 }
 
 /**
- * 설정 파일 경로 찾기
+ * Find config file path
  *
- * @param cwd - 검색 시작 디렉토리
- * @returns 설정 파일 경로 또는 null
+ * @param cwd - Directory to start searching from
+ * @returns Config file path or null
  */
 export function findConfigFile(cwd: string = process.cwd()): string | null {
   for (const fileName of CONFIG_FILE_NAMES) {
@@ -128,10 +128,10 @@ export function findConfigFile(cwd: string = process.cwd()): string | null {
 }
 
 /**
- * 설정 파일 로드
+ * Load config file
  *
- * @param configPath - 설정 파일 경로 (없으면 자동 탐색)
- * @returns 로드된 설정 또는 빈 객체
+ * @param configPath - Config file path (auto-discover if not provided)
+ * @returns Loaded configuration or empty object
  */
 export async function loadConfigFile(configPath?: string): Promise<NswagConfig> {
   const filePath = configPath || findConfigFile();
@@ -141,13 +141,13 @@ export async function loadConfigFile(configPath?: string): Promise<NswagConfig> 
   }
 
   try {
-    // TypeScript 파일인 경우 ts-node 또는 tsx 로더가 필요할 수 있음
+    // TypeScript files may require ts-node or tsx loader
     const fileUrl = pathToFileURL(filePath).href;
     const module = await import(fileUrl);
     return module.default || module;
   } catch (error) {
-    // .ts 파일을 직접 import할 수 없는 경우,
-    // 컴파일된 .js 파일을 찾거나 에러 발생
+    // If .ts file cannot be imported directly,
+    // look for compiled .js file or throw error
     const jsPath = filePath.replace(/\.ts$/, '.js');
     if (existsSync(jsPath)) {
       try {
@@ -155,29 +155,29 @@ export async function loadConfigFile(configPath?: string): Promise<NswagConfig> 
         const module = await import(fileUrl);
         return module.default || module;
       } catch {
-        // 무시
+        // ignore
       }
     }
 
-    console.warn(`설정 파일 로드 실패: ${filePath}`);
-    console.warn('기본 설정을 사용합니다.');
+    console.warn(`Failed to load config file: ${filePath}`);
+    console.warn('Using default configuration.');
     return {};
   }
 }
 
 /**
- * 설정 해석 (resolve)
- * 사용자 설정, 환경 변수, 기본값을 병합
+ * Resolve configuration
+ * Merge user config, environment variables, and defaults
  *
- * @param userConfig - 사용자 설정
- * @param envConfig - 환경 변수 설정
- * @returns 해석된 완전한 설정
+ * @param userConfig - User configuration
+ * @param envConfig - Environment variable configuration
+ * @returns Resolved complete configuration
  */
 export function resolveConfig(
   userConfig: NswagConfig,
   envConfig: EnvironmentConfig = {}
 ): ResolvedNswagConfig {
-  // 환경 변수 우선 적용
+  // Apply environment variables first
   let testPatterns = userConfig.testPatterns || DEFAULT_CONFIG.testPatterns;
   if (envConfig.pattern) {
     testPatterns = [envConfig.pattern];
@@ -210,10 +210,10 @@ export function resolveConfig(
 }
 
 /**
- * 설정 로드 및 해석을 한 번에 수행
+ * Load and resolve configuration in one step
  *
- * @param configPath - 설정 파일 경로 (선택)
- * @returns 해석된 설정
+ * @param configPath - Config file path (optional)
+ * @returns Resolved configuration
  */
 export async function loadConfig(configPath?: string): Promise<ResolvedNswagConfig> {
   const userConfig = await loadConfigFile(configPath);
@@ -222,27 +222,27 @@ export async function loadConfig(configPath?: string): Promise<ResolvedNswagConf
 }
 
 /**
- * 설정 검증
+ * Validate configuration
  *
- * @param config - 검증할 설정
- * @returns 검증 결과
+ * @param config - Configuration to validate
+ * @returns Validation result
  */
 export function validateConfig(config: NswagConfig): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
-  // 테스트 프레임워크 검증
+  // Validate test framework
   if (config.testFramework && !['jest', 'vitest', 'mocha'].includes(config.testFramework)) {
-    errors.push(`유효하지 않은 testFramework: ${config.testFramework}`);
+    errors.push(`Invalid testFramework: ${config.testFramework}`);
   }
 
-  // 출력 포맷 검증
+  // Validate output format
   if (config.outputFormat && !['json', 'yaml'].includes(config.outputFormat)) {
-    errors.push(`유효하지 않은 outputFormat: ${config.outputFormat}`);
+    errors.push(`Invalid outputFormat: ${config.outputFormat}`);
   }
 
-  // 테스트 타임아웃 검증
+  // Validate test timeout
   if (config.testTimeout !== undefined && config.testTimeout < 0) {
-    errors.push(`testTimeout은 0 이상이어야 합니다: ${config.testTimeout}`);
+    errors.push(`testTimeout must be greater than or equal to 0: ${config.testTimeout}`);
   }
 
   return {

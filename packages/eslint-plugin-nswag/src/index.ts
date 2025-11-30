@@ -12,7 +12,7 @@ import noEmptyResponse from './rules/no-empty-response.js';
 import validHttpStatus from './rules/valid-http-status.js';
 import preferRequestBody from './rules/prefer-request-body.js';
 
-// 모든 규칙
+// All rules
 const rules = {
   'require-run-test': requireRunTest,
   'valid-schema': validSchema,
@@ -24,7 +24,7 @@ const rules = {
   'prefer-request-body': preferRequestBody,
 };
 
-// 권장 설정
+// Recommended config
 const recommendedConfig = {
   plugins: ['@aspect/nswag'],
   rules: {
@@ -39,7 +39,7 @@ const recommendedConfig = {
   },
 };
 
-// 엄격한 설정
+// Strict config
 const strictConfig = {
   plugins: ['@aspect/nswag'],
   rules: {
@@ -54,7 +54,7 @@ const strictConfig = {
   },
 };
 
-// 플러그인 내보내기
+// Plugin export
 const plugin = {
   rules,
   configs: {

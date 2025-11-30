@@ -1,6 +1,6 @@
 /**
- * Express 미들웨어
- * Express 앱에서 OpenAPI 스펙을 JSON/YAML 엔드포인트로 노출
+ * Express middleware
+ * Exposes OpenAPI specs as JSON/YAML endpoints in Express apps
  *
  * @example
  * ```typescript
@@ -10,8 +10,8 @@
  *   openapiRoot: './openapi',
  * }));
  *
- * // GET /api-docs/v1/openapi.json -> ./openapi/v1/openapi.json 내용 반환
- * // GET /api-docs/v2/openapi.yaml -> ./openapi/v2/openapi.yaml 내용 반환
+ * // GET /api-docs/v1/openapi.json -> returns ./openapi/v1/openapi.json contents
+ * // GET /api-docs/v2/openapi.yaml -> returns ./openapi/v2/openapi.yaml contents
  * ```
  */
 
@@ -38,11 +38,11 @@ import {
 } from './types.js';
 
 /**
- * Express 미들웨어 생성
- * OpenAPI 스펙을 JSON/YAML 엔드포인트로 제공
+ * Create Express middleware
+ * Provides OpenAPI specs as JSON/YAML endpoints
  *
- * @param options - 미들웨어 설정
- * @returns Express 미들웨어
+ * @param options - Middleware configuration
+ * @returns Express middleware
  */
 export function nswagApi(options: ExpressNswagApiOptions): RequestHandler {
   const {
@@ -54,17 +54,17 @@ export function nswagApi(options: ExpressNswagApiOptions): RequestHandler {
     openapiHeaders = DEFAULT_OPTIONS.openapiHeaders,
   } = options;
 
-  // openapiRoot를 절대 경로로 변환
+  // Convert openapiRoot to absolute path
   const absoluteRoot = resolve(process.cwd(), openapiRoot);
 
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    // GET 또는 OPTIONS 메서드만 처리
+    // Only handle GET or OPTIONS methods
     if (req.method !== 'GET' && req.method !== 'OPTIONS') {
       next();
       return;
     }
 
-    // CORS preflight 요청 처리
+    // Handle CORS preflight request
     if (isPreflightRequest(req.method)) {
       if (cors.enabled) {
         const origin = getOriginFromHeaders(req.headers as Record<string, string | string[] | undefined>);
@@ -78,19 +78,19 @@ export function nswagApi(options: ExpressNswagApiOptions): RequestHandler {
           return;
         }
       }
-      // CORS가 비활성화되었거나 오리진이 허용되지 않은 경우
+      // CORS is disabled or origin is not allowed
       res.status(204).end();
       return;
     }
 
-    // 요청 경로 파싱
+    // Parse request path
     const fileInfo = parseRequestPath(req.path, absoluteRoot);
     if (!fileInfo) {
       next();
       return;
     }
 
-    // 인증 검증
+    // Validate authentication
     if (auth?.enabled) {
       const authResult = validateAuth(
         req.headers as Record<string, string | string[] | undefined>,
@@ -109,7 +109,7 @@ export function nswagApi(options: ExpressNswagApiOptions): RequestHandler {
       }
     }
 
-    // CORS 헤더 설정
+    // Set CORS headers
     if (cors.enabled) {
       const origin = getOriginFromHeaders(req.headers as Record<string, string | string[] | undefined>);
       const corsHeaders = getCorsHeaders(origin, cors);
@@ -121,7 +121,7 @@ export function nswagApi(options: ExpressNswagApiOptions): RequestHandler {
       }
     }
 
-    // OpenAPI 파일 로드
+    // Load OpenAPI file
     let spec = loadOpenAPIFile(fileInfo.absolutePath, cache);
     if (!spec) {
       res.status(404).json({
@@ -131,10 +131,10 @@ export function nswagApi(options: ExpressNswagApiOptions): RequestHandler {
       return;
     }
 
-    // 동적 필터 적용
+    // Apply dynamic filter
     if (openapiFilter) {
       try {
-        // 원본 수정 방지를 위해 복사본 생성
+        // Create a copy to prevent modifying the original
         spec = cloneOpenAPI(spec);
         const expressReq: ExpressRequest = {
           headers: req.headers as Record<string, string | string[] | undefined>,
@@ -152,20 +152,20 @@ export function nswagApi(options: ExpressNswagApiOptions): RequestHandler {
       }
     }
 
-    // 응답 헤더 설정
+    // Set response headers
     const contentType = getContentType(fileInfo.format);
     res.setHeader('Content-Type', contentType);
 
-    // 커스텀 헤더 적용
+    // Apply custom headers
     Object.entries(openapiHeaders).forEach(([key, value]) => {
       if (typeof value === 'string') res.setHeader(key, value);
     });
 
-    // 응답 전송
+    // Send response
     const body = serializeOpenAPI(spec, fileInfo.format);
     res.send(body);
   };
 }
 
-// 기본 export
+// Default export
 export default nswagApi;

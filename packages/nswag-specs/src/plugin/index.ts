@@ -1,6 +1,6 @@
 /**
- * 플러그인 시스템
- * Phase 9 명세서 기반 구현
+ * Plugin system
+ * Phase 9 specification-based implementation
  */
 
 import type {
@@ -13,24 +13,24 @@ import { NswagPluginError } from '../errors/index.js';
 import { debugPlugin } from '../logger/index.js';
 
 /**
- * 플러그인 정의 옵션
+ * Plugin definition options
  */
 export interface DefinePluginOptions {
-  /** 플러그인 이름 */
+  /** Plugin name */
   name: string;
-  /** 테스트 실행 전 훅 */
+  /** Before test hook */
   beforeTest?: (testInfo: TestInfo) => Promise<void>;
-  /** 테스트 실행 후 훅 */
+  /** After test hook */
   afterTest?: (testInfo: TestInfo, result: TestResult) => Promise<void>;
-  /** 스펙 생성 전 훅 */
+  /** Before generate hook */
   beforeGenerate?: (spec: OpenAPISpec) => Promise<OpenAPISpec>;
-  /** 스펙 생성 후 훅 */
+  /** After generate hook */
   afterGenerate?: (spec: OpenAPISpec) => Promise<OpenAPISpec>;
 }
 
 /**
- * 플러그인 정의 함수
- * 타입 안전한 플러그인 생성을 위한 헬퍼
+ * Plugin definition function
+ * Helper for type-safe plugin creation
  *
  * @example
  * const auditPlugin = definePlugin({
@@ -61,14 +61,14 @@ export function definePlugin(options: DefinePluginOptions): NswagPlugin {
 }
 
 /**
- * 플러그인 실행 엔진
- * 플러그인 라이프사이클 관리 및 훅 실행
+ * Plugin execution engine
+ * Manages plugin lifecycle and hook execution
  */
 export class PluginEngine {
   private plugins: NswagPlugin[] = [];
 
   /**
-   * 플러그인 등록
+   * Register plugin
    */
   register(plugin: NswagPlugin): void {
     if (this.plugins.some((p) => p.name === plugin.name)) {
@@ -80,7 +80,7 @@ export class PluginEngine {
   }
 
   /**
-   * 여러 플러그인 등록
+   * Register multiple plugins
    */
   registerAll(plugins: NswagPlugin[]): void {
     for (const plugin of plugins) {
@@ -89,7 +89,7 @@ export class PluginEngine {
   }
 
   /**
-   * 플러그인 등록 해제
+   * Unregister plugin
    */
   unregister(pluginName: string): boolean {
     const index = this.plugins.findIndex((p) => p.name === pluginName);
@@ -102,7 +102,7 @@ export class PluginEngine {
   }
 
   /**
-   * 모든 플러그인 초기화
+   * Clear all plugins
    */
   clear(): void {
     this.plugins = [];
@@ -110,21 +110,21 @@ export class PluginEngine {
   }
 
   /**
-   * 등록된 플러그인 목록
+   * Get registered plugins list
    */
   getPlugins(): NswagPlugin[] {
     return [...this.plugins];
   }
 
   /**
-   * 특정 플러그인 조회
+   * Get specific plugin
    */
   getPlugin(name: string): NswagPlugin | undefined {
     return this.plugins.find((p) => p.name === name);
   }
 
   /**
-   * beforeTest 훅 실행
+   * Run beforeTest hook
    */
   async runBeforeTest(testInfo: TestInfo): Promise<void> {
     for (const plugin of this.plugins) {
@@ -146,7 +146,7 @@ export class PluginEngine {
   }
 
   /**
-   * afterTest 훅 실행
+   * Run afterTest hook
    */
   async runAfterTest(testInfo: TestInfo, result: TestResult): Promise<void> {
     for (const plugin of this.plugins) {
@@ -168,8 +168,8 @@ export class PluginEngine {
   }
 
   /**
-   * beforeGenerate 훅 실행
-   * 스펙을 순차적으로 변환
+   * Run beforeGenerate hook
+   * Transform spec sequentially
    */
   async runBeforeGenerate(spec: OpenAPISpec): Promise<OpenAPISpec> {
     let currentSpec = spec;
@@ -195,8 +195,8 @@ export class PluginEngine {
   }
 
   /**
-   * afterGenerate 훅 실행
-   * 스펙을 순차적으로 변환
+   * Run afterGenerate hook
+   * Transform spec sequentially
    */
   async runAfterGenerate(spec: OpenAPISpec): Promise<OpenAPISpec> {
     let currentSpec = spec;
@@ -222,11 +222,11 @@ export class PluginEngine {
   }
 }
 
-// 싱글톤 인스턴스
+// Singleton instance
 let pluginEngineInstance: PluginEngine | null = null;
 
 /**
- * 플러그인 엔진 인스턴스 가져오기
+ * Get plugin engine instance
  */
 export function getPluginEngine(): PluginEngine {
   if (!pluginEngineInstance) {
@@ -236,7 +236,7 @@ export function getPluginEngine(): PluginEngine {
 }
 
 /**
- * 플러그인 엔진 리셋
+ * Reset plugin engine
  */
 export function resetPluginEngine(): void {
   if (pluginEngineInstance) {
@@ -246,12 +246,12 @@ export function resetPluginEngine(): void {
 }
 
 /**
- * 내장 플러그인들
+ * Built-in plugins
  */
 
 /**
- * 보안 감사 플러그인
- * 보안 정의가 없는 엔드포인트에 경고
+ * Security audit plugin
+ * Warns about endpoints without security definitions
  */
 export const securityAuditPlugin = definePlugin({
   name: 'security-audit',
@@ -265,8 +265,8 @@ export const securityAuditPlugin = definePlugin({
 });
 
 /**
- * 감가상각 체크 플러그인
- * deprecated 표시된 엔드포인트 사용 시 경고
+ * Deprecation check plugin
+ * Warns when using deprecated endpoints
  */
 export const deprecationCheckPlugin = definePlugin({
   name: 'deprecation-check',
@@ -291,8 +291,8 @@ export const deprecationCheckPlugin = definePlugin({
 });
 
 /**
- * 타임스탬프 플러그인
- * 생성된 스펙에 생성 시간 추가
+ * Timestamp plugin
+ * Adds generation time to generated spec
  */
 export const timestampPlugin = definePlugin({
   name: 'timestamp',
@@ -308,8 +308,8 @@ export const timestampPlugin = definePlugin({
 });
 
 /**
- * 로깅 플러그인
- * 테스트 실행 정보 로깅
+ * Logging plugin
+ * Logs test execution information
  */
 export const loggingPlugin = definePlugin({
   name: 'logging',

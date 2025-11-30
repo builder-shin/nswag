@@ -1,15 +1,15 @@
 /**
- * DSL 타입 정의
- * Phase 3: nswag-specs 코어 - 기본 DSL
- * Phase 4: API 버전 및 문서화 옵션
+ * DSL Type Definitions
+ * Phase 3: nswag-specs core - Basic DSL
+ * Phase 4: API versioning and documentation options
  */
 
 // ============================================================================
-// OpenAPI 스펙 설정 타입
+// OpenAPI spec configuration types
 // ============================================================================
 
 /**
- * OpenAPI 스펙 정보
+ * OpenAPI Spec Information
  */
 export interface OpenAPISpecInfo {
   openapi: string;
@@ -52,42 +52,42 @@ export interface OpenAPISpecInfo {
 }
 
 /**
- * 다중 OpenAPI 스펙 설정
+ * Multiple OpenAPI Spec Configuration
  */
 export type OpenAPISpecsConfig = Record<string, Partial<OpenAPISpecInfo>>;
 
 /**
- * 전역 설정 옵션
+ * Global Configuration Options
  */
 export interface GlobalConfigOptions {
-  /** OpenAPI 스펙 파일 루트 경로 */
+  /** OpenAPI spec file root path */
   openapiRoot?: string;
-  /** 다중 OpenAPI 스펙 설정 */
+  /** Multiple OpenAPI spec configuration */
   openapiSpecs?: OpenAPISpecsConfig;
-  /** 응답에 추가 속성 허용 안함 (전역) */
+  /** Disallow additional properties in responses (global) */
   openapiNoAdditionalProperties?: boolean;
-  /** 모든 속성을 필수로 처리 (전역) */
+  /** Treat all properties as required (global) */
   openapiAllPropertiesRequired?: boolean;
-  /** 기본 OpenAPI 버전 */
+  /** Default OpenAPI version */
   defaultOpenAPIVersion?: '3.0.3' | '3.1.0';
 }
 
 // ============================================================================
-// 컨텍스트 타입
+// Context Types
 // ============================================================================
 
 /**
- * DSL 블록 타입
+ * DSL Block Type
  */
 export type DSLBlockType = 'describe' | 'path' | 'method' | 'response';
 
 /**
- * HTTP 메서드 타입
+ * HTTP Method Type
  */
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS';
 
 /**
- * 응답 태그 (rswag 호환)
+ * Response Tag (rswag compatible)
  */
 export type ResponseTag =
   | ':document'
@@ -96,30 +96,30 @@ export type ResponseTag =
   | ':useAsRequestExample';
 
 // ============================================================================
-// Describe 옵션
+// Describe Options
 // ============================================================================
 
 /**
- * describe() 함수 옵션
+ * describe() function options
  */
 export interface DescribeOptions {
-  /** 대상 OpenAPI 스펙 파일 */
+  /** Target OpenAPI spec file */
   openapiSpec?: string;
-  /** 문서화 포함 여부 */
+  /** Whether to include in documentation */
   document?: boolean;
 }
 
 // ============================================================================
-// 파라미터 관련 타입
+// Parameter Related Types
 // ============================================================================
 
 /**
- * 파라미터 위치 타입 (body는 rswag 호환)
+ * Parameter Location Type (body for rswag compatibility)
  */
 export type ParameterLocation = 'query' | 'header' | 'path' | 'cookie' | 'body';
 
 /**
- * 파라미터 객체 (nswag 확장)
+ * Parameter Object (nswag extension)
  */
 export interface ParameterObject {
   name: string;
@@ -128,13 +128,13 @@ export interface ParameterObject {
   required?: boolean;
   deprecated?: boolean;
   schema?: SchemaObject;
-  /** nswag 확장: enum 값과 설명 매핑 */
+  /** nswag extension: enum value to description mapping */
   enum?: Record<string, string>;
   example?: unknown;
 }
 
 /**
- * 스키마 객체
+ * Schema Object
  */
 export interface SchemaObject {
   type?: string;
@@ -160,11 +160,11 @@ export interface SchemaObject {
 }
 
 // ============================================================================
-// 요청 본문 관련 타입
+// Request Body Related Types
 // ============================================================================
 
 /**
- * 미디어 타입 객체
+ * Media Type Object
  */
 export interface MediaTypeObject {
   schema?: SchemaObject;
@@ -174,7 +174,7 @@ export interface MediaTypeObject {
 }
 
 /**
- * 예제 객체
+ * Example Object
  */
 export interface ExampleObject {
   summary?: string;
@@ -184,7 +184,7 @@ export interface ExampleObject {
 }
 
 /**
- * 인코딩 객체
+ * Encoding Object
  */
 export interface EncodingObject {
   contentType?: string;
@@ -195,7 +195,7 @@ export interface EncodingObject {
 }
 
 /**
- * 헤더 객체
+ * Header Object
  */
 export interface HeaderObject {
   description?: string;
@@ -206,7 +206,7 @@ export interface HeaderObject {
 }
 
 /**
- * 요청 본문 객체 (OpenAPI 3.0 네이티브)
+ * Request Body Object (OpenAPI 3.0 native)
  */
 export interface RequestBodyObject {
   description?: string;
@@ -215,11 +215,11 @@ export interface RequestBodyObject {
 }
 
 // ============================================================================
-// 응답 관련 타입
+// Response Related Types
 // ============================================================================
 
 /**
- * 응답 옵션
+ * Response Options
  */
 export interface ResponseOptions {
   document?: boolean;
@@ -229,11 +229,11 @@ export interface ResponseOptions {
 }
 
 // ============================================================================
-// 테스트 실행 관련 타입
+// Test Execution Related Types
 // ============================================================================
 
 /**
- * VCR 옵션
+ * VCR Options
  */
 export interface VCROptions {
   cassette?: string;
@@ -241,7 +241,7 @@ export interface VCROptions {
 }
 
 /**
- * runTest() 함수 옵션
+ * runTest() function options
  */
 export interface RunTestOptions {
   focus?: boolean;
@@ -252,7 +252,7 @@ export interface RunTestOptions {
 }
 
 /**
- * 테스트 응답 객체
+ * Test Response Object
  */
 export interface TestResponse {
   statusCode: number;
@@ -261,7 +261,7 @@ export interface TestResponse {
 }
 
 /**
- * 테스트 요청 객체
+ * Test Request Object
  */
 export interface TestRequest {
   path: string;
@@ -271,11 +271,11 @@ export interface TestRequest {
 }
 
 // ============================================================================
-// 메타데이터 타입
+// Metadata Types
 // ============================================================================
 
 /**
- * 요청 메타데이터
+ * Request Metadata
  */
 export interface DSLRequestMetadata {
   path: string;
@@ -286,7 +286,7 @@ export interface DSLRequestMetadata {
 }
 
 /**
- * 응답 메타데이터
+ * Response Metadata
  */
 export interface DSLResponseMetadata {
   statusCode: number;
@@ -297,7 +297,7 @@ export interface DSLResponseMetadata {
 }
 
 /**
- * 확장된 메타데이터 (Operation 포함)
+ * Extended Metadata (includes Operation)
  */
 export interface ExtendedDSLMetadata extends DSLRequestMetadata {
   readonly operation?: OperationMetadata;
@@ -305,7 +305,7 @@ export interface ExtendedDSLMetadata extends DSLRequestMetadata {
 }
 
 /**
- * 오퍼레이션 메타데이터
+ * Operation Metadata
  */
 export interface OperationMetadata {
   operationId?: string;
@@ -320,7 +320,7 @@ export interface OperationMetadata {
 }
 
 /**
- * 외부 문서 객체
+ * External Documentation Object
  */
 export interface ExternalDocsObject {
   url: string;
@@ -328,51 +328,51 @@ export interface ExternalDocsObject {
 }
 
 /**
- * 보안 요구사항
+ * Security Requirement
  */
 export type SecurityRequirement = Record<string, string[]>;
 
 // ============================================================================
-// Phase 5: 스키마 및 보안 기능 타입
+// Phase 5: Schema and Security Feature Types
 // ============================================================================
 
 /**
- * 응답 헤더 옵션 (header() 함수용)
+ * Response Header Options (for header() function)
  */
 export interface HeaderOptions {
-  /** 스키마 정의 */
+  /** Schema definition */
   schema: SchemaObject;
-  /** 헤더 설명 */
+  /** Header description */
   description?: string;
-  /** 필수 여부 (Header Object 레벨) */
+  /** Whether required (Header Object level) */
   required?: boolean;
-  /** 사용 중단 여부 (Header Object 레벨) */
+  /** Whether deprecated (Header Object level) */
   deprecated?: boolean;
-  /** 예제 값 */
+  /** Example value */
   example?: unknown;
 }
 
 /**
- * 요청 본문 예제 옵션 (requestBodyExample() 함수용)
+ * Request Body Example Options (for requestBodyExample() function)
  */
 export interface RequestBodyExampleOptions {
-  /** 예제 값 */
+  /** Example value */
   value: unknown;
-  /** 예제 이름 (키) */
+  /** Example name (key) */
   name?: string;
-  /** 간단한 요약 */
+  /** Brief summary */
   summary?: string;
-  /** 상세 설명 */
+  /** Detailed description */
   description?: string;
 }
 
 /**
- * 보안 스키마 타입
+ * Security Scheme Type
  */
 export type SecuritySchemeType = 'apiKey' | 'http' | 'oauth2' | 'openIdConnect';
 
 /**
- * API Key 보안 스키마
+ * API Key Security Scheme
  */
 export interface ApiKeySecurityScheme {
   type: 'apiKey';
@@ -382,7 +382,7 @@ export interface ApiKeySecurityScheme {
 }
 
 /**
- * HTTP 보안 스키마 (Basic, Bearer 등)
+ * HTTP Security Scheme (Basic, Bearer, etc.)
  */
 export interface HttpSecurityScheme {
   type: 'http';
@@ -392,7 +392,7 @@ export interface HttpSecurityScheme {
 }
 
 /**
- * OAuth2 플로우 객체
+ * OAuth2 Flow Object
  */
 export interface OAuthFlowObject {
   authorizationUrl?: string;
@@ -402,7 +402,7 @@ export interface OAuthFlowObject {
 }
 
 /**
- * OAuth2 플로우들
+ * OAuth2 Flows Object
  */
 export interface OAuthFlowsObject {
   implicit?: OAuthFlowObject;
@@ -412,7 +412,7 @@ export interface OAuthFlowsObject {
 }
 
 /**
- * OAuth2 보안 스키마
+ * OAuth2 Security Scheme
  */
 export interface OAuth2SecurityScheme {
   type: 'oauth2';
@@ -421,7 +421,7 @@ export interface OAuth2SecurityScheme {
 }
 
 /**
- * OpenID Connect 보안 스키마
+ * OpenID Connect Security Scheme
  */
 export interface OpenIdConnectSecurityScheme {
   type: 'openIdConnect';
@@ -430,7 +430,7 @@ export interface OpenIdConnectSecurityScheme {
 }
 
 /**
- * 보안 스키마 객체 (유니온 타입)
+ * Security Scheme Object (union type)
  */
 export type SecuritySchemeObject =
   | ApiKeySecurityScheme
@@ -439,18 +439,18 @@ export type SecuritySchemeObject =
   | OpenIdConnectSecurityScheme;
 
 /**
- * 확장된 Enum 파라미터 (설명 포함)
+ * Extended Enum Parameter (with descriptions)
  */
 export interface EnumDescriptions {
   [value: string]: string;
 }
 
 // ============================================================================
-// 훅 컨텍스트 타입
+// Hook Context Types
 // ============================================================================
 
 /**
- * BeforeEach 훅 컨텍스트
+ * BeforeEach Hook Context
  */
 export interface DSLBeforeEachContext {
   testName: string;
@@ -460,7 +460,7 @@ export interface DSLBeforeEachContext {
 }
 
 /**
- * AfterEach 훅 컨텍스트
+ * AfterEach Hook Context
  */
 export interface DSLAfterEachContext {
   testName: string;
@@ -472,16 +472,16 @@ export interface DSLAfterEachContext {
 }
 
 /**
- * Example 컨텍스트 (it 함수에서 사용)
+ * Example Context (used in it function)
  */
 export type ExampleContext = DSLAfterEachContext;
 
 // ============================================================================
-// submitRequest 관련 타입
+// submitRequest Related Types
 // ============================================================================
 
 /**
- * submitRequest 결과
+ * submitRequest Result
  */
 export interface SubmitRequestResult {
   request: TestRequest;
@@ -489,11 +489,11 @@ export interface SubmitRequestResult {
 }
 
 // ============================================================================
-// DSL 컨텍스트 타입
+// DSL Context Types
 // ============================================================================
 
 /**
- * Describe 컨텍스트
+ * Describe Context
  */
 export interface DescribeContext {
   type: 'describe';
@@ -503,7 +503,7 @@ export interface DescribeContext {
 }
 
 /**
- * Path 컨텍스트
+ * Path Context
  */
 export interface PathContext {
   type: 'path';
@@ -514,7 +514,7 @@ export interface PathContext {
 }
 
 /**
- * Method 컨텍스트
+ * Method Context
  */
 export interface MethodContext {
   type: 'method';
@@ -532,20 +532,20 @@ export interface MethodContext {
   responses: ResponseContext[];
   beforeAllHooks: Array<() => void | Promise<void>>;
   afterAllHooks: Array<() => void | Promise<void>>;
-  /** Operation ID (클라이언트 코드 생성용) */
+  /** Operation ID (for client code generation) */
   operationId?: string;
-  /** 상세 설명 */
+  /** Detailed description */
   description?: string;
-  /** 사용 중단 표시 */
+  /** Deprecation indicator */
   deprecated?: boolean;
-  /** 외부 문서 링크 */
+  /** External documentation link */
   externalDocs?: ExternalDocsObject;
-  /** 보안 요구사항 (Phase 5) */
+  /** Security requirements (Phase 5) */
   security?: SecurityRequirement[];
 }
 
 /**
- * Response 컨텍스트
+ * Response Context
  */
 export interface ResponseContext {
   type: 'response';
@@ -562,7 +562,7 @@ export interface ResponseContext {
 }
 
 /**
- * 테스트 정의
+ * Test Definition
  */
 export interface TestDefinition {
   description?: string;
@@ -571,7 +571,7 @@ export interface TestDefinition {
 }
 
 /**
- * It 테스트 정의
+ * It Test Definition
  */
 export interface ItTestDefinition {
   description: string;
@@ -579,12 +579,12 @@ export interface ItTestDefinition {
 }
 
 /**
- * DSL 컨텍스트 유니온
+ * DSL Context Union
  */
 export type DSLContext = DescribeContext | PathContext | MethodContext | ResponseContext;
 
 // ============================================================================
-// 훅 타입
+// Hook Types
 // ============================================================================
 
 export type BeforeAllHook = () => void | Promise<void>;

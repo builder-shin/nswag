@@ -1,30 +1,30 @@
 /**
- * @aspect/nswag-ui 타입 정의
- * Swagger UI 및 Redoc UI 설정 옵션
+ * @aspect/nswag-ui type definitions
+ * Swagger UI and Redoc UI configuration options
  */
 
 /**
- * UI 엔진 유형
+ * UI engine type
  */
 export type UIEngine = 'swagger-ui' | 'redoc';
 
 /**
- * 스펙 URL 정보 (다중 스펙 지원)
+ * Spec URL information (multi-spec support)
  */
 export interface SpecUrl {
-  /** OpenAPI 스펙 URL */
+  /** OpenAPI spec URL */
   url: string;
-  /** 스펙 이름 (선택 드롭다운에 표시) */
+  /** Spec name (displayed in selection dropdown) */
   name: string;
 }
 
 /**
- * Basic Auth 설정
+ * Basic Auth configuration
  */
 export interface BasicAuthConfig {
-  /** Basic Auth 활성화 여부 */
+  /** Whether Basic Auth is enabled */
   enabled: boolean;
-  /** 인증 자격 증명 */
+  /** Authentication credentials */
   credentials: {
     username: string;
     password: string;
@@ -32,31 +32,31 @@ export interface BasicAuthConfig {
 }
 
 /**
- * Swagger UI 네이티브 설정 옵션
+ * Swagger UI native configuration options
  * @see https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/
  */
 export interface SwaggerUIConfigObject {
-  /** 모델 섹션 기본 펼침 깊이 (기본: 1, -1은 모두 숨김) */
+  /** Default expansion depth for model section (default: 1, -1 hides all) */
   defaultModelsExpandDepth?: number;
-  /** 개별 모델 기본 펼침 깊이 (기본: 1) */
+  /** Default expansion depth for individual model (default: 1) */
   defaultModelExpandDepth?: number;
-  /** 작업 확장 방식: 'list' | 'full' | 'none' */
+  /** Operation expansion mode: 'list' | 'full' | 'none' */
   docExpansion?: 'list' | 'full' | 'none';
-  /** API 요청 소요 시간 표시 */
+  /** Display API request duration */
   displayRequestDuration?: boolean;
-  /** 필터 검색창 표시 */
+  /** Show filter search box */
   filter?: boolean | string;
-  /** 딥 링킹 활성화 */
+  /** Enable deep linking */
   deepLinking?: boolean;
-  /** 인증 정보 저장 */
+  /** Persist authorization information */
   persistAuthorization?: boolean;
-  /** 확장 속성 표시 */
+  /** Show extension attributes */
   showExtensions?: boolean;
-  /** 공통 확장 속성 표시 */
+  /** Show common extension attributes */
   showCommonExtensions?: boolean;
-  /** OAuth2 리다이렉트 URL */
+  /** OAuth2 redirect URL */
   oauth2RedirectUrl?: string;
-  /** OAuth 설정 */
+  /** OAuth configuration */
   oauth?: {
     clientId?: string;
     clientSecret?: string;
@@ -68,51 +68,51 @@ export interface SwaggerUIConfigObject {
     useBasicAuthenticationWithAccessCodeGrant?: boolean;
     usePkceWithAuthorizationCodeGrant?: boolean;
   };
-  /** 기타 설정 */
+  /** Other configuration */
   [key: string]: unknown;
 }
 
 /**
- * Swagger UI 옵션
+ * Swagger UI options
  */
 export interface SwaggerUiOptions {
-  // === 스펙 URL ===
-  /** 단일 스펙 URL */
+  // === Spec URL ===
+  /** Single spec URL */
   specUrl?: string;
-  /** 다중 스펙 URL 목록 */
+  /** Multiple spec URL list */
   specUrls?: SpecUrl[];
-  /** 기본 선택할 스펙 이름 */
+  /** Default spec name to select */
   primaryName?: string;
 
   // === Basic Auth ===
-  /** Basic Auth 설정 */
+  /** Basic Auth configuration */
   basicAuth?: BasicAuthConfig;
 
-  // === Swagger UI 네이티브 설정 ===
-  /** Swagger UI 설정 객체 */
+  // === Swagger UI Native Configuration ===
+  /** Swagger UI configuration object */
   configObject?: SwaggerUIConfigObject;
 
-  // === 커스터마이징 ===
-  /** 커스텀 HTML 템플릿 경로 */
+  // === Customization ===
+  /** Custom HTML template path */
   customHtmlPath?: string;
-  /** 인라인 커스텀 CSS */
+  /** Inline custom CSS */
   customCss?: string;
-  /** 외부 커스텀 CSS URL */
+  /** External custom CSS URL */
   customCssUrl?: string;
-  /** 커스텀 JavaScript 코드 */
+  /** Custom JavaScript code */
   customJs?: string;
-  /** 커스텀 파비콘 URL */
+  /** Custom favicon URL */
   customFavicon?: string;
-  /** 커스텀 페이지 제목 */
+  /** Custom page title */
   customSiteTitle?: string;
 }
 
 /**
- * Redoc 네이티브 설정 옵션
+ * Redoc native configuration options
  * @see https://redocly.com/docs/redoc/config
  */
 export interface RedocRawOptions {
-  /** 테마 설정 */
+  /** Theme configuration */
   theme?: {
     colors?: {
       primary?: {
@@ -176,87 +176,87 @@ export interface RedocRawOptions {
       gutter?: string;
     };
   };
-  /** 확장 가능한 기본 상태 */
+  /** Expandable default server variables */
   expandDefaultServerVariables?: boolean;
-  /** 요청 샘플 표시 */
+  /** Show request samples */
   expandResponses?: string;
-  /** 하나만 열기 */
+  /** Open only one */
   maxDisplayedEnumValues?: number;
-  /** 사이드바 숨김 */
+  /** Hide sidebar */
   hideSidebar?: boolean;
-  /** 다운로드 버튼 숨김 */
+  /** Hide download button */
   hideDownloadButton?: boolean;
-  /** 호스트 이름 숨김 */
+  /** Hide hostname */
   hideHostname?: boolean;
-  /** 로딩 표시기 숨김 */
+  /** Hide loading indicator */
   hideLoading?: boolean;
-  /** 스키마 제목 숨김 */
+  /** Hide schema title */
   hideSchemaPattern?: boolean;
-  /** 단일 요청 샘플 탭 숨김 */
+  /** Hide single request sample tab */
   hideSingleRequestSampleTab?: boolean;
-  /** JSON 샘플 펼침 깊이 */
+  /** JSON sample expansion depth */
   jsonSampleExpandLevel?: number | 'all';
-  /** 네이티브 스크롤바 사용 */
+  /** Use native scrollbars */
   nativeScrollbars?: boolean;
-  /** 요청 본문 응답 탭 제거 */
+  /** Remove request body response tab */
   noAutoAuth?: boolean;
-  /** 경로 쿼리 펼치기 */
+  /** Expand path query */
   pathInMiddlePanel?: boolean;
-  /** 필수 속성 우선 표시 */
+  /** Show required properties first */
   requiredPropsFirst?: boolean;
-  /** 스크롤 Y 오프셋 */
+  /** Scroll Y offset */
   scrollYOffset?: number | string;
-  /** 확장 표시 */
+  /** Show extensions */
   showExtensions?: boolean | string[];
-  /** 응답 샘플 정렬 */
+  /** Sort response samples */
   sortPropsAlphabetically?: boolean;
-  /** 기타 설정 */
+  /** Other configuration */
   [key: string]: unknown;
 }
 
 /**
- * Redoc 옵션
+ * Redoc options
  */
 export interface RedocOptions {
-  /** 스펙 URL (필수) */
+  /** Spec URL (required) */
   specUrl: string;
 
   // === Basic Auth ===
-  /** Basic Auth 설정 */
+  /** Basic Auth configuration */
   basicAuth?: BasicAuthConfig;
 
-  // === Redoc 네이티브 설정 ===
-  /** Redoc 설정 객체 */
+  // === Redoc Native Configuration ===
+  /** Redoc configuration object */
   options?: RedocRawOptions;
 
-  // === 커스터마이징 ===
-  /** 인라인 커스텀 CSS */
+  // === Customization ===
+  /** Inline custom CSS */
   customCss?: string;
-  /** 외부 커스텀 CSS URL */
+  /** External custom CSS URL */
   customCssUrl?: string;
-  /** 커스텀 JavaScript 코드 */
+  /** Custom JavaScript code */
   customJs?: string;
-  /** 커스텀 파비콘 URL */
+  /** Custom favicon URL */
   customFavicon?: string;
-  /** 커스텀 페이지 제목 */
+  /** Custom page title */
   customSiteTitle?: string;
 }
 
 /**
- * NestJS 모듈 옵션
+ * NestJS module options
  */
 export interface NswagUiModuleOptions {
-  /** UI 경로 (기본: /docs) */
+  /** UI path (default: /docs) */
   path: string;
-  /** 스펙 URL 목록 */
+  /** Spec URL list */
   specUrls: SpecUrl[];
-  /** UI 엔진 선택: 'swagger-ui' | 'redoc' */
+  /** UI engine selection: 'swagger-ui' | 'redoc' */
   engine: UIEngine;
-  /** 기본 선택 스펙 이름 */
+  /** Default spec name to select */
   primaryName?: string;
-  /** Basic Auth 설정 */
+  /** Basic Auth configuration */
   basicAuth?: BasicAuthConfig;
-  /** 커스터마이징 옵션 */
+  /** Customization options */
   customization?: {
     customCss?: string;
     customCssUrl?: string;
@@ -264,42 +264,42 @@ export interface NswagUiModuleOptions {
     customFavicon?: string;
     customSiteTitle?: string;
   };
-  /** 엔진별 추가 설정 */
+  /** Engine-specific additional configuration */
   engineOptions?: SwaggerUIConfigObject | RedocRawOptions;
 }
 
 /**
- * Fastify Swagger UI 플러그인 옵션
+ * Fastify Swagger UI plugin options
  */
 export interface FastifySwaggerUiPluginOptions extends SwaggerUiOptions {
-  /** 라우트 prefix (기본: /docs) */
+  /** Route prefix (default: /docs) */
   prefix?: string;
 }
 
 /**
- * Fastify Redoc 플러그인 옵션
+ * Fastify Redoc plugin options
  */
 export interface FastifyRedocPluginOptions extends RedocOptions {
-  /** 라우트 prefix (기본: /redoc) */
+  /** Route prefix (default: /redoc) */
   prefix?: string;
 }
 
-// ========== 레거시 호환 타입 (하위 호환성) ==========
+// ========== Legacy Compatible Types (for backward compatibility) ==========
 
 /**
- * @deprecated SwaggerUiOptions를 사용하세요
+ * @deprecated Use SwaggerUiOptions instead
  */
 export type SwaggerUIOptions = SwaggerUiOptions;
 
 /**
- * UI 유형 (레거시)
- * @deprecated UIEngine을 사용하세요
+ * UI type (legacy)
+ * @deprecated Use UIEngine instead
  */
 export type UIType = UIEngine;
 
 /**
- * Redoc 테마 설정 (레거시)
- * @deprecated RedocRawOptions.theme을 사용하세요
+ * Redoc theme configuration (legacy)
+ * @deprecated Use RedocRawOptions.theme instead
  */
 export interface RedocTheme {
   colors?: {
@@ -316,10 +316,10 @@ export interface RedocTheme {
   };
 }
 
-// ========== 기본값 상수 ==========
+// ========== Default Constants ==========
 
 /**
- * 기본 Swagger UI 옵션
+ * Default Swagger UI options
  */
 export const DEFAULT_SWAGGER_UI_OPTIONS = {
   customSiteTitle: 'API Documentation',
@@ -332,7 +332,7 @@ export const DEFAULT_SWAGGER_UI_OPTIONS = {
 } as const;
 
 /**
- * 기본 Redoc 옵션
+ * Default Redoc options
  */
 export const DEFAULT_REDOC_OPTIONS = {
   customSiteTitle: 'API Documentation',

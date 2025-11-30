@@ -1,6 +1,6 @@
 /**
- * mock 서브커맨드
- * 모킹 서버 시작 (mock:start)
+ * mock subcommand
+ * Start mocking server (mock:start)
  */
 
 import { existsSync, readFileSync } from 'fs';
@@ -13,19 +13,19 @@ import { logger, type ParsedArgs, colorize } from '../utils.js';
 import type { OpenAPISpec, PathItem, Operation, Schema } from '../../types/index.js';
 
 /**
- * mock:start 서브커맨드 실행
+ * Execute mock:start subcommand
  */
 export async function runMockStart(args: ParsedArgs): Promise<void> {
-  logger.title('OpenAPI 모킹 서버');
+  logger.title('OpenAPI Mocking Server');
 
-  // 옵션 파싱
+  // Parse options
   let specPath = args.flags.spec as string;
   const port = parseInt(args.flags.port as string, 10) || 4000;
   const host = (args.flags.host as string) || 'localhost';
   const delay = parseInt(args.flags.delay as string, 10) || 0;
   const cors = args.flags.cors !== false;
 
-  // 스펙 파일 경로 결정
+  // Determine spec file path
   if (!specPath) {
     const configPath = args.flags.config as string | undefined || args.flags.c as string | undefined;
     const config = await loadConfig(configPath);
@@ -38,45 +38,45 @@ export async function runMockStart(args: ParsedArgs): Promise<void> {
     specPath = resolve(process.cwd(), specPath);
   }
 
-  // 파일 존재 확인
+  // Check file existence
   if (!existsSync(specPath)) {
-    logger.error(`스펙 파일을 찾을 수 없습니다: ${specPath}`);
+    logger.error(`Spec file not found: ${specPath}`);
     process.exit(1);
   }
 
-  // 스펙 로드
-  logger.info(`스펙 파일: ${specPath}`);
+  // Load spec
+  logger.info(`Spec file: ${specPath}`);
   const spec = loadSpecFile(specPath);
 
-  // 서버 생성 및 시작
+  // Create and start server
   const server = createMockServer(spec, { delay, cors });
 
   server.listen(port, host, () => {
     logger.newline();
-    logger.success(`모킹 서버 시작됨`);
+    logger.success(`Mocking server started`);
     logger.info(`URL: ${colorize(`http://${host}:${port}`, 'cyan')}`);
     logger.newline();
 
-    // 등록된 엔드포인트 출력
+    // Print registered endpoints
     printEndpoints(spec);
 
     logger.newline();
-    logger.info('종료하려면 Ctrl+C를 누르세요.');
+    logger.info('Press Ctrl+C to quit.');
   });
 
-  // 종료 시그널 처리
+  // Handle termination signals
   process.on('SIGINT', () => {
     logger.newline();
-    logger.info('서버 종료 중...');
+    logger.info('Shutting down server...');
     server.close(() => {
-      logger.success('서버가 종료되었습니다.');
+      logger.success('Server closed.');
       process.exit(0);
     });
   });
 }
 
 /**
- * 스펙 파일 로드
+ * Load spec file
  */
 function loadSpecFile(filePath: string): OpenAPISpec {
   const content = readFileSync(filePath, 'utf-8');
@@ -90,7 +90,7 @@ function loadSpecFile(filePath: string): OpenAPISpec {
 }
 
 /**
- * Mock 서버 옵션
+ * Mock server options
  */
 interface MockServerOptions {
   delay?: number;
@@ -98,7 +98,7 @@ interface MockServerOptions {
 }
 
 /**
- * Mock 서버 생성
+ * Create mock server
  */
 function createMockServer(spec: OpenAPISpec, options: MockServerOptions): Server {
   const { delay = 0, cors = true } = options;
@@ -109,21 +109,21 @@ function createMockServer(spec: OpenAPISpec, options: MockServerOptions): Server
     const url = new URL(req.url || '/', `http://${req.headers.host}`);
     const pathname = url.pathname;
 
-    // CORS 헤더
+    // CORS headers
     if (cors) {
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     }
 
-    // OPTIONS 요청 처리 (CORS preflight)
+    // Handle OPTIONS request (CORS preflight)
     if (method === 'OPTIONS') {
       res.writeHead(204);
       res.end();
       return;
     }
 
-    // 라우트 매칭
+    // Route matching
     const match = matchRoute(spec.paths, pathname, method);
 
     if (!match) {
@@ -135,12 +135,12 @@ function createMockServer(spec: OpenAPISpec, options: MockServerOptions): Server
 
     const { operation } = match;
 
-    // 응답 지연
+    // Apply response delay
     if (delay > 0) {
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
 
-    // 응답 생성
+    // Generate response
     const response = generateResponse(operation, spec.components?.schemas || {});
 
     res.writeHead(response.statusCode, {
@@ -154,7 +154,7 @@ function createMockServer(spec: OpenAPISpec, options: MockServerOptions): Server
 }
 
 /**
- * 라우트 매칭
+ * Route matching
  */
 interface RouteMatch {
   operation: Operation;
@@ -182,10 +182,10 @@ function matchRoute(
 }
 
 /**
- * 경로 패턴 매칭
+ * Path pattern matching
  */
 function matchPath(pattern: string, pathname: string): Record<string, string> | null {
-  // 패턴을 정규식으로 변환
+  // Convert pattern to regex
   const paramNames: string[] = [];
   const regexPattern = pattern.replace(/\{([^}]+)\}/g, (_, paramName) => {
     paramNames.push(paramName);
@@ -209,7 +209,7 @@ function matchPath(pattern: string, pathname: string): Record<string, string> | 
 }
 
 /**
- * 응답 생성
+ * Generate response
  */
 interface MockResponse {
   statusCode: number;
@@ -222,7 +222,7 @@ function generateResponse(
 ): MockResponse {
   const { responses } = operation;
 
-  // 성공 응답 찾기 (200, 201 등)
+  // Find success response (200, 201, etc.)
   const successCodes = ['200', '201', '204'];
   let statusCode = 200;
   let responseSpec: { description: string; content?: Record<string, { schema?: Schema }> } | undefined;
@@ -235,28 +235,28 @@ function generateResponse(
     }
   }
 
-  // 응답 스키마가 없는 경우
+  // If no response schema
   if (!responseSpec || !responseSpec.content) {
     return { statusCode, body: null };
   }
 
-  // JSON 응답 스키마 찾기
+  // Find JSON response schema
   const jsonContent = responseSpec.content['application/json'];
   if (!jsonContent?.schema) {
     return { statusCode, body: null };
   }
 
-  // 스키마 해석 ($ref 처리)
+  // Resolve schema ($ref handling)
   const schema = resolveSchema(jsonContent.schema, schemas);
 
-  // Mock 데이터 생성
+  // Generate mock data
   const body = generateMock(schema);
 
   return { statusCode, body };
 }
 
 /**
- * 스키마 해석 ($ref 처리)
+ * Resolve schema ($ref handling)
  */
 function resolveSchema(schema: Schema, schemas: Record<string, Schema>): Schema {
   if (schema.$ref) {
@@ -268,7 +268,7 @@ function resolveSchema(schema: Schema, schemas: Record<string, Schema>): Schema 
     return {};
   }
 
-  // 중첩된 스키마 해석
+  // Resolve nested schemas
   const result: Schema = { ...schema };
 
   if (result.properties) {
@@ -286,10 +286,10 @@ function resolveSchema(schema: Schema, schemas: Record<string, Schema>): Schema 
 }
 
 /**
- * 엔드포인트 목록 출력
+ * Print endpoint list
  */
 function printEndpoints(spec: OpenAPISpec): void {
-  logger.info('등록된 엔드포인트:');
+  logger.info('Registered endpoints:');
 
   const methods = ['get', 'post', 'put', 'delete', 'patch'] as const;
 
@@ -316,7 +316,7 @@ function printEndpoints(spec: OpenAPISpec): void {
 }
 
 /**
- * 요청 로그 출력
+ * Log request
  */
 function logRequest(method: string, path: string, status: number, duration: number): void {
   const statusColor = status < 400 ? '\x1b[32m' : '\x1b[31m';

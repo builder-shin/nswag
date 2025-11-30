@@ -1,8 +1,8 @@
 /**
- * 문서화 옵션 유틸리티
- * Phase 4: API 버전 및 문서화 옵션
+ * Documentation options utilities
+ * Phase 4: API version and documentation options
  *
- * describe, response 레벨의 document 옵션 처리
+ * Handle document options at describe and response levels
  */
 
 import type {
@@ -16,24 +16,24 @@ import type {
 } from './types.js';
 
 // ============================================================================
-// document 옵션 처리
+// document option processing
 // ============================================================================
 
 /**
- * 문서화 포함 여부 결정
+ * Determine whether to include in documentation
  *
- * 우선순위:
- * 1. Response 레벨 document 옵션
- * 2. Method 레벨 (없음, 항상 상위 참조)
- * 3. Describe 레벨 document 옵션
- * 4. 기본값: true
+ * Priority:
+ * 1. Response level document option
+ * 2. Method level (none, always reference parent)
+ * 3. Describe level document option
+ * 4. Default: true
  *
  * @example
- * // Describe 레벨에서 제외하고 특정 Response만 포함
+ * // Exclude at Describe level but include specific Response
  * describe('API', { document: false }, () => {
  *   path('/users', () => {
  *     get('List', () => {
- *       response(200, 'OK', { document: true }, () => {  // 이것만 문서화됨
+ *       response(200, 'OK', { document: true }, () => {  // Only this is documented
  *         runTest();
  *       });
  *     });
@@ -44,37 +44,37 @@ export function shouldDocument(
   responseOptions?: ResponseOptions,
   describeOptions?: DescribeOptions
 ): boolean {
-  // Response 레벨에서 명시적으로 설정된 경우
+  // If explicitly set at Response level
   if (responseOptions?.document !== undefined) {
     return responseOptions.document;
   }
 
-  // Describe 레벨에서 설정된 경우
+  // If set at Describe level
   if (describeOptions?.document !== undefined) {
     return describeOptions.document;
   }
 
-  // 기본값: 문서화 포함
+  // Default: include in documentation
   return true;
 }
 
 /**
- * 컨텍스트 체인에서 Describe 옵션 수집
+ * Collect Describe options from context chain
  */
 export function getDescribeOptionsFromContext(
   context: PathContext | MethodContext | ResponseContext
 ): DescribeOptions | undefined {
-  // Path 컨텍스트에서 부모 Describe 찾기
+  // Find parent Describe from Path context
   if (context.type === 'path') {
     return context.parent?.options;
   }
 
-  // Method 컨텍스트에서 부모 Path → Describe 찾기
+  // Find parent Path → Describe from Method context
   if (context.type === 'method') {
     return context.parent?.parent?.options;
   }
 
-  // Response 컨텍스트에서 부모 Method → Path → Describe 찾기
+  // Find parent Method → Path → Describe from Response context
   if (context.type === 'response') {
     return context.parent?.parent?.parent?.options;
   }
@@ -83,7 +83,7 @@ export function getDescribeOptionsFromContext(
 }
 
 /**
- * Response 컨텍스트의 문서화 여부 결정
+ * Determine whether to document Response context
  */
 export function shouldDocumentResponse(responseContext: ResponseContext): boolean {
   const describeOptions = getDescribeOptionsFromContext(responseContext);
@@ -91,11 +91,11 @@ export function shouldDocumentResponse(responseContext: ResponseContext): boolea
 }
 
 // ============================================================================
-// 문서화 필터링
+// Documentation filtering
 // ============================================================================
 
 /**
- * 문서화 대상 응답만 필터링
+ * Filter only documentable responses
  */
 export function filterDocumentableResponses(
   responses: ResponseContext[]
@@ -104,8 +104,8 @@ export function filterDocumentableResponses(
 }
 
 /**
- * 문서화 대상 메서드만 필터링
- * (하나 이상의 문서화 대상 응답이 있는 경우)
+ * Filter only documentable methods
+ * (if at least one documentable response exists)
  */
 export function filterDocumentableMethods(
   methods: MethodContext[]
@@ -116,8 +116,8 @@ export function filterDocumentableMethods(
 }
 
 /**
- * 문서화 대상 경로만 필터링
- * (하나 이상의 문서화 대상 메서드가 있는 경우)
+ * Filter only documentable paths
+ * (if at least one documentable method exists)
  */
 export function filterDocumentablePaths(
   paths: PathContext[]
@@ -130,29 +130,29 @@ export function filterDocumentablePaths(
 }
 
 // ============================================================================
-// openapiSpec 옵션 처리
+// openapiSpec option processing
 // ============================================================================
 
 /**
- * 컨텍스트에서 대상 OpenAPI 스펙 파일 경로 가져오기
+ * Get target OpenAPI spec file path from context
  */
 export function getTargetSpec(context: DSLContext): string | undefined {
-  // Describe 컨텍스트에서 직접 가져오기
+  // Get directly from Describe context
   if (context.type === 'describe') {
     return context.options.openapiSpec;
   }
 
-  // Path 컨텍스트에서 부모 Describe의 옵션 참조
+  // Reference parent Describe's option from Path context
   if (context.type === 'path') {
     return context.parent?.options.openapiSpec;
   }
 
-  // Method 컨텍스트에서 부모 체인 순회
+  // Traverse parent chain from Method context
   if (context.type === 'method') {
     return context.parent?.parent?.options.openapiSpec;
   }
 
-  // Response 컨텍스트에서 부모 체인 순회
+  // Traverse parent chain from Response context
   if (context.type === 'response') {
     return context.parent?.parent?.parent?.options.openapiSpec;
   }
@@ -161,7 +161,7 @@ export function getTargetSpec(context: DSLContext): string | undefined {
 }
 
 /**
- * 응답을 스펙 파일별로 그룹화
+ * Group responses by spec file
  */
 export function groupBySpec(
   describes: DescribeContext[]
@@ -179,11 +179,11 @@ export function groupBySpec(
 }
 
 // ============================================================================
-// 유틸리티
+// Utilities
 // ============================================================================
 
 /**
- * 중첩된 Describe 컨텍스트를 평면화
+ * Flatten nested Describe contexts
  */
 export function flattenDescribes(
   describes: DescribeContext[]
@@ -208,7 +208,7 @@ export function flattenDescribes(
 }
 
 /**
- * Describe 컨텍스트에서 모든 Path 추출
+ * Extract all Paths from Describe context
  */
 export function extractPaths(describe: DescribeContext): PathContext[] {
   const paths: PathContext[] = [];
@@ -225,7 +225,7 @@ export function extractPaths(describe: DescribeContext): PathContext[] {
 }
 
 /**
- * 문서화 통계 계산
+ * Calculate documentation statistics
  */
 export interface DocumentationStats {
   totalDescribes: number;

@@ -1,12 +1,12 @@
 /**
- * no-duplicate-operation-id 규칙
- * operationId() 중복 방지
+ * no-duplicate-operation-id rule
+ * Prevent duplicate operationId()
  */
 
 import type { Rule } from 'eslint';
 import type { CallExpression, Node } from 'estree';
 
-// 노드가 operationId() 호출인지 확인
+// Check if node is an operationId() call
 function isOperationIdCall(node: Node): node is CallExpression {
   return (
     node.type === 'CallExpression' &&
@@ -15,7 +15,7 @@ function isOperationIdCall(node: Node): node is CallExpression {
   );
 }
 
-// 리터럴 값 추출
+// Extract literal value
 function getLiteralValue(node: Node): string | undefined {
   if (node.type === 'Literal' && typeof node.value === 'string') {
     return node.value;
@@ -30,19 +30,19 @@ const rule: Rule.RuleModule = {
   meta: {
     type: 'problem',
     docs: {
-      description: 'operationId() 중복 방지',
+      description: 'Prevent duplicate operationId()',
       category: 'Possible Errors',
       recommended: true,
     },
     schema: [],
     messages: {
       duplicateOperationId:
-        '중복된 operationId: "{{operationId}}". operationId는 파일 내에서 고유해야 합니다.',
+        'Duplicate operationId: "{{operationId}}". operationId must be unique within the file.',
     },
   },
 
   create(context) {
-    // 파일 내에서 발견된 operationId 저장
+    // Store operationIds found in the file
     const operationIds = new Map<string, CallExpression>();
 
     return {
@@ -58,7 +58,7 @@ const rule: Rule.RuleModule = {
 
         const operationId = getLiteralValue(arg);
         if (!operationId) {
-          return; // 동적 값은 검사하지 않음
+          return; // Don't check dynamic values
         }
 
         const existing = operationIds.get(operationId);

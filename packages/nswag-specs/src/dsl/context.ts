@@ -1,6 +1,6 @@
 /**
- * DSL 컨텍스트 관리자
- * 중첩 블록 처리 및 메타데이터 수집
+ * DSL context manager
+ * Handles nested blocks and metadata collection
  */
 
 import type {
@@ -29,21 +29,21 @@ import type {
 } from './types.js';
 
 /**
- * DSL 컨텍스트 스택 관리자
+ * DSL context stack manager
  */
 export class DSLContextManager {
   private contextStack: DSLContext[] = [];
   private rootDescribes: DescribeContext[] = [];
 
   /**
-   * 현재 컨텍스트 가져오기
+   * Get current context
    */
   getCurrentContext(): DSLContext | null {
     return this.contextStack[this.contextStack.length - 1] ?? null;
   }
 
   /**
-   * 특정 타입의 부모 컨텍스트 찾기
+   * Find parent context of specific type
    */
   findParentContext<T extends DSLContext['type']>(
     type: T,
@@ -58,39 +58,39 @@ export class DSLContextManager {
   }
 
   /**
-   * 현재 Describe 컨텍스트 가져오기
+   * Get current Describe context
    */
   getCurrentDescribe(): DescribeContext | null {
     return this.findParentContext('describe');
   }
 
   /**
-   * 현재 Path 컨텍스트 가져오기
+   * Get current Path context
    */
   getCurrentPath(): PathContext | null {
     return this.findParentContext('path');
   }
 
   /**
-   * 현재 Method 컨텍스트 가져오기
+   * Get current Method context
    */
   getCurrentMethod(): MethodContext | null {
     return this.findParentContext('method');
   }
 
   /**
-   * 현재 Response 컨텍스트 가져오기
+   * Get current Response context
    */
   getCurrentResponse(): ResponseContext | null {
     return this.findParentContext('response');
   }
 
   // ============================================================================
-  // Describe 컨텍스트
+  // Describe context
   // ============================================================================
 
   /**
-   * Describe 컨텍스트 시작
+   * Begin Describe context
    */
   beginDescribe(name: string, options: DescribeOptions = {}): DescribeContext {
     const context: DescribeContext = {
@@ -100,7 +100,7 @@ export class DSLContextManager {
       children: [],
     };
 
-    // 부모 describe에 추가
+    // Add to parent describe
     const parentDescribe = this.getCurrentDescribe();
     if (parentDescribe) {
       parentDescribe.children.push(context);
@@ -113,7 +113,7 @@ export class DSLContextManager {
   }
 
   /**
-   * Describe 컨텍스트 종료
+   * End Describe context
    */
   endDescribe(): DescribeContext | null {
     const current = this.getCurrentContext();
@@ -124,11 +124,11 @@ export class DSLContextManager {
   }
 
   // ============================================================================
-  // Path 컨텍스트
+  // Path context
   // ============================================================================
 
   /**
-   * Path 컨텍스트 시작
+   * Begin Path context
    */
   beginPath(pathTemplate: string): PathContext {
     const parentDescribe = this.getCurrentDescribe();
@@ -150,7 +150,7 @@ export class DSLContextManager {
   }
 
   /**
-   * Path 컨텍스트 종료
+   * End Path context
    */
   endPath(): PathContext | null {
     const current = this.getCurrentContext();
@@ -161,11 +161,11 @@ export class DSLContextManager {
   }
 
   // ============================================================================
-  // Method 컨텍스트
+  // Method context
   // ============================================================================
 
   /**
-   * Method 컨텍스트 시작
+   * Begin Method context
    */
   beginMethod(httpMethod: HttpMethod, summary: string): MethodContext {
     const parentPath = this.getCurrentPath();
@@ -197,7 +197,7 @@ export class DSLContextManager {
   }
 
   /**
-   * Method 컨텍스트 종료
+   * End Method context
    */
   endMethod(): MethodContext | null {
     const current = this.getCurrentContext();
@@ -208,11 +208,11 @@ export class DSLContextManager {
   }
 
   // ============================================================================
-  // Response 컨텍스트
+  // Response context
   // ============================================================================
 
   /**
-   * Response 컨텍스트 시작
+   * Begin Response context
    */
   beginResponse(
     statusCode: number,
@@ -244,7 +244,7 @@ export class DSLContextManager {
   }
 
   /**
-   * Response 컨텍스트 종료
+   * End Response context
    */
   endResponse(): ResponseContext | null {
     const current = this.getCurrentContext();
@@ -255,11 +255,11 @@ export class DSLContextManager {
   }
 
   // ============================================================================
-  // 메타데이터 설정 메서드
+  // Metadata setter methods
   // ============================================================================
 
   /**
-   * 태그 추가 (Method 컨텍스트)
+   * Add tags (Method context)
    */
   addTags(...tags: string[]): void {
     const method = this.getCurrentMethod();
@@ -269,7 +269,7 @@ export class DSLContextManager {
   }
 
   /**
-   * Consumes 미디어 타입 추가 (Method 컨텍스트)
+   * Add consumes media types (Method context)
    */
   addConsumes(...mediaTypes: string[]): void {
     const method = this.getCurrentMethod();
@@ -279,7 +279,7 @@ export class DSLContextManager {
   }
 
   /**
-   * Produces 미디어 타입 추가 (Method 컨텍스트)
+   * Add produces media types (Method context)
    */
   addProduces(...mediaTypes: string[]): void {
     const method = this.getCurrentMethod();
@@ -289,12 +289,12 @@ export class DSLContextManager {
   }
 
   // ============================================================================
-  // Operation 메타데이터 설정 메서드 (Phase 4)
+  // Operation metadata setter methods (Phase 4)
   // ============================================================================
 
   /**
-   * Operation ID 설정 (Method 컨텍스트)
-   * API 클라이언트 코드 생성 시 사용되는 고유 식별자
+   * Set operation ID (Method context)
+   * Unique identifier used when generating API client code
    */
   setOperationId(id: string): void {
     const method = this.getCurrentMethod();
@@ -304,8 +304,8 @@ export class DSLContextManager {
   }
 
   /**
-   * Operation 설명 설정 (Method 컨텍스트)
-   * 상세한 엔드포인트 설명
+   * Set operation description (Method context)
+   * Detailed endpoint description
    */
   setDescription(text: string): void {
     const method = this.getCurrentMethod();
@@ -315,8 +315,8 @@ export class DSLContextManager {
   }
 
   /**
-   * Deprecated 설정 (Method 컨텍스트)
-   * 엔드포인트 사용 중단 표시
+   * Set deprecated flag (Method context)
+   * Mark endpoint as deprecated
    */
   setDeprecated(isDeprecated: boolean): void {
     const method = this.getCurrentMethod();
@@ -326,7 +326,7 @@ export class DSLContextManager {
   }
 
   /**
-   * 외부 문서 링크 설정 (Method 컨텍스트)
+   * Set external documentation link (Method context)
    */
   setExternalDocs(docs: ExternalDocsObject): void {
     const method = this.getCurrentMethod();
@@ -336,10 +336,10 @@ export class DSLContextManager {
   }
 
   /**
-   * 파라미터 추가
+   * Add parameter
    */
   addParameter(param: ParameterObject): void {
-    // Path 컨텍스트 또는 Method 컨텍스트에 추가
+    // Add to Path context or Method context
     const method = this.getCurrentMethod();
     if (method) {
       method.parameters.push(param);
@@ -353,7 +353,7 @@ export class DSLContextManager {
   }
 
   /**
-   * 요청 본문 설정 (Method 컨텍스트)
+   * Set request body (Method context)
    */
   setRequestBody(body: RequestBodyObject): void {
     const method = this.getCurrentMethod();
@@ -363,17 +363,17 @@ export class DSLContextManager {
   }
 
   /**
-   * 스키마 설정
+   * Set schema
    */
   setSchema(schema: SchemaObject): void {
-    // Response 컨텍스트가 있으면 응답 스키마로 설정
+    // Set as response schema if Response context exists
     const response = this.getCurrentResponse();
     if (response) {
       response.schema = schema;
       return;
     }
 
-    // Method 컨텍스트에 요청 스키마로 설정
+    // Set as request schema in Method context
     const method = this.getCurrentMethod();
     if (method) {
       method.schema = schema;
@@ -381,7 +381,7 @@ export class DSLContextManager {
   }
 
   /**
-   * 요청 파라미터 설정 (Method 컨텍스트)
+   * Set request parameters (Method context)
    */
   setRequestParams(
     params: Record<string, unknown> | (() => Record<string, unknown>) | (() => Promise<Record<string, unknown>>),
@@ -393,7 +393,7 @@ export class DSLContextManager {
   }
 
   /**
-   * 요청 헤더 설정 (Method 컨텍스트)
+   * Set request headers (Method context)
    */
   setRequestHeaders(headers: Record<string, string>): void {
     const method = this.getCurrentMethod();
@@ -403,7 +403,7 @@ export class DSLContextManager {
   }
 
   /**
-   * 응답 헤더 설정 (Response 컨텍스트)
+   * Set response headers (Response context)
    */
   setResponseHeaders(headers: Record<string, HeaderObject>): void {
     const response = this.getCurrentResponse();
@@ -413,7 +413,7 @@ export class DSLContextManager {
   }
 
   /**
-   * 응답 콘텐츠 설정 (Response 컨텍스트)
+   * Set response content (Response context)
    */
   setResponseContent(content: Record<string, MediaTypeObject>): void {
     const response = this.getCurrentResponse();
@@ -423,11 +423,11 @@ export class DSLContextManager {
   }
 
   // ============================================================================
-  // 테스트 정의 메서드
+  // Test definition methods
   // ============================================================================
 
   /**
-   * 테스트 추가 (Response 컨텍스트)
+   * Add test (Response context)
    */
   addTest(test: TestDefinition): void {
     const response = this.getCurrentResponse();
@@ -437,11 +437,11 @@ export class DSLContextManager {
   }
 
   // ============================================================================
-  // 훅 메서드
+  // Hook methods
   // ============================================================================
 
   /**
-   * beforeAll 훅 추가 (Method 컨텍스트)
+   * Add beforeAll hook (Method context)
    */
   addBeforeAll(hook: BeforeAllHook): void {
     const method = this.getCurrentMethod();
@@ -451,7 +451,7 @@ export class DSLContextManager {
   }
 
   /**
-   * afterAll 훅 추가 (Method 컨텍스트)
+   * Add afterAll hook (Method context)
    */
   addAfterAll(hook: AfterAllHook): void {
     const method = this.getCurrentMethod();
@@ -461,7 +461,7 @@ export class DSLContextManager {
   }
 
   /**
-   * beforeEach 훅 추가 (Response 컨텍스트)
+   * Add beforeEach hook (Response context)
    */
   addBeforeEach(hook: BeforeEachHook): void {
     const response = this.getCurrentResponse();
@@ -471,7 +471,7 @@ export class DSLContextManager {
   }
 
   /**
-   * afterEach 훅 추가 (Response 컨텍스트)
+   * Add afterEach hook (Response context)
    */
   addAfterEach(hook: AfterEachHook): void {
     const response = this.getCurrentResponse();
@@ -481,16 +481,16 @@ export class DSLContextManager {
   }
 
   // ============================================================================
-  // Phase 5: 스키마 및 보안 기능 메서드
+  // Phase 5: Schema and security feature methods
   // ============================================================================
 
   /**
-   * 보안 요구사항 설정 (Method 컨텍스트)
+   * Set security requirements (Method context)
    *
    * @example
    * setSecurity([{ basic_auth: [] }]);
    * setSecurity([{ oauth2: ['read', 'write'] }]);
-   * setSecurity([]); // 전역 security 비활성화
+   * setSecurity([]); // Disable global security
    */
   setSecurity(requirements: SecurityRequirement[]): void {
     const method = this.getCurrentMethod();
@@ -500,7 +500,7 @@ export class DSLContextManager {
   }
 
   /**
-   * 응답 헤더 추가 (Response 컨텍스트)
+   * Add response header (Response context)
    *
    * @example
    * addResponseHeader('X-Rate-Limit', {
@@ -525,7 +525,7 @@ export class DSLContextManager {
   }
 
   /**
-   * 응답 예제 추가 (Response 컨텍스트)
+   * Add response example (Response context)
    *
    * @example
    * addResponseExample('application/json', 'example_key', { id: 1 }, 'Summary', 'Description');
@@ -558,7 +558,7 @@ export class DSLContextManager {
   }
 
   /**
-   * 요청 본문 예제 추가 (Method 컨텍스트)
+   * Add request body example (Method context)
    *
    * @example
    * addRequestBodyExample({ id: 1 }, 'example_key', 'Summary', 'Description');
@@ -591,18 +591,18 @@ export class DSLContextManager {
   }
 
   // ============================================================================
-  // 유틸리티 메서드
+  // Utility methods
   // ============================================================================
 
   /**
-   * 루트 Describe 컨텍스트 목록 가져오기
+   * Get root Describe context list
    */
   getRootDescribes(): DescribeContext[] {
     return this.rootDescribes;
   }
 
   /**
-   * 모든 컨텍스트 초기화
+   * Reset all contexts
    */
   reset(): void {
     this.contextStack = [];
@@ -610,21 +610,21 @@ export class DSLContextManager {
   }
 
   /**
-   * 컨텍스트 스택 깊이
+   * Get context stack depth
    */
   getDepth(): number {
     return this.contextStack.length;
   }
 
   /**
-   * 현재 컨텍스트가 특정 타입인지 확인
+   * Check if current context is of specific type
    */
   isInContext(type: DSLContext['type']): boolean {
     return this.findParentContext(type as never) !== null;
   }
 
   /**
-   * 전체 경로 템플릿 생성 (중첩된 path 고려)
+   * Generate full path template (considering nested paths)
    */
   getFullPath(): string {
     let fullPath = '';
@@ -637,7 +637,7 @@ export class DSLContextManager {
   }
 
   /**
-   * 디버깅용 직렬화
+   * Serialize for debugging
    */
   serialize(): string {
     return JSON.stringify(
@@ -652,11 +652,11 @@ export class DSLContextManager {
   }
 }
 
-// 싱글톤 인스턴스
+// Singleton instance
 let contextManagerInstance: DSLContextManager | null = null;
 
 /**
- * DSL 컨텍스트 관리자 인스턴스 가져오기
+ * Get DSL context manager instance
  */
 export function getDSLContextManager(): DSLContextManager {
   if (!contextManagerInstance) {
@@ -666,7 +666,7 @@ export function getDSLContextManager(): DSLContextManager {
 }
 
 /**
- * DSL 컨텍스트 관리자 리셋
+ * Reset DSL context manager
  */
 export function resetDSLContextManager(): void {
   if (contextManagerInstance) {
@@ -676,7 +676,7 @@ export function resetDSLContextManager(): void {
 }
 
 /**
- * 현재 DSL 컨텍스트 가져오기 (편의 함수)
+ * Get current DSL context (convenience function)
  */
 export function getCurrentDSLContext(): DSLContext | null {
   return getDSLContextManager().getCurrentContext();

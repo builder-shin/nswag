@@ -1,10 +1,10 @@
 /**
- * nswag-api 타입 정의
- * 명세서 섹션 5. @aspect/nswag-api 모듈 기반
+ * nswag-api type definitions
+ * Based on specification section 5. @aspect/nswag-api module
  */
 
 /**
- * OpenAPI 객체 타입 (openapi-types 호환)
+ * OpenAPI object type (openapi-types compatible)
  */
 export interface OpenAPIObject {
   openapi?: string;
@@ -29,7 +29,7 @@ export interface OpenAPIObject {
 }
 
 /**
- * Express Request 타입 (프레임워크 독립)
+ * Express Request type (framework independent)
  */
 export interface ExpressRequest {
   headers: Record<string, string | string[] | undefined>;
@@ -40,7 +40,7 @@ export interface ExpressRequest {
 }
 
 /**
- * Fastify Request 타입 (프레임워크 독립)
+ * Fastify Request type (framework independent)
  */
 export interface FastifyRequest {
   headers: Record<string, string | string[] | undefined>;
@@ -51,7 +51,7 @@ export interface FastifyRequest {
 }
 
 /**
- * Koa Context 타입 (프레임워크 독립)
+ * Koa Context type (framework independent)
  */
 export interface KoaContext {
   headers: Record<string, string | string[] | undefined>;
@@ -66,8 +66,8 @@ export interface KoaContext {
 }
 
 /**
- * 동적 OpenAPI 필터 함수 타입
- * 프레임워크별로 두 번째 파라미터 타입이 다름
+ * Dynamic OpenAPI filter function type
+ * Second parameter type differs by framework
  */
 export type OpenapiFilterFn<TContext = ExpressRequest | FastifyRequest | KoaContext> = (
   openapi: OpenAPIObject,
@@ -75,130 +75,130 @@ export type OpenapiFilterFn<TContext = ExpressRequest | FastifyRequest | KoaCont
 ) => OpenAPIObject | Promise<OpenAPIObject>;
 
 /**
- * Express 전용 필터 함수 타입
+ * Express-specific filter function type
  */
 export type ExpressOpenapiFilterFn = OpenapiFilterFn<ExpressRequest>;
 
 /**
- * Fastify 전용 필터 함수 타입
+ * Fastify-specific filter function type
  */
 export type FastifyOpenapiFilterFn = OpenapiFilterFn<FastifyRequest>;
 
 /**
- * Koa 전용 필터 함수 타입
+ * Koa-specific filter function type
  */
 export type KoaOpenapiFilterFn = OpenapiFilterFn<KoaContext>;
 
 /**
- * 인증 설정 타입
+ * Authentication configuration type
  */
 export interface AuthConfig {
-  /** 인증 활성화 여부 */
+  /** Whether authentication is enabled */
   enabled: boolean;
-  /** 인증 타입 */
+  /** Authentication type */
   type: 'basic' | 'bearer' | 'api-key';
-  /** 인증 자격 증명 */
+  /** Authentication credentials */
   credentials: {
-    /** basic 인증용 사용자명 */
+    /** Username for basic authentication */
     username?: string;
-    /** basic 인증용 비밀번호 */
+    /** Password for basic authentication */
     password?: string;
-    /** bearer 인증용 토큰 */
+    /** Token for bearer authentication */
     token?: string;
-    /** api-key 인증용 API 키 */
+    /** API key for api-key authentication */
     apiKey?: string;
-    /** api-key 인증 시 헤더명 (기본: 'X-API-Key') */
+    /** Header name for api-key authentication (default: 'X-API-Key') */
     headerName?: string;
   };
 }
 
 /**
- * 캐시 설정 타입
+ * Cache configuration type
  */
 export interface CacheConfig {
-  /** 캐시 활성화 여부 */
+  /** Whether caching is enabled */
   enabled: boolean;
-  /** 캐시 유효 시간 (밀리초) */
+  /** Cache time-to-live (milliseconds) */
   ttl: number;
 }
 
 /**
- * CORS 설정 타입
+ * CORS configuration type
  */
 export interface CorsConfig {
-  /** CORS 활성화 여부 */
+  /** Whether CORS is enabled */
   enabled: boolean;
-  /** 허용할 오리진 목록 */
+  /** List of allowed origins */
   origins: string[];
 }
 
 /**
- * nswag-api 미들웨어 옵션
+ * nswag-api middleware options
  */
 export interface NswagApiOptions<TContext = ExpressRequest | FastifyRequest | KoaContext> {
-  /** OpenAPI 파일들이 위치한 루트 디렉토리 */
+  /** Root directory where OpenAPI files are located */
   openapiRoot: string;
 
-  /** 응답 형식 (기본: 파일 확장자에 따름) */
+  /** Response format (default: depends on file extension) */
   defaultFormat?: 'json' | 'yaml';
 
-  /** 캐싱 설정 */
+  /** Caching configuration */
   cache?: CacheConfig;
 
-  /** CORS 설정 */
+  /** CORS configuration */
   cors?: CorsConfig;
 
-  /** 인증 설정 (프로덕션 환경에서 문서 보호) */
+  /** Authentication configuration (for protecting documentation in production) */
   auth?: AuthConfig;
 
-  /** 동적 필터 함수 */
+  /** Dynamic filter function */
   openapiFilter?: OpenapiFilterFn<TContext>;
 
-  /** 커스텀 응답 헤더 */
+  /** Custom response headers */
   openapiHeaders?: Record<string, string>;
 }
 
 /**
- * Express 미들웨어 옵션
+ * Express middleware options
  */
 export interface ExpressNswagApiOptions extends NswagApiOptions<ExpressRequest> {
   openapiFilter?: ExpressOpenapiFilterFn;
 }
 
 /**
- * Fastify 플러그인 옵션
+ * Fastify plugin options
  */
 export interface FastifyNswagApiOptions extends NswagApiOptions<FastifyRequest> {
-  /** 라우트 prefix (Fastify 플러그인용) */
+  /** Route prefix (for Fastify plugin) */
   prefix?: string;
   openapiFilter?: FastifyOpenapiFilterFn;
 }
 
 /**
- * NestJS 모듈 옵션
+ * NestJS module options
  */
 export interface NestJSNswagApiOptions extends NswagApiOptions {
-  /** 라우트 경로 */
+  /** Route path */
   path?: string;
 }
 
 /**
- * Koa 미들웨어 옵션
+ * Koa middleware options
  */
 export interface KoaNswagApiOptions extends NswagApiOptions<KoaContext> {
-  /** 라우트 prefix */
+  /** Route prefix */
   prefix?: string;
   openapiFilter?: KoaOpenapiFilterFn;
 }
 
 /**
- * 기본 옵션 값
+ * Default option values
  */
 export const DEFAULT_OPTIONS = {
   defaultFormat: 'json' as const,
   cache: {
     enabled: true,
-    ttl: 60000, // 1분
+    ttl: 60000, // 1 minute
   },
   cors: {
     enabled: false,
@@ -208,7 +208,7 @@ export const DEFAULT_OPTIONS = {
 };
 
 /**
- * 캐시 엔트리 타입
+ * Cache entry type
  */
 export interface CacheEntry {
   content: OpenAPIObject;
@@ -217,15 +217,15 @@ export interface CacheEntry {
 }
 
 /**
- * 파일 정보 타입
+ * File information type
  */
 export interface FileInfo {
-  /** 파일 절대 경로 */
+  /** Absolute file path */
   absolutePath: string;
-  /** 상대 경로 (openapiRoot 기준) */
+  /** Relative path (based on openapiRoot) */
   relativePath: string;
-  /** 파일 포맷 */
+  /** File format */
   format: 'json' | 'yaml';
-  /** 버전 (예: v1, v2) */
+  /** Version (e.g., v1, v2) */
   version?: string;
 }

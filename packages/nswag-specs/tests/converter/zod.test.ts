@@ -1,5 +1,5 @@
 /**
- * Zod 변환기 테스트
+ * Zod converter tests
  */
 
 import { describe, it, expect } from 'vitest';
@@ -206,7 +206,7 @@ describe('Zod Converter', () => {
       };
       const code = generateZodCode(schema, { schemaName: 'MergedSchema', includeImports: false });
 
-      // allOf는 병합된 객체로 변환됨
+      // allOf is converted to a merged object
       expect(code).toContain('z.object(');
     });
 

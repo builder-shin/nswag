@@ -1,6 +1,6 @@
 /**
- * Schema 빌더
- * JSON Schema 정의를 위한 플루언트 빌더
+ * Schema builder
+ * Fluent builder for JSON Schema definitions
  */
 
 import type { Schema } from '../types/index.js';

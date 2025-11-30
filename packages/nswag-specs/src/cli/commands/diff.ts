@@ -1,6 +1,6 @@
 /**
- * diff 서브커맨드
- * OpenAPI 스펙 비교 및 Breaking Change 감지
+ * diff subcommand
+ * OpenAPI spec comparison and breaking change detection
  */
 
 import { existsSync, readFileSync } from 'fs';
@@ -10,12 +10,12 @@ import { loadConfig } from '../../config/index.js';
 import { logger, type ParsedArgs, colorize } from '../utils.js';
 
 /**
- * 변경 유형
+ * Change type
  */
 type ChangeType = 'breaking' | 'non-breaking' | 'info';
 
 /**
- * 변경 항목 인터페이스
+ * Change item interface
  */
 interface Change {
   type: ChangeType;
@@ -25,24 +25,24 @@ interface Change {
 }
 
 /**
- * diff 커맨드 실행
+ * Execute diff command
  */
 export async function runDiff(args: ParsedArgs): Promise<void> {
-  logger.title('OpenAPI 스펙 비교');
+  logger.title('OpenAPI Spec Comparison');
 
   const basePath = args.flags.base as string;
   const headPath = args.flags.head as string;
 
   if (!basePath) {
-    logger.error('--base 옵션이 필요합니다');
-    logger.info('사용법: npx nswag diff --base ./openapi/v1/openapi.json');
+    logger.error('--base option is required');
+    logger.info('Usage: npx nswag diff --base ./openapi/v1/openapi.json');
     process.exit(1);
   }
 
-  // base 파일 로드
+  // Load base file
   const baseSpec = loadSpecFile(resolve(process.cwd(), basePath));
 
-  // head 파일 결정 (지정되지 않으면 현재 설정의 기본 경로)
+  // Determine head file (use default config path if not specified)
   let headSpec: Record<string, unknown>;
 
   if (headPath) {
@@ -57,38 +57,38 @@ export async function runDiff(args: ParsedArgs): Promise<void> {
     );
 
     if (!existsSync(defaultHeadPath)) {
-      logger.error(`비교 대상 파일을 찾을 수 없습니다: ${defaultHeadPath}`);
-      logger.info('--head 옵션으로 비교할 파일을 지정하세요');
+      logger.error(`Comparison target file not found: ${defaultHeadPath}`);
+      logger.info('Specify comparison file with --head option');
       process.exit(1);
     }
 
     headSpec = loadSpecFile(defaultHeadPath);
-    logger.info(`비교: ${basePath} ↔ ${config.outputDir}/${config.outputFileName}.${config.outputFormat}`);
+    logger.info(`Comparing: ${basePath} ↔ ${config.outputDir}/${config.outputFileName}.${config.outputFormat}`);
   }
 
   logger.newline();
 
-  // 비교 수행
+  // Perform comparison
   const changes = compareSpecs(baseSpec, headSpec);
 
-  // 결과 출력
+  // Print results
   printChanges(changes);
 
-  // Breaking Change가 있으면 종료 코드 1
+  // Exit with code 1 if there are breaking changes
   const hasBreakingChanges = changes.some((c) => c.type === 'breaking');
   if (hasBreakingChanges) {
     logger.newline();
-    logger.error('Breaking Change가 발견되었습니다!');
+    logger.error('Breaking changes detected!');
     process.exit(1);
   }
 }
 
 /**
- * 스펙 파일 로드
+ * Load spec file
  */
 function loadSpecFile(filePath: string): Record<string, unknown> {
   if (!existsSync(filePath)) {
-    logger.error(`파일을 찾을 수 없습니다: ${filePath}`);
+    logger.error(`File not found: ${filePath}`);
     process.exit(1);
   }
 
@@ -103,18 +103,18 @@ function loadSpecFile(filePath: string): Record<string, unknown> {
 }
 
 /**
- * 스펙 비교
+ * Compare specs
  */
 function compareSpecs(base: Record<string, unknown>, head: Record<string, unknown>): Change[] {
   const changes: Change[] = [];
 
-  // info 비교
+  // Compare info
   compareInfo(base.info as Record<string, unknown>, head.info as Record<string, unknown>, changes);
 
-  // paths 비교
+  // Compare paths
   comparePaths(base.paths as Record<string, unknown>, head.paths as Record<string, unknown>, changes);
 
-  // components 비교
+  // Compare components
   compareComponents(
     base.components as Record<string, unknown>,
     head.components as Record<string, unknown>,
@@ -125,7 +125,7 @@ function compareSpecs(base: Record<string, unknown>, head: Record<string, unknow
 }
 
 /**
- * info 섹션 비교
+ * Compare info section
  */
 function compareInfo(
   base: Record<string, unknown> | undefined,
@@ -138,7 +138,7 @@ function compareInfo(
     changes.push({
       type: 'info',
       path: '/info/title',
-      message: '제목 변경됨',
+      message: 'Title changed',
       details: `"${base.title}" → "${head.title}"`,
     });
   }
@@ -147,14 +147,14 @@ function compareInfo(
     changes.push({
       type: 'info',
       path: '/info/version',
-      message: '버전 변경됨',
+      message: 'Version changed',
       details: `"${base.version}" → "${head.version}"`,
     });
   }
 }
 
 /**
- * paths 섹션 비교
+ * Compare paths section
  */
 function comparePaths(
   base: Record<string, unknown> | undefined,
@@ -167,29 +167,29 @@ function comparePaths(
   const basePaths = new Set(Object.keys(base));
   const headPaths = new Set(Object.keys(head));
 
-  // 삭제된 경로 (Breaking)
+  // Removed paths (Breaking)
   for (const path of basePaths) {
     if (!headPaths.has(path)) {
       changes.push({
         type: 'breaking',
         path: `/paths${path}`,
-        message: '경로 삭제됨',
+        message: 'Path removed',
       });
     }
   }
 
-  // 추가된 경로 (Non-breaking)
+  // Added paths (Non-breaking)
   for (const path of headPaths) {
     if (!basePaths.has(path)) {
       changes.push({
         type: 'non-breaking',
         path: `/paths${path}`,
-        message: '경로 추가됨',
+        message: 'Path added',
       });
     }
   }
 
-  // 공통 경로 비교
+  // Compare common paths
   for (const path of basePaths) {
     if (headPaths.has(path)) {
       comparePathItem(
@@ -203,7 +203,7 @@ function comparePaths(
 }
 
 /**
- * 단일 경로 항목 비교
+ * Compare single path item
  */
 function comparePathItem(
   path: string,
@@ -218,28 +218,28 @@ function comparePathItem(
     const headOp = head[method] as Record<string, unknown> | undefined;
 
     if (baseOp && !headOp) {
-      // 메서드 삭제됨 (Breaking)
+      // Method removed (Breaking)
       changes.push({
         type: 'breaking',
         path: `/paths${path}/${method}`,
-        message: `${method.toUpperCase()} 메서드 삭제됨`,
+        message: `${method.toUpperCase()} method removed`,
       });
     } else if (!baseOp && headOp) {
-      // 메서드 추가됨 (Non-breaking)
+      // Method added (Non-breaking)
       changes.push({
         type: 'non-breaking',
         path: `/paths${path}/${method}`,
-        message: `${method.toUpperCase()} 메서드 추가됨`,
+        message: `${method.toUpperCase()} method added`,
       });
     } else if (baseOp && headOp) {
-      // 메서드 비교
+      // Compare method
       compareOperation(path, method, baseOp, headOp, changes);
     }
   }
 }
 
 /**
- * 작업(Operation) 비교
+ * Compare operation
  */
 function compareOperation(
   path: string,
@@ -250,11 +250,11 @@ function compareOperation(
 ): void {
   const basePath = `/paths${path}/${method}`;
 
-  // 파라미터 비교
+  // Compare parameters
   const baseParams = (base.parameters || []) as Array<Record<string, unknown>>;
   const headParams = (head.parameters || []) as Array<Record<string, unknown>>;
 
-  // 필수 파라미터 추가 체크 (Breaking)
+  // Check for required parameter additions (Breaking)
   for (const headParam of headParams) {
     const matchingBase = baseParams.find(
       (bp) => bp.name === headParam.name && bp.in === headParam.in
@@ -264,12 +264,12 @@ function compareOperation(
       changes.push({
         type: 'breaking',
         path: `${basePath}/parameters`,
-        message: `필수 파라미터 추가됨: ${headParam.name} (${headParam.in})`,
+        message: `Required parameter added: ${headParam.name} (${headParam.in})`,
       });
     }
   }
 
-  // 파라미터 삭제 체크 (Breaking - 필수가 삭제된 경우)
+  // Check for parameter removals (Breaking - if required parameter removed)
   for (const baseParam of baseParams) {
     const matchingHead = headParams.find(
       (hp) => hp.name === baseParam.name && hp.in === baseParam.in
@@ -279,12 +279,12 @@ function compareOperation(
       changes.push({
         type: baseParam.required ? 'breaking' : 'non-breaking',
         path: `${basePath}/parameters`,
-        message: `파라미터 삭제됨: ${baseParam.name} (${baseParam.in})`,
+        message: `Parameter removed: ${baseParam.name} (${baseParam.in})`,
       });
     }
   }
 
-  // requestBody 비교
+  // Compare requestBody
   const baseBody = base.requestBody as Record<string, unknown> | undefined;
   const headBody = head.requestBody as Record<string, unknown> | undefined;
 
@@ -292,45 +292,45 @@ function compareOperation(
     changes.push({
       type: 'breaking',
       path: `${basePath}/requestBody`,
-      message: '필수 요청 본문 추가됨',
+      message: 'Required request body added',
     });
   } else if (baseBody && !headBody) {
     changes.push({
       type: 'non-breaking',
       path: `${basePath}/requestBody`,
-      message: '요청 본문 제거됨',
+      message: 'Request body removed',
     });
   }
 
-  // responses 비교
+  // Compare responses
   const baseResponses = (base.responses || {}) as Record<string, unknown>;
   const headResponses = (head.responses || {}) as Record<string, unknown>;
 
-  // 응답 코드 삭제 체크
+  // Check for response code removals
   for (const code of Object.keys(baseResponses)) {
     if (!(code in headResponses)) {
       changes.push({
         type: 'info',
         path: `${basePath}/responses/${code}`,
-        message: `응답 코드 삭제됨: ${code}`,
+        message: `Response code removed: ${code}`,
       });
     }
   }
 
-  // 응답 코드 추가 체크
+  // Check for response code additions
   for (const code of Object.keys(headResponses)) {
     if (!(code in baseResponses)) {
       changes.push({
         type: 'non-breaking',
         path: `${basePath}/responses/${code}`,
-        message: `응답 코드 추가됨: ${code}`,
+        message: `Response code added: ${code}`,
       });
     }
   }
 }
 
 /**
- * components 섹션 비교
+ * Compare components section
  */
 function compareComponents(
   base: Record<string, unknown> | undefined,
@@ -341,35 +341,35 @@ function compareComponents(
   if (!base) base = {};
   if (!head) head = {};
 
-  // schemas 비교
+  // Compare schemas
   const baseSchemas = (base.schemas || {}) as Record<string, unknown>;
   const headSchemas = (head.schemas || {}) as Record<string, unknown>;
 
-  // 삭제된 스키마 (Breaking - 사용 중인 경우)
+  // Removed schemas (Breaking - if in use)
   for (const name of Object.keys(baseSchemas)) {
     if (!(name in headSchemas)) {
       changes.push({
         type: 'breaking',
         path: `/components/schemas/${name}`,
-        message: `스키마 삭제됨: ${name}`,
+        message: `Schema removed: ${name}`,
       });
     }
   }
 
-  // 추가된 스키마 (Non-breaking)
+  // Added schemas (Non-breaking)
   for (const name of Object.keys(headSchemas)) {
     if (!(name in baseSchemas)) {
       changes.push({
         type: 'non-breaking',
         path: `/components/schemas/${name}`,
-        message: `스키마 추가됨: ${name}`,
+        message: `Schema added: ${name}`,
       });
     }
   }
 }
 
 /**
- * 변경 사항 출력
+ * Print changes
  */
 function printChanges(changes: Change[]): void {
   const breakingChanges = changes.filter((c) => c.type === 'breaking');
@@ -377,7 +377,7 @@ function printChanges(changes: Change[]): void {
   const infoChanges = changes.filter((c) => c.type === 'info');
 
   if (changes.length === 0) {
-    logger.success('변경 사항 없음');
+    logger.success('No changes');
     return;
   }
 
@@ -409,7 +409,7 @@ function printChanges(changes: Change[]): void {
 
   // Info Changes
   if (infoChanges.length > 0) {
-    logger.info(colorize(`정보 변경 (${infoChanges.length}):`, 'blue'));
+    logger.info(colorize(`Info Changes (${infoChanges.length}):`, 'blue'));
     for (const change of infoChanges) {
       console.log(`  ${colorize('ℹ', 'blue')} ${change.path}`);
       console.log(`    ${change.message}`);
@@ -420,8 +420,8 @@ function printChanges(changes: Change[]): void {
     logger.newline();
   }
 
-  // 요약
-  logger.info('요약:');
+  // Summary
+  logger.info('Summary:');
   logger.info(`  Breaking: ${colorize(String(breakingChanges.length), 'red')}`);
   logger.info(`  Non-breaking: ${colorize(String(nonBreakingChanges.length), 'green')}`);
   logger.info(`  Info: ${colorize(String(infoChanges.length), 'blue')}`);

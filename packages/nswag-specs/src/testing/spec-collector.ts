@@ -1,6 +1,6 @@
 /**
- * 스펙 수집기
- * 테스트 실행 중 API 스펙 데이터 수집
+ * Spec Collector
+ * Collects API spec data during test execution
  */
 
 import type {
@@ -13,7 +13,7 @@ import type {
 } from '../types/index.js';
 
 /**
- * 수집된 API 엔드포인트 정보
+ * Collected API Endpoint Information
  */
 interface CollectedEndpoint {
   path: string;
@@ -28,8 +28,8 @@ interface CollectedEndpoint {
 }
 
 /**
- * 스펙 수집기 클래스
- * 테스트 실행 중 API 요청/응답을 수집하여 OpenAPI 스펙 생성
+ * Spec Collector Class
+ * Collects API requests/responses during test execution to generate OpenAPI spec
  */
 export class SpecCollector {
   private endpoints: Map<string, CollectedEndpoint> = new Map();
@@ -44,14 +44,14 @@ export class SpecCollector {
   }
 
   /**
-   * 엔드포인트 키 생성
+   * Generate Endpoint Key
    */
   private getEndpointKey(method: string, path: string): string {
     return `${method.toUpperCase()}:${path}`;
   }
 
   /**
-   * 요청/응답 데이터 수집
+   * Collect Request/Response Data
    */
   collect(
     metadata: RequestMetadata,
@@ -62,11 +62,11 @@ export class SpecCollector {
     const existing = this.endpoints.get(key);
 
     if (existing) {
-      // 기존 엔드포인트에 예제 추가
+      // Add example to existing endpoint
       existing.examples = existing.examples ?? [];
       existing.examples.push({ request, response });
     } else {
-      // 새 엔드포인트 추가
+      // Add new endpoint
       this.endpoints.set(key, {
         path: request.path,
         method: request.method,
@@ -79,7 +79,7 @@ export class SpecCollector {
   }
 
   /**
-   * 수집된 데이터를 OpenAPI 스펙으로 변환
+   * Convert Collected Data to OpenAPI Spec
    */
   toOpenAPISpec(): OpenAPISpec {
     const paths: Record<string, PathItem> = {};
@@ -106,7 +106,7 @@ export class SpecCollector {
   }
 
   /**
-   * Operation 객체 생성
+   * Build Operation Object
    */
   private buildOperation(endpoint: CollectedEndpoint): Operation {
     const operation: Operation = {
@@ -118,7 +118,7 @@ export class SpecCollector {
       responses: {},
     };
 
-    // 응답 정보 추가
+    // Add response information
     if (endpoint.response) {
       const statusCode = String(endpoint.response.statusCode);
       operation.responses[statusCode] = {
@@ -127,7 +127,7 @@ export class SpecCollector {
       };
     }
 
-    // 예제에서 추가 응답 상태 코드 수집
+    // Collect additional response status codes from examples
     if (endpoint.examples) {
       for (const example of endpoint.examples) {
         const statusCode = String(example.response.statusCode);
@@ -140,7 +140,7 @@ export class SpecCollector {
       }
     }
 
-    // 요청 본문 정보 추가
+    // Add request body information
     if (endpoint.request?.body) {
       operation.requestBody = endpoint.metadata?.requestBody ?? {
         content: {
@@ -156,7 +156,7 @@ export class SpecCollector {
   }
 
   /**
-   * 응답 콘텐츠 생성
+   * Build Response Content
    */
   private buildResponseContent(response: ResponseData): Record<string, { schema?: { type: string }; example?: unknown }> {
     const contentType = 'application/json';
@@ -169,7 +169,7 @@ export class SpecCollector {
   }
 
   /**
-   * 본문 파싱
+   * Parse Body
    */
   private parseBody(body: string): unknown {
     try {
@@ -180,7 +180,7 @@ export class SpecCollector {
   }
 
   /**
-   * HTTP 상태 코드 설명
+   * HTTP Status Code Description
    */
   private getStatusDescription(statusCode: number): string {
     const descriptions: Record<number, string> = {
@@ -199,39 +199,39 @@ export class SpecCollector {
   }
 
   /**
-   * 수집된 엔드포인트 수
+   * Count of Collected Endpoints
    */
   get count(): number {
     return this.endpoints.size;
   }
 
   /**
-   * 수집된 데이터 초기화
+   * Clear Collected Data
    */
   clear(): void {
     this.endpoints.clear();
   }
 
   /**
-   * 특정 엔드포인트 조회
+   * Get Specific Endpoint
    */
   getEndpoint(method: string, path: string): CollectedEndpoint | undefined {
     return this.endpoints.get(this.getEndpointKey(method, path));
   }
 
   /**
-   * 모든 엔드포인트 조회
+   * Get All Endpoints
    */
   getAllEndpoints(): CollectedEndpoint[] {
     return Array.from(this.endpoints.values());
   }
 }
 
-// 싱글톤 인스턴스
+// Singleton instance
 let collectorInstance: SpecCollector | null = null;
 
 /**
- * 스펙 수집기 인스턴스 가져오기
+ * Get Spec Collector Instance
  */
 export function getSpecCollector(options?: {
   title?: string;
@@ -245,7 +245,7 @@ export function getSpecCollector(options?: {
 }
 
 /**
- * 스펙 수집기 리셋
+ * Reset Spec Collector
  */
 export function resetSpecCollector(): void {
   if (collectorInstance) {

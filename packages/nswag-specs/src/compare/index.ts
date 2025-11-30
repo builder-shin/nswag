@@ -1,6 +1,6 @@
 /**
- * OpenAPI 스펙 비교 및 Breaking Change 감지
- * Phase 9 명세서 기반 구현
+ * OpenAPI spec comparison and breaking change detection
+ * Phase 9 specification-based implementation
  */
 
 import { readFile } from 'fs/promises';
@@ -19,7 +19,7 @@ import type {
 import { debugCompare } from '../logger/index.js';
 
 /**
- * 스펙 파일 로드
+ * Load spec file
  */
 async function loadSpec(filePath: string): Promise<OpenAPISpec> {
   const content = await readFile(filePath, 'utf-8');
@@ -32,12 +32,12 @@ async function loadSpec(filePath: string): Promise<OpenAPISpec> {
 }
 
 /**
- * HTTP 메서드 목록
+ * HTTP methods list
  */
 const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'options', 'head', 'trace'] as const;
 
 /**
- * 스키마 타입 비교
+ * Compare schema types
  */
 function isTypeChanged(baseSchema: Schema | undefined, headSchema: Schema | undefined): boolean {
   if (!baseSchema || !headSchema) return false;
@@ -47,7 +47,7 @@ function isTypeChanged(baseSchema: Schema | undefined, headSchema: Schema | unde
 }
 
 /**
- * 필수 속성 비교
+ * Compare required properties
  */
 function findAddedRequiredProperties(
   baseSchema: Schema | undefined,
@@ -60,7 +60,7 @@ function findAddedRequiredProperties(
 }
 
 /**
- * enum 값 비교
+ * Compare enum values
  */
 function findRemovedEnumValues(
   baseSchema: Schema | undefined,
@@ -73,7 +73,7 @@ function findRemovedEnumValues(
 }
 
 /**
- * 파라미터 비교
+ * Compare parameters
  */
 function compareParameters(
   basePath: string,
@@ -89,7 +89,7 @@ function compareParameters(
     (headParams || []).map((p) => [`${p.in}:${p.name}`, p])
   );
 
-  // 제거된 파라미터 확인
+  // Check for removed parameters
   for (const [key, baseParam] of baseParamMap) {
     if (!headParamMap.has(key)) {
       changes.push({
@@ -101,7 +101,7 @@ function compareParameters(
     }
   }
 
-  // 새로 필수가 된 파라미터 확인
+  // Check for newly required parameters
   for (const [key, headParam] of headParamMap) {
     const baseParam = baseParamMap.get(key);
     if (baseParam && !baseParam.required && headParam.required) {
@@ -118,7 +118,7 @@ function compareParameters(
 }
 
 /**
- * 응답 코드 비교
+ * Compare response codes
  */
 function compareResponses(
   basePath: string,
@@ -130,7 +130,7 @@ function compareResponses(
   const baseResponseCodes = new Set(Object.keys(baseResponses || {}));
   const headResponseCodes = new Set(Object.keys(headResponses || {}));
 
-  // 성공 응답 코드 (2xx) 제거 확인
+  // Check for removed success response codes (2xx)
   for (const code of baseResponseCodes) {
     if (code.startsWith('2') && !headResponseCodes.has(code)) {
       changes.push({
@@ -146,7 +146,7 @@ function compareResponses(
 }
 
 /**
- * 스키마 비교
+ * Compare schemas
  */
 function compareSchemas(
   basePath: string,
@@ -158,7 +158,7 @@ function compareSchemas(
 
   if (!baseSchema || !headSchema) return changes;
 
-  // 타입 변경 확인
+  // Check for type changes
   if (isTypeChanged(baseSchema, headSchema)) {
     changes.push({
       path: basePath,
@@ -168,7 +168,7 @@ function compareSchemas(
     });
   }
 
-  // 필수 속성 추가 확인
+  // Check for added required properties
   const addedRequired = findAddedRequiredProperties(baseSchema, headSchema);
   for (const prop of addedRequired) {
     changes.push({
@@ -179,7 +179,7 @@ function compareSchemas(
     });
   }
 
-  // enum 값 제거 확인
+  // Check for removed enum values
   const removedEnums = findRemovedEnumValues(baseSchema, headSchema);
   for (const value of removedEnums) {
     changes.push({
@@ -190,7 +190,7 @@ function compareSchemas(
     });
   }
 
-  // 중첩 속성 비교
+  // Compare nested properties
   if (baseSchema.properties && headSchema.properties) {
     for (const [propName, basePropSchema] of Object.entries(baseSchema.properties)) {
       const headPropSchema = headSchema.properties[propName];
@@ -202,7 +202,7 @@ function compareSchemas(
     }
   }
 
-  // 배열 아이템 비교
+  // Compare array items
   if (baseSchema.items && headSchema.items) {
     changes.push(
       ...compareSchemas(basePath, method, baseSchema.items, headSchema.items)
@@ -213,7 +213,7 @@ function compareSchemas(
 }
 
 /**
- * 오퍼레이션 비교
+ * Compare operations
  */
 function compareOperations(
   path: string,
@@ -224,17 +224,17 @@ function compareOperations(
   const breaking: BreakingChange[] = [];
   const nonBreaking: Change[] = [];
 
-  // 파라미터 비교
+  // Compare parameters
   breaking.push(
     ...compareParameters(path, method, baseOp.parameters, headOp.parameters)
   );
 
-  // 응답 코드 비교
+  // Compare response codes
   breaking.push(
     ...compareResponses(path, method, baseOp.responses, headOp.responses)
   );
 
-  // 응답 스키마 비교 (주요 성공 응답)
+  // Compare response schemas (main success responses)
   const successCodes = ['200', '201', '204'];
   for (const code of successCodes) {
     const baseResponse = baseOp.responses?.[code];
@@ -257,7 +257,7 @@ function compareOperations(
     }
   }
 
-  // 비파괴적 변경 감지
+  // Detect non-breaking changes
   if (baseOp.summary !== headOp.summary && headOp.summary) {
     nonBreaking.push({
       path,
@@ -280,7 +280,7 @@ function compareOperations(
 }
 
 /**
- * 두 OpenAPI 스펙 비교
+ * Compare two OpenAPI specs
  *
  * @example
  * const result = await compareSpecs({
@@ -324,7 +324,7 @@ export async function compareSpecs(
     const basePathItem = basePaths[path] as PathItem | undefined;
     const headPathItem = headPaths[path] as PathItem | undefined;
 
-    // 엔드포인트 제거 확인
+    // Check for removed endpoints
     if (basePathItem && !headPathItem) {
       for (const method of HTTP_METHODS) {
         if (basePathItem[method]) {
@@ -339,7 +339,7 @@ export async function compareSpecs(
       continue;
     }
 
-    // 새 엔드포인트 추가
+    // Check for added endpoints
     if (!basePathItem && headPathItem) {
       for (const method of HTTP_METHODS) {
         if (headPathItem[method]) {
@@ -354,13 +354,13 @@ export async function compareSpecs(
       continue;
     }
 
-    // 메서드별 비교
+    // Compare by method
     if (basePathItem && headPathItem) {
       for (const method of HTTP_METHODS) {
         const baseOp = basePathItem[method];
         const headOp = headPathItem[method];
 
-        // 메서드 제거
+        // Method removed
         if (baseOp && !headOp) {
           result.breaking.push({
             path,
@@ -371,7 +371,7 @@ export async function compareSpecs(
           continue;
         }
 
-        // 새 메서드 추가
+        // Method added
         if (!baseOp && headOp) {
           result.nonBreaking.push({
             path,
@@ -382,13 +382,13 @@ export async function compareSpecs(
           continue;
         }
 
-        // 양쪽 모두 존재하면 비교
+        // Compare if both exist
         if (baseOp && headOp) {
           const comparison = compareOperations(path, method, baseOp, headOp);
           result.breaking.push(...comparison.breaking);
           result.nonBreaking.push(...comparison.nonBreaking);
 
-          // deprecated 확인
+          // Check for deprecated
           if (!baseOp.deprecated && headOp.deprecated) {
             result.deprecated.push({
               path,
@@ -409,14 +409,14 @@ export async function compareSpecs(
 }
 
 /**
- * Breaking Change 여부 확인 헬퍼
+ * Check for breaking changes helper
  */
 export function hasBreakingChanges(result: CompareSpecsResult): boolean {
   return result.breaking.length > 0;
 }
 
 /**
- * 비교 결과를 문자열로 포맷팅
+ * Format comparison result as string
  */
 export function formatCompareResult(result: CompareSpecsResult): string {
   const lines: string[] = [];

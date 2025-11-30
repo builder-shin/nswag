@@ -1,67 +1,67 @@
 /**
- * 스키마 변환기 공통 유틸리티 함수
- * $ref 참조 해석, 복합 스키마 처리, format 검증 등
+ * Schema converter common utility functions
+ * $ref resolution, composite schema processing, format validation, etc.
  */
 
 import type { Schema, OpenAPISpec } from '../types/index.js';
 import type { ConvertWarning, WarningType, ConvertOptions } from './types.js';
 
 /**
- * 경고 수집기 클래스
- * 변환 중 발생하는 경고를 수집하고 관리
+ * Warning collector class
+ * Collects and manages warnings during conversion
  */
 export class WarningCollector {
   private warnings: ConvertWarning[] = [];
 
   /**
-   * 경고 추가
+   * Add warning
    *
-   * @param type - 경고 유형
-   * @param message - 경고 메시지
-   * @param path - 스키마 경로 (선택적)
+   * @param type - Warning type
+   * @param message - Warning message
+   * @param path - Schema path (optional)
    */
   add(type: WarningType, message: string, path?: string): void {
     this.warnings.push({ type, message, path });
   }
 
   /**
-   * 간단한 경고 추가 (문자열만)
+   * Add simple warning (string only)
    *
-   * @param message - 경고 메시지
+   * @param message - Warning message
    */
   addSimple(message: string): void {
     this.warnings.push({ type: 'fallback-used', message });
   }
 
   /**
-   * 수집된 경고 목록 반환
+   * Return collected warning list
    *
-   * @returns 경고 문자열 배열
+   * @returns Warning string array
    */
   getWarnings(): string[] {
     return this.warnings.map((w) => (w.path ? `[${w.path}] ${w.message}` : w.message));
   }
 
   /**
-   * 상세 경고 목록 반환
+   * Return detailed warning list
    *
-   * @returns 경고 객체 배열
+   * @returns Warning object array
    */
   getDetailedWarnings(): ConvertWarning[] {
     return [...this.warnings];
   }
 
   /**
-   * 경고 존재 여부 확인
+   * Check if warnings exist
    *
-   * @returns 경고가 있으면 true
+   * @returns true if warnings exist
    */
   hasWarnings(): boolean {
     return this.warnings.length > 0;
   }
 
   /**
-   * 경고 초기화
+   * Clear warnings
    */
   clear(): void {
     this.warnings = [];
@@ -69,13 +69,13 @@ export class WarningCollector {
 }
 
 /**
- * $ref 참조 해석
- * OpenAPI 스펙 내의 $ref 참조를 실제 스키마로 해석
+ * Resolve $ref reference
+ * Resolve $ref references in OpenAPI spec to actual schemas
  *
- * @param ref - $ref 문자열 (예: '#/components/schemas/User')
- * @param rootSpec - 루트 OpenAPI 스펙
- * @returns 해석된 스키마
- * @throws 참조를 찾을 수 없는 경우 에러
+ * @param ref - $ref string (e.g. '#/components/schemas/User')
+ * @param rootSpec - Root OpenAPI spec
+ * @returns Resolved schema
+ * @throws Error if reference cannot be found
  *
  * @example
  * ```typescript
@@ -83,9 +83,9 @@ export class WarningCollector {
  * ```
  */
 export function resolveRef(ref: string, rootSpec: OpenAPISpec): Schema {
-  // '#/components/schemas/SchemaName' 형태 처리
+  // Handle '#/components/schemas/SchemaName' format
   if (!ref.startsWith('#/')) {
-    throw new Error(`외부 참조는 지원하지 않습니다: ${ref}`);
+    throw new Error(`External references are not supported: ${ref}`);
   }
 
   const path = ref.slice(2).split('/');
@@ -94,25 +94,25 @@ export function resolveRef(ref: string, rootSpec: OpenAPISpec): Schema {
 
   for (const segment of path) {
     if (current === undefined || current === null) {
-      throw new Error(`$ref 참조를 해석할 수 없습니다: ${ref}`);
+      throw new Error(`Cannot resolve $ref reference: ${ref}`);
     }
     current = current[segment];
   }
 
   if (current === undefined) {
-    throw new Error(`$ref 참조를 찾을 수 없습니다: ${ref}`);
+    throw new Error(`$ref reference not found: ${ref}`);
   }
 
   return current as Schema;
 }
 
 /**
- * 참조 해석 시도 (에러 발생하지 않음)
+ * Try to resolve reference (no error thrown)
  *
- * @param ref - $ref 문자열
- * @param rootSpec - 루트 OpenAPI 스펙
- * @param collector - 경고 수집기
- * @returns 해석된 스키마 또는 빈 객체
+ * @param ref - $ref string
+ * @param rootSpec - Root OpenAPI spec
+ * @param collector - Warning collector
+ * @returns Resolved schema or empty object
  */
 export function tryResolveRef(
   ref: string,
@@ -120,7 +120,7 @@ export function tryResolveRef(
   collector: WarningCollector,
 ): Schema {
   if (!rootSpec) {
-    collector.add('unresolved-ref', `$ref 해석을 위한 rootSpec이 제공되지 않았습니다: ${ref}`);
+    collector.add('unresolved-ref', `rootSpec not provided for $ref resolution: ${ref}`);
     return {};
   }
 
@@ -129,27 +129,27 @@ export function tryResolveRef(
   } catch (error) {
     collector.add(
       'unresolved-ref',
-      `$ref 참조를 해석할 수 없습니다: ${ref} - ${error instanceof Error ? error.message : String(error)}`,
+      `Cannot resolve $ref reference: ${ref} - ${error instanceof Error ? error.message : String(error)}`,
     );
     return {};
   }
 }
 
 /**
- * 복합 스키마 처리 (oneOf, anyOf, allOf)
- * 복합 스키마를 단일 스키마로 병합하거나 처리
+ * Process composite schemas (oneOf, anyOf, allOf)
+ * Merge or process composite schemas into a single schema
  *
- * @param schema - OpenAPI 스키마
- * @param options - 변환 옵션
- * @param collector - 경고 수집기
- * @returns 처리된 스키마
+ * @param schema - OpenAPI schema
+ * @param options - Conversion options
+ * @param collector - Warning collector
+ * @returns Processed schema
  */
 export function processCompositeSchema(
   schema: Schema,
   options: ConvertOptions = {},
   collector: WarningCollector,
 ): Schema {
-  // allOf 처리: 모든 스키마를 병합
+  // allOf processing: merge all schemas
   if (schema.allOf && schema.allOf.length > 0) {
     let merged: Schema = {};
     for (const subSchema of schema.allOf) {
@@ -161,27 +161,27 @@ export function processCompositeSchema(
     return merged;
   }
 
-  // oneOf, anyOf는 그대로 반환 (변환기에서 처리)
+  // oneOf, anyOf are returned as-is (processed by converter)
   return schema;
 }
 
 /**
- * 두 스키마 병합
- * allOf 처리 시 사용
+ * Merge two schemas
+ * Used for allOf processing
  *
- * @param base - 기본 스키마
- * @param override - 덮어쓸 스키마
- * @returns 병합된 스키마
+ * @param base - Base schema
+ * @param override - Schema to override with
+ * @returns Merged schema
  */
 export function mergeSchemas(base: Schema, override: Schema): Schema {
   const merged: Schema = { ...base };
 
-  // 타입 병합
+  // Merge type
   if (override.type) {
     merged.type = override.type;
   }
 
-  // properties 병합
+  // Merge properties
   if (override.properties) {
     merged.properties = {
       ...(merged.properties || {}),
@@ -189,12 +189,12 @@ export function mergeSchemas(base: Schema, override: Schema): Schema {
     };
   }
 
-  // required 병합
+  // Merge required
   if (override.required) {
     merged.required = [...new Set([...(merged.required || []), ...override.required])];
   }
 
-  // 다른 속성들 복사
+  // Copy other attributes
   const keysToMerge = [
     'format',
     'description',
@@ -222,8 +222,8 @@ export function mergeSchemas(base: Schema, override: Schema): Schema {
 }
 
 /**
- * format 검증 함수 매핑
- * OpenAPI format에 대한 검증 함수들
+ * Format validation function mapping
+ * Validation functions for OpenAPI formats
  */
 export const FORMAT_VALIDATORS: Record<string, (value: string) => boolean> = {
   email: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
@@ -268,20 +268,20 @@ export const FORMAT_VALIDATORS: Record<string, (value: string) => boolean> = {
 };
 
 /**
- * 스키마 이름 정규화
- * 코드 생성 시 사용할 유효한 변수 이름으로 변환
+ * Normalize schema name
+ * Convert to valid variable name for code generation
  *
- * @param name - 원본 이름
- * @returns 정규화된 이름
+ * @param name - Original name
+ * @returns Normalized name
  */
 export function normalizeSchemaName(name: string): string {
-  // 첫 글자를 대문자로
+  // Capitalize first letter
   let normalized = name.charAt(0).toUpperCase() + name.slice(1);
 
-  // 유효하지 않은 문자 제거
+  // Remove invalid characters
   normalized = normalized.replace(/[^a-zA-Z0-9_]/g, '');
 
-  // 숫자로 시작하면 앞에 _ 추가
+  // Add _ prefix if starts with number
   if (/^\d/.test(normalized)) {
     normalized = '_' + normalized;
   }
@@ -290,11 +290,11 @@ export function normalizeSchemaName(name: string): string {
 }
 
 /**
- * 문자열 이스케이프
- * 코드 생성 시 문자열 리터럴에 사용
+ * Escape string
+ * For use in string literals during code generation
  *
- * @param str - 원본 문자열
- * @returns 이스케이프된 문자열
+ * @param str - Original string
+ * @returns Escaped string
  */
 export function escapeString(str: string): string {
   return str
@@ -307,25 +307,25 @@ export function escapeString(str: string): string {
 }
 
 /**
- * 정규식 패턴 이스케이프
- * 코드 생성 시 정규식 리터럴에 사용
+ * Escape regex pattern
+ * For use in regex literals during code generation
  *
- * @param pattern - 원본 패턴
- * @returns 이스케이프된 패턴
+ * @param pattern - Original pattern
+ * @returns Escaped pattern
  */
 export function escapeRegexPattern(pattern: string): string {
-  // 백슬래시만 이스케이프 (정규식 내에서 다른 문자는 그대로 유지)
+  // Only escape backslashes (other characters are preserved in regex)
   return pattern.replace(/\\/g, '\\\\');
 }
 
 /**
- * 들여쓰기 적용
- * 코드 생성 시 들여쓰기 처리
+ * Apply indentation
+ * Handle indentation for code generation
  *
- * @param code - 코드 문자열
- * @param level - 들여쓰기 레벨
- * @param indent - 들여쓰기 문자열
- * @returns 들여쓰기가 적용된 코드
+ * @param code - Code string
+ * @param level - Indentation level
+ * @param indent - Indentation string
+ * @returns Code with indentation applied
  */
 export function applyIndent(code: string, level: number, indent: string = '  '): string {
   const prefix = indent.repeat(level);
@@ -336,10 +336,10 @@ export function applyIndent(code: string, level: number, indent: string = '  '):
 }
 
 /**
- * 기본 변환 옵션 생성
+ * Create default conversion options
  *
- * @param options - 사용자 제공 옵션
- * @returns 기본값이 적용된 옵션
+ * @param options - User-provided options
+ * @returns Options with defaults applied
  */
 export function getDefaultOptions(options: ConvertOptions = {}): Required<
   Omit<ConvertOptions, 'rootSpec' | 'definitions' | 'schemaName'>
@@ -360,31 +360,31 @@ export function getDefaultOptions(options: ConvertOptions = {}): Required<
 }
 
 /**
- * OpenAPI 스키마가 nullable인지 확인
+ * Check if OpenAPI schema is nullable
  *
- * @param schema - OpenAPI 스키마
- * @returns nullable 여부
+ * @param schema - OpenAPI schema
+ * @returns Whether nullable
  */
 export function isNullable(schema: Schema): boolean {
   return schema.nullable === true;
 }
 
 /**
- * OpenAPI 스키마가 required 속성인지 확인
+ * Check if OpenAPI schema property is required
  *
- * @param propertyName - 속성 이름
- * @param parentSchema - 부모 object 스키마
- * @returns required 여부
+ * @param propertyName - Property name
+ * @param parentSchema - Parent object schema
+ * @returns Whether required
  */
 export function isRequired(propertyName: string, parentSchema: Schema): boolean {
   return parentSchema.required?.includes(propertyName) ?? false;
 }
 
 /**
- * enum 값을 문자열 리터럴로 변환
+ * Convert enum values to string literals
  *
- * @param values - enum 값 배열
- * @returns 문자열 리터럴 배열
+ * @param values - enum value array
+ * @returns String literal array
  */
 export function enumToLiterals(values: unknown[]): string[] {
   return values.map((v) => {
@@ -396,10 +396,10 @@ export function enumToLiterals(values: unknown[]): string[] {
 }
 
 /**
- * $ref에서 스키마 이름 추출
+ * Extract schema name from $ref
  *
- * @param ref - $ref 문자열
- * @returns 스키마 이름
+ * @param ref - $ref string
+ * @returns Schema name
  */
 export function getSchemaNameFromRef(ref: string): string {
   const parts = ref.split('/');
@@ -407,10 +407,10 @@ export function getSchemaNameFromRef(ref: string): string {
 }
 
 /**
- * OpenAPI 타입이 기본 타입인지 확인
+ * Check if OpenAPI type is a primitive type
  *
- * @param schema - OpenAPI 스키마
- * @returns 기본 타입 여부
+ * @param schema - OpenAPI schema
+ * @returns Whether primitive type
  */
 export function isPrimitiveType(schema: Schema): boolean {
   const primitiveTypes = ['string', 'number', 'integer', 'boolean', 'null'];
@@ -418,20 +418,20 @@ export function isPrimitiveType(schema: Schema): boolean {
 }
 
 /**
- * 스키마가 복합 타입인지 확인 (oneOf, anyOf, allOf)
+ * Check if schema is a composite type (oneOf, anyOf, allOf)
  *
- * @param schema - OpenAPI 스키마
- * @returns 복합 타입 여부
+ * @param schema - OpenAPI schema
+ * @returns Whether composite type
  */
 export function isCompositeType(schema: Schema): boolean {
   return Boolean(schema.oneOf || schema.anyOf || schema.allOf);
 }
 
 /**
- * 스키마가 참조 타입인지 확인
+ * Check if schema is a reference type
  *
- * @param schema - OpenAPI 스키마
- * @returns 참조 타입 여부
+ * @param schema - OpenAPI schema
+ * @returns Whether reference type
  */
 export function isRefType(schema: Schema): boolean {
   return Boolean(schema.$ref);

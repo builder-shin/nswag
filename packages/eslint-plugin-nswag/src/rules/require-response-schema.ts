@@ -1,12 +1,12 @@
 /**
- * require-response-schema 규칙
- * response() 블록 내 schema() 정의 권장
+ * require-response-schema rule
+ * Recommend schema() definition in response() blocks
  */
 
 import type { Rule } from 'eslint';
 import type { CallExpression, Node } from 'estree';
 
-// 노드가 response() 호출인지 확인
+// Check if node is a response() call
 function isResponseCall(node: Node): node is CallExpression {
   return (
     node.type === 'CallExpression' &&
@@ -15,7 +15,7 @@ function isResponseCall(node: Node): node is CallExpression {
   );
 }
 
-// 노드가 schema() 호출인지 확인
+// Check if node is a schema() call
 function isSchemaCall(node: CallExpression): boolean {
   return (
     node.callee.type === 'Identifier' &&
@@ -23,13 +23,13 @@ function isSchemaCall(node: CallExpression): boolean {
   );
 }
 
-// response 블록 내에서 schema 호출 찾기
+// Find schema call in response block
 function hasSchemaInBlock(node: Node): boolean {
   if (node.type === 'CallExpression') {
     if (isSchemaCall(node)) {
       return true;
     }
-    // 인자들 검사
+    // Check arguments
     for (const arg of node.arguments) {
       if (hasSchemaInBlock(arg)) {
         return true;
@@ -68,14 +68,14 @@ const rule: Rule.RuleModule = {
   meta: {
     type: 'suggestion',
     docs: {
-      description: 'response() 블록 내 schema() 정의 권장',
+      description: 'Recommend schema() definition in response() blocks',
       category: 'Best Practices',
       recommended: false,
     },
     schema: [],
     messages: {
       missingSchema:
-        'response() 블록에 schema() 정의를 추가하는 것을 권장합니다. 응답 스키마는 API 문서화와 검증에 도움이 됩니다.',
+        'Adding schema() definition to response() block is recommended. Response schemas help with API documentation and validation.',
     },
   },
 
@@ -86,7 +86,7 @@ const rule: Rule.RuleModule = {
           return;
         }
 
-        // response()의 두 번째 인자가 콜백 함수여야 함
+        // Second argument of response() should be a callback function
         const callback = node.arguments[1];
         if (!callback) {
           return;

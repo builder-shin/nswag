@@ -1,6 +1,6 @@
 /**
- * 테스트 컨텍스트 관리자
- * 테스트 실행 중 컨텍스트 데이터 관리
+ * Test Context Manager
+ * Manages context data during test execution
  */
 
 import type {
@@ -18,8 +18,8 @@ import type {
 } from '../types/index.js';
 
 /**
- * 확장된 테스트 컨텍스트 인터페이스
- * 사용자가 모듈 확장을 통해 커스텀 속성 추가 가능
+ * Extended Test Context Interface
+ * Users can add custom properties through module extension
  *
  * @example
  * declare module '@aspect/nswag-specs' {
@@ -30,13 +30,13 @@ import type {
  * }
  */
 export interface ExtendedTestContext {
-  // 사용자가 확장할 수 있는 인터페이스
+  // Interface that users can extend
   [key: string]: unknown;
 }
 
 /**
- * 테스트 컨텍스트 관리자 클래스
- * 테스트 격리 및 컨텍스트 데이터 관리
+ * Test Context Manager Class
+ * Manages test isolation and context data
  */
 export class TestContextManager {
   private currentContext: (TestContext & ExtendedTestContext) | null = null;
@@ -46,28 +46,28 @@ export class TestContextManager {
   private extensionData: ExtendedTestContext = {};
 
   /**
-   * 플러그인 등록
+   * Register Plugins
    */
   registerPlugins(plugins: NswagPlugin[]): void {
     this.plugins = plugins;
   }
 
   /**
-   * 확장 데이터 설정
+   * Set Extension Data
    */
   setExtensionData(data: ExtendedTestContext): void {
     this.extensionData = { ...this.extensionData, ...data };
   }
 
   /**
-   * 확장 데이터 가져오기
+   * Get Extension Data
    */
   getExtensionData(): ExtendedTestContext {
     return { ...this.extensionData };
   }
 
   /**
-   * 새 테스트 컨텍스트 시작
+   * Begin New Test Context
    */
   begin(testName: string, specFile: string): TestContext & ExtendedTestContext {
     const context: TestContext & ExtendedTestContext = {
@@ -78,7 +78,7 @@ export class TestContextManager {
       ...this.extensionData,
     };
 
-    // 중첩 테스트 지원을 위해 스택에 push
+    // Push to stack to support nested tests
     if (this.currentContext) {
       this.contextStack.push(this.currentContext);
     }
@@ -88,33 +88,33 @@ export class TestContextManager {
   }
 
   /**
-   * 현재 컨텍스트 종료
+   * End Current Context
    */
   end(): TestContext | null {
     const endedContext = this.currentContext;
 
-    // 스택에서 이전 컨텍스트 복원
+    // Restore previous context from stack
     this.currentContext = this.contextStack.pop() ?? null;
 
     return endedContext;
   }
 
   /**
-   * 현재 컨텍스트 조회
+   * Get Current Context
    */
   getCurrent(): TestContext | null {
     return this.currentContext;
   }
 
   /**
-   * 현재 컨텍스트가 있는지 확인
+   * Check if Context Exists
    */
   hasContext(): boolean {
     return this.currentContext !== null;
   }
 
   /**
-   * VCR 모드 설정
+   * Set VCR Mode
    */
   setVCRMode(mode: VCRMode): void {
     this.vcrMode = mode;
@@ -124,14 +124,14 @@ export class TestContextManager {
   }
 
   /**
-   * VCR 모드 조회
+   * Get VCR Mode
    */
   getVCRMode(): VCRMode {
     return this.vcrMode;
   }
 
   /**
-   * 컨텍스트에 데이터 추가
+   * Add Data to Context
    */
   set<K extends keyof TestContext>(key: K, value: TestContext[K]): void {
     if (this.currentContext) {
@@ -140,14 +140,14 @@ export class TestContextManager {
   }
 
   /**
-   * 컨텍스트에서 데이터 조회
+   * Get Data from Context
    */
   get<K extends keyof TestContext>(key: K): TestContext[K] | undefined {
     return this.currentContext?.[key];
   }
 
   /**
-   * BeforeEach 컨텍스트 생성
+   * Create BeforeEach Context
    */
   createBeforeEachContext(metadata: RequestMetadata): BeforeEachContext | null {
     if (!this.currentContext) return null;
@@ -159,7 +159,7 @@ export class TestContextManager {
   }
 
   /**
-   * RequestContext 생성
+   * Create RequestContext
    */
   createRequestContext(request: unknown): RequestContext | null {
     if (!this.currentContext) return null;
@@ -171,7 +171,7 @@ export class TestContextManager {
   }
 
   /**
-   * AfterEach 컨텍스트 생성
+   * Create AfterEach Context
    */
   createAfterEachContext(
     metadata: RequestMetadata,
@@ -199,7 +199,7 @@ export class TestContextManager {
   }
 
   /**
-   * 테스트 실행 시간 계산
+   * Calculate Test Execution Time
    */
   getElapsedTime(): number {
     if (!this.currentContext) return 0;
@@ -207,7 +207,7 @@ export class TestContextManager {
   }
 
   /**
-   * 모든 컨텍스트 초기화
+   * Reset All Contexts
    */
   reset(): void {
     this.currentContext = null;
@@ -215,14 +215,14 @@ export class TestContextManager {
   }
 
   /**
-   * 컨텍스트 깊이 조회 (중첩 레벨)
+   * Get Context Depth (nesting level)
    */
   getDepth(): number {
     return this.contextStack.length + (this.currentContext ? 1 : 0);
   }
 
   /**
-   * 컨텍스트 직렬화 (디버깅용)
+   * Serialize Context (for debugging)
    */
   serialize(): string {
     return JSON.stringify({
@@ -233,14 +233,14 @@ export class TestContextManager {
   }
 
   /**
-   * 등록된 플러그인 가져오기
+   * Get Registered Plugins
    */
   getPlugins(): NswagPlugin[] {
     return [...this.plugins];
   }
 
   /**
-   * 테스트 실행 전 플러그인 훅 실행
+   * Run Plugin Hooks Before Test
    */
   async runBeforeTestPlugins(testInfo: TestInfo): Promise<void> {
     for (const plugin of this.plugins) {
@@ -255,7 +255,7 @@ export class TestContextManager {
   }
 
   /**
-   * 테스트 실행 후 플러그인 훅 실행
+   * Run Plugin Hooks After Test
    */
   async runAfterTestPlugins(testInfo: TestInfo, result: TestResult): Promise<void> {
     for (const plugin of this.plugins) {
@@ -270,18 +270,18 @@ export class TestContextManager {
   }
 
   /**
-   * 확장 데이터 초기화
+   * Reset Extension Data
    */
   resetExtensionData(): void {
     this.extensionData = {};
   }
 }
 
-// 싱글톤 인스턴스
+// Singleton instance
 let contextManagerInstance: TestContextManager | null = null;
 
 /**
- * 테스트 컨텍스트 관리자 인스턴스 가져오기
+ * Get Test Context Manager Instance
  */
 export function getContextManager(): TestContextManager {
   if (!contextManagerInstance) {
@@ -291,7 +291,7 @@ export function getContextManager(): TestContextManager {
 }
 
 /**
- * 테스트 컨텍스트 관리자 리셋
+ * Reset Test Context Manager
  */
 export function resetContextManager(): void {
   if (contextManagerInstance) {
@@ -301,21 +301,21 @@ export function resetContextManager(): void {
 }
 
 /**
- * 현재 테스트 컨텍스트 가져오기 (편의 함수)
+ * Get Current Test Context (convenience function)
  */
 export function getCurrentTestContext(): TestContext | null {
   return getContextManager().getCurrent();
 }
 
 /**
- * 테스트 컨텍스트 시작 (편의 함수)
+ * Begin Test Context (convenience function)
  */
 export function beginTestContext(testName: string, specFile: string): TestContext {
   return getContextManager().begin(testName, specFile);
 }
 
 /**
- * 테스트 컨텍스트 종료 (편의 함수)
+ * End Test Context (convenience function)
  */
 export function endTestContext(): TestContext | null {
   return getContextManager().end();

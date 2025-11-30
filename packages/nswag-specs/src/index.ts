@@ -1,21 +1,21 @@
 /**
  * @aspect/nswag-specs
- * OpenAPI 기반 DSL과 테스트 러너 통합, 스펙 파일 생성
+ * OpenAPI-based DSL and test runner integration, spec file generation
  */
 
-// 핵심 타입 내보내기
+// Export core types
 export * from './types/index.js';
 
-// DSL 빌더 내보내기
+// Export DSL builder
 export * from './dsl/index.js';
 
-// 스펙 생성기 내보내기
+// Export spec generator
 export * from './generator/index.js';
 
-// 검증기 내보내기
+// Export validator
 export * from './validator/index.js';
 
-// 설정 모듈 내보내기
+// Export config module
 export {
   defineConfig,
   loadConfig,
@@ -35,7 +35,7 @@ export type {
   EnvironmentConfig,
 } from './config/index.js';
 
-// 테스팅 유틸리티 내보내기 (configure, HttpClient 등)
+// Export testing utilities (configure, HttpClient, etc.)
 export {
   configure,
   getConfiguration,
@@ -67,7 +67,7 @@ export {
 
 export type { ExtendedTestContext } from './testing/context-manager.js';
 
-// 에러 클래스 내보내기
+// Export error classes
 export {
   NswagSchemaValidationError,
   NswagConfigurationError,
@@ -79,7 +79,7 @@ export {
   wrapError,
 } from './errors/index.js';
 
-// 로거 내보내기
+// Export logger
 export {
   loggers,
   debug,
@@ -98,7 +98,7 @@ export {
 
 export type { Logger, LogLevel, DebugNamespace } from './logger/index.js';
 
-// 플러그인 시스템 내보내기
+// Export plugin system
 export {
   definePlugin,
   PluginEngine,
@@ -112,15 +112,15 @@ export {
 
 export type { DefinePluginOptions } from './plugin/index.js';
 
-// 스펙 비교 내보내기
+// Export spec comparison
 export {
   compareSpecs,
   hasBreakingChanges,
   formatCompareResult,
 } from './compare/index.js';
 
-// Mock 서버 내보내기
+// Export mock server
 export { createMockServer, MockGenerator, generateMock, mockGenerator } from './mock/index.js';
 
-// 스키마 변환기 내보내기
+// Export schema converters
 export * from './converter/index.js';

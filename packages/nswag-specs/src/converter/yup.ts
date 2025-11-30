@@ -1,12 +1,12 @@
 /**
- * Yup 스키마 변환기
- * OpenAPI JSON Schema와 Yup 스키마 간의 양방향 변환
+ * Yup schema converter
+ * Bidirectional conversion between OpenAPI JSON Schema and Yup schemas
  *
  * @example
  * ```typescript
  * import { openApiToYup, generateYupCode } from '@aspect/nswag-specs/converter';
  *
- * // 런타임 스키마 생성
+ * // Runtime schema generation
  * const result = await openApiToYup({
  *   type: 'object',
  *   properties: {
@@ -16,10 +16,10 @@
  *   required: ['id', 'email'],
  * });
  *
- * // 유효성 검증
+ * // Validation
  * const isValid = await result.schema.isValid(data);
  *
- * // 코드 생성
+ * // Code generation
  * const code = generateYupCode(schema, { schemaName: 'userSchema' });
  * ```
  */
@@ -39,7 +39,7 @@ import {
 } from './utils.js';
 
 /**
- * Yup 타입 인터페이스 (내부 사용)
+ * Yup type interface (internal use)
  */
 interface YupType {
   required: (message?: string) => YupType;
@@ -74,7 +74,7 @@ interface YupType {
 }
 
 /**
- * Yup 네임스페이스 타입
+ * Yup namespace type
  */
 interface YupNamespace {
   string: () => YupType;
@@ -88,10 +88,10 @@ interface YupNamespace {
 }
 
 /**
- * Yup 인스턴스를 동적으로 로드
+ * Yup Dynamically load instance
  *
- * @returns Yup 모듈
- * @throws Yup이 설치되어 있지 않은 경우 에러
+ * @returns Yup module
+ * @throws Error if Yup is not installed
  */
 async function loadYup(): Promise<YupNamespace> {
   try {
@@ -99,17 +99,17 @@ async function loadYup(): Promise<YupNamespace> {
     return yupModule as unknown as YupNamespace;
   } catch {
     throw new Error(
-      'yup 패키지가 설치되어 있지 않습니다. npm install yup을 실행하세요.',
+      'The yup package is not installed. Please run npm install yup.',
     );
   }
 }
 
 /**
- * OpenAPI 스키마를 Yup 스키마로 변환 (비동기)
+ * Convert OpenAPI schema to Yup schema (async)
  *
- * @param schema - OpenAPI 스키마
- * @param options - 변환 옵션
- * @returns 변환 결과 (Yup 스키마 및 경고)
+ * @param schema - OpenAPI schema
+ * @param options - Conversion options
+ * @returns Conversion result (schema and warnings)
  *
  * @example
  * ```typescript
@@ -144,13 +144,13 @@ export async function openApiToYup(
 }
 
 /**
- * OpenAPI 스키마를 Yup 스키마로 변환 (동기, Yup 인스턴스 필요)
+ * Convert OpenAPI schema to Yup schema (sync, instance required)
  *
- * @param schema - OpenAPI 스키마
- * @param yup - Yup 네임스페이스
- * @param options - 변환 옵션
- * @param collector - 경고 수집기
- * @returns Yup 스키마
+ * @param schema - OpenAPI schema
+ * @param yup - Yup namespace
+ * @param options - Conversion options
+ * @param collector - Warning collector
+ * @returns Yup schema
  */
 function convertSchemaToYup(
   schema: Schema,
@@ -158,7 +158,7 @@ function convertSchemaToYup(
   options: ReturnType<typeof getDefaultOptions>,
   collector: WarningCollector,
 ): YupType {
-  // $ref 처리
+  // $ref processing
   if (schema.$ref) {
     const resolved = tryResolveRef(schema.$ref, options.rootSpec, collector);
     if (Object.keys(resolved).length === 0) {
@@ -167,28 +167,28 @@ function convertSchemaToYup(
     return convertSchemaToYup(resolved, yup, options, collector);
   }
 
-  // allOf 처리
+  // allOf processing
   if (schema.allOf) {
     const processed = processCompositeSchema(schema, options, collector);
     return convertSchemaToYup(processed, yup, options, collector);
   }
 
-  // oneOf/anyOf 처리 (Yup에서는 mixed().oneOf()로 처리)
+  // oneOf/anyOf processing (in Yup, converted to mixed().oneOf())
   if (schema.oneOf || schema.anyOf) {
     collector.add(
       'complex-composition',
-      'oneOf/anyOf는 Yup에서 제한적으로 지원됩니다. mixed() 타입으로 변환됩니다.',
+      'oneOf/anyOf has limited support in Yup. Converting to mixed() type.',
     );
     return yup.mixed();
   }
 
-  // enum 처리
+  // enum processing
   if (schema.enum && schema.enum.length > 0) {
     const baseSchema = getBaseSchemaForEnum(schema, yup);
     return baseSchema.oneOf(schema.enum);
   }
 
-  // 타입별 처리
+  // Type-specific processing
   switch (schema.type) {
     case 'string':
       return convertStringSchema(schema, yup, collector);
@@ -211,16 +211,16 @@ function convertSchemaToYup(
 
     default:
       if (!schema.type) {
-        collector.add('unsupported-type', '타입이 지정되지 않은 스키마입니다. mixed로 변환됩니다.');
+        collector.add('unsupported-type', 'Schema has no type specified. Converting to mixed.');
         return yup.mixed();
       }
-      collector.add('unsupported-type', `지원하지 않는 타입입니다: ${schema.type}`);
+      collector.add('unsupported-type', `Unsupported type: ${schema.type}`);
       return yup.mixed();
   }
 }
 
 /**
- * enum의 기본 스키마 타입 결정
+ * Determine base schema type for enum
  */
 function getBaseSchemaForEnum(schema: Schema, yup: YupNamespace): YupType {
   if (schema.enum && schema.enum.length > 0) {
@@ -236,7 +236,7 @@ function getBaseSchemaForEnum(schema: Schema, yup: YupNamespace): YupType {
 }
 
 /**
- * string 스키마 변환
+ * string Schema conversion
  */
 function convertStringSchema(
   schema: Schema,
@@ -245,7 +245,7 @@ function convertStringSchema(
 ): YupType {
   let result = yup.string();
 
-  // format 처리
+  // format processing
   if (schema.format) {
     switch (schema.format) {
       case 'email':
@@ -260,11 +260,11 @@ function convertStringSchema(
         break;
       case 'date-time':
       case 'date':
-        // Yup의 date()는 문자열이 아닌 Date 객체를 기대
-        // 문자열로 유지하려면 matches 사용
+        // Yup's date() expects Date object, not string
+        // Use matches if you need string validation
         collector.add(
           'unsupported-format',
-          'date/date-time format은 Yup에서 Date 객체로 처리됩니다. 문자열 검증이 필요하면 matches()를 사용하세요.',
+          'date/date-time format is processed as Date object in Yup. Use matches() if string validation is needed.',
         );
         break;
       case 'ipv4':
@@ -278,12 +278,12 @@ function convertStringSchema(
       default:
         collector.add(
           'unsupported-format',
-          `알 수 없는 format입니다: ${schema.format}`,
+          `Unknown format: ${schema.format}`,
         );
     }
   }
 
-  // 길이 제약조건
+  // Length constraints
   if (schema.minLength !== undefined) {
     result = result.min(schema.minLength);
   }
@@ -291,14 +291,14 @@ function convertStringSchema(
     result = result.max(schema.maxLength);
   }
 
-  // pattern 처리
+  // pattern processing
   if (schema.pattern) {
     try {
       result = result.matches(new RegExp(schema.pattern));
     } catch (error) {
       collector.add(
         'unsupported-constraint',
-        `잘못된 정규식 패턴입니다: ${schema.pattern}`,
+        `Invalid regex pattern: ${schema.pattern}`,
       );
     }
   }
@@ -307,7 +307,7 @@ function convertStringSchema(
 }
 
 /**
- * number/integer 스키마 변환
+ * number/integer Schema conversion
  */
 function convertNumberSchema(
   schema: Schema,
@@ -316,12 +316,12 @@ function convertNumberSchema(
 ): YupType {
   let result = yup.number();
 
-  // integer 처리
+  // integer processing
   if (schema.type === 'integer') {
     result = result.integer();
   }
 
-  // minimum/maximum 제약조건
+  // minimum/maximum constraints
   if (schema.minimum !== undefined) {
     result = result.min(schema.minimum);
   }
@@ -335,11 +335,11 @@ function convertNumberSchema(
     result = result.lessThan(schema.exclusiveMaximum);
   }
 
-  // multipleOf 처리 - Yup에서 직접 지원하지 않음
+  // multipleOf processing - Not directly supported by Yup
   if (schema.multipleOf !== undefined) {
     collector.add(
       'unsupported-constraint',
-      'multipleOf는 Yup에서 직접 지원하지 않습니다. test()를 사용하여 수동으로 검증하세요.',
+      'multipleOf is not directly supported by Yup. Use test() for manual validation.',
     );
   }
 
@@ -347,7 +347,7 @@ function convertNumberSchema(
 }
 
 /**
- * array 스키마 변환
+ * array Schema conversion
  */
 function convertArraySchema(
   schema: Schema,
@@ -355,14 +355,14 @@ function convertArraySchema(
   options: ReturnType<typeof getDefaultOptions>,
   collector: WarningCollector,
 ): YupType {
-  // items 스키마
+  // items schema
   const itemSchema = schema.items
     ? convertSchemaToYup(schema.items, yup, options, collector)
     : yup.mixed();
 
   let result = yup.array(itemSchema);
 
-  // 배열 길이 제약조건
+  // Array length constraints
   if (schema.minItems !== undefined) {
     result = result.min(schema.minItems);
   }
@@ -370,11 +370,11 @@ function convertArraySchema(
     result = result.max(schema.maxItems);
   }
 
-  // uniqueItems는 Yup에서 직접 지원하지 않음
+  // uniqueItems is not directly supported by Yup
   if (schema.uniqueItems) {
     collector.add(
       'unsupported-constraint',
-      'uniqueItems는 Yup에서 직접 지원하지 않습니다. test()를 사용하여 수동으로 검증하세요.',
+      'uniqueItems is not directly supported by Yup. Use test() for manual validation.',
     );
   }
 
@@ -382,7 +382,7 @@ function convertArraySchema(
 }
 
 /**
- * object 스키마 변환
+ * object Schema conversion
  */
 function convertObjectSchema(
   schema: Schema,
@@ -397,12 +397,12 @@ function convertObjectSchema(
     for (const [key, propSchema] of Object.entries(schema.properties)) {
       let fieldSchema = convertSchemaToYup(propSchema, yup, options, collector);
 
-      // nullable 처리
+      // nullable processing
       if (propSchema.nullable) {
         fieldSchema = fieldSchema.nullable();
       }
 
-      // required 처리
+      // required processing
       const isRequired = options.defaultRequired || requiredFields.has(key);
       if (isRequired) {
         fieldSchema = fieldSchema.required();
@@ -410,7 +410,7 @@ function convertObjectSchema(
         fieldSchema = fieldSchema.notRequired();
       }
 
-      // default 처리
+      // default processing
       if (propSchema.default !== undefined) {
         fieldSchema = fieldSchema.default(propSchema.default);
       }
@@ -421,7 +421,7 @@ function convertObjectSchema(
 
   let result = yup.object(shape);
 
-  // additionalProperties 처리
+  // additionalProperties processing
   if (!options.additionalProperties) {
     result = result.noUnknown(true);
   }
@@ -434,20 +434,20 @@ function convertObjectSchema(
 }
 
 /**
- * Yup 스키마를 OpenAPI 스키마로 변환
- * (adapters/yup.ts의 yupToOpenApi와 동일한 기능 - re-export)
+ * Convert Yup schema to OpenAPI schema
+ * (Same functionality as yupToOpenApi in adapters/yup.ts - re-export)
  *
- * @param yupSchema - Yup 스키마
- * @returns OpenAPI 스키마
+ * @param yupSchema - Yup schema
+ * @returns OpenAPI schema
  */
 export { yupToOpenApi } from '../adapters/yup.js';
 
 /**
- * OpenAPI 스키마에서 Yup TypeScript 코드 생성
+ * Generate TypeScript code from OpenAPI schema
  *
- * @param schema - OpenAPI 스키마
- * @param options - 변환 옵션
- * @returns 생성된 TypeScript 코드
+ * @param schema - OpenAPI schema
+ * @param options - Conversion options
+ * @returns Generated TypeScript code
  *
  * @example
  * ```typescript
@@ -463,7 +463,7 @@ export { yupToOpenApi } from '../adapters/yup.js';
  *   { schemaName: 'userSchema', includeImports: true }
  * );
  *
- * // 출력:
+ * // Output:
  * // import * as yup from 'yup';
  * //
  * // export const userSchema = yup.object({
@@ -477,25 +477,25 @@ export function generateYupCode(schema: Schema, options: ConvertOptions = {}): s
   const collector = new WarningCollector();
   const lines: string[] = [];
 
-  // import 문 생성
+  // Generate import statement
   if (opts.includeImports) {
     lines.push("import * as yup from 'yup';");
     lines.push('');
   }
 
-  // 스키마 이름 (Yup은 camelCase 관례)
+  // Schema name (Yup uses camelCase convention)
   const schemaName = opts.schemaName
     ? opts.schemaName.charAt(0).toLowerCase() + opts.schemaName.slice(1)
     : 'generatedSchema';
 
-  // 스키마 코드 생성
+  // Schema code generation
   const schemaCode = generateSchemaCode(schema, opts, collector, 0);
 
-  // export 여부
+  // Export flag
   const exportPrefix = opts.exportSchema ? 'export ' : '';
   lines.push(`${exportPrefix}const ${schemaName} = ${schemaCode};`);
 
-  // 타입 추론 생성
+  // Generate type inference
   if (opts.generateTypeInference) {
     lines.push('');
     const typeName = normalizeSchemaName(schemaName.replace(/Schema$/i, '')) || 'Generated';
@@ -506,7 +506,7 @@ export function generateYupCode(schema: Schema, options: ConvertOptions = {}): s
 }
 
 /**
- * 스키마 코드 생성 (재귀)
+ * Schema code generation (recursive)
  */
 function generateSchemaCode(
   schema: Schema,
@@ -517,33 +517,33 @@ function generateSchemaCode(
   const indent = options.indent.repeat(depth);
   const innerIndent = options.indent.repeat(depth + 1);
 
-  // $ref 처리
+  // $ref processing
   if (schema.$ref) {
     const refName = getSchemaNameFromRef(schema.$ref);
     return refName.charAt(0).toLowerCase() + refName.slice(1);
   }
 
-  // allOf 처리
+  // allOf processing
   if (schema.allOf && schema.allOf.length > 0) {
-    collector.add('complex-composition', 'allOf는 병합된 object로 변환됩니다.');
+    collector.add('complex-composition', 'allOf is converted to a merged object.');
     const processed = processCompositeSchema(schema, options, collector);
     return generateSchemaCode(processed, options, collector, depth);
   }
 
-  // oneOf/anyOf 처리
+  // oneOf/anyOf processing
   if (schema.oneOf || schema.anyOf) {
-    collector.add('complex-composition', 'oneOf/anyOf는 Yup에서 제한적으로 지원됩니다.');
+    collector.add('complex-composition', 'oneOf/anyOf has limited support in Yup.');
     return 'yup.mixed()';
   }
 
-  // enum 처리
+  // enum processing
   if (schema.enum && schema.enum.length > 0) {
     const values = enumToLiterals(schema.enum);
     const baseType = typeof schema.enum[0] === 'string' ? 'yup.string()' : 'yup.number()';
     return `${baseType}.oneOf([${values.join(', ')}])`;
   }
 
-  // 타입별 처리
+  // Type-specific processing
   switch (schema.type) {
     case 'string':
       return generateStringCode(schema, collector);
@@ -568,18 +568,18 @@ function generateSchemaCode(
       if (!schema.type) {
         return 'yup.mixed()';
       }
-      collector.add('unsupported-type', `지원하지 않는 타입입니다: ${schema.type}`);
+      collector.add('unsupported-type', `Unsupported type: ${schema.type}`);
       return 'yup.mixed()';
   }
 }
 
 /**
- * string 코드 생성
+ * string Code generation
  */
 function generateStringCode(schema: Schema, collector: WarningCollector): string {
   let code = 'yup.string()';
 
-  // format 처리
+  // format processing
   if (schema.format) {
     switch (schema.format) {
       case 'email':
@@ -602,12 +602,12 @@ function generateStringCode(schema: Schema, collector: WarningCollector): string
       default:
         collector.add(
           'unsupported-format',
-          `Yup에서 '${schema.format}' format을 직접 지원하지 않습니다.`,
+          `Yup does not directly support '${schema.format}' format.`,
         );
     }
   }
 
-  // 길이 제약조건
+  // Length constraints
   if (schema.minLength !== undefined) {
     code += `.min(${schema.minLength})`;
   }
@@ -615,7 +615,7 @@ function generateStringCode(schema: Schema, collector: WarningCollector): string
     code += `.max(${schema.maxLength})`;
   }
 
-  // pattern 처리
+  // pattern processing
   if (schema.pattern) {
     const escapedPattern = escapeRegexPattern(schema.pattern);
     code += `.matches(/${escapedPattern}/)`;
@@ -625,17 +625,17 @@ function generateStringCode(schema: Schema, collector: WarningCollector): string
 }
 
 /**
- * number 코드 생성
+ * number Code generation
  */
 function generateNumberCode(schema: Schema, collector: WarningCollector): string {
   let code = 'yup.number()';
 
-  // integer 처리
+  // integer processing
   if (schema.type === 'integer') {
     code += '.integer()';
   }
 
-  // minimum/maximum 제약조건
+  // minimum/maximum constraints
   if (schema.minimum !== undefined) {
     code += `.min(${schema.minimum})`;
   }
@@ -649,11 +649,11 @@ function generateNumberCode(schema: Schema, collector: WarningCollector): string
     code += `.lessThan(${schema.exclusiveMaximum})`;
   }
 
-  // multipleOf 처리
+  // multipleOf processing
   if (schema.multipleOf !== undefined) {
     collector.add(
       'unsupported-constraint',
-      `multipleOf(${schema.multipleOf})는 Yup에서 직접 지원하지 않습니다.`,
+      `multipleOf(${schema.multipleOf}) is not directly supported by Yup.`,
     );
   }
 
@@ -661,7 +661,7 @@ function generateNumberCode(schema: Schema, collector: WarningCollector): string
 }
 
 /**
- * array 코드 생성
+ * array Code generation
  */
 function generateArrayCode(
   schema: Schema,
@@ -686,7 +686,7 @@ function generateArrayCode(
 }
 
 /**
- * object 코드 생성
+ * object Code generation
  */
 function generateObjectCode(
   schema: Schema,
@@ -710,18 +710,18 @@ function generateObjectCode(
   for (const [key, propSchema] of Object.entries(schema.properties)) {
     let propCode = generateSchemaCode(propSchema, options, collector, depth + 1);
 
-    // nullable 처리
+    // nullable processing
     if (propSchema.nullable) {
       propCode += '.nullable()';
     }
 
-    // required 처리
+    // required processing
     const isRequired = options.defaultRequired || requiredFields.has(key);
     if (isRequired) {
       propCode += '.required()';
     }
 
-    // default 처리
+    // default processing
     if (propSchema.default !== undefined) {
       const defaultValue =
         typeof propSchema.default === 'string'
@@ -735,7 +735,7 @@ function generateObjectCode(
 
   let code = `yup.object({\n${propLines.join('\n')}\n${indent}})`;
 
-  // additionalProperties 처리
+  // additionalProperties processing
   if (!options.additionalProperties) {
     code += '.noUnknown()';
   }
